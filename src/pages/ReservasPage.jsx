@@ -1,64 +1,75 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  TextField,
-  InputAdornment,
-} from "@mui/material";
-import { Search } from "@mui/icons-material";
-import InstalacionesTable from "../components/InstalacionesTable";
+import React, { useMemo, useState } from "react";
+import { Box } from "@mui/material";
+import PageHeader from "../components/PageHeader";
+import EntityTable from "../components/EntityTable";
+import TableFooter from "../components/TableFooter";
+import StatusPill from "../components/StatusPill";
+
+const DATA = [
+	{ id: 1, nombre: "María González", rol: "Atleta", instalacion: "Cancha Olímpica #1", fecha: "18/07/2025", hora: "4:00 pm – 6:00 pm", comentario: "Partido de práctica con equipo local", estado: "Aprobada", foto: "https://i.pravatar.cc/32?img=11" },
+	{ id: 2, nombre: "Juan Pérez", rol: "Atleta", instalacion: "Piscina Semiolímpica", fecha: "19/07/2025", hora: "9:00 am – 10:30 am", comentario: "Entrenamiento precompetencia", estado: "Pendiente", foto: "https://i.pravatar.cc/32?img=12" },
+	{ id: 3, nombre: "Rosa Martínez", rol: "Entrenador", instalacion: "Salón de Artes Marciales", fecha: "20/07/2025", hora: "5:00 pm – 7:00 pm", comentario: "Clase extra para alumnos de cinta azul", estado: "Cancelada", foto: "https://i.pravatar.cc/32?img=13" },
+	{ id: 4, nombre: "Carlos Rodríguez", rol: "Atleta", instalacion: "Campo de fútbol externo", fecha: "21/07/2025", hora: "3:00 pm – 5:00 pm", comentario: "Torneo escolar nivel B", estado: "Aprobada", foto: "https://i.pravatar.cc/32?img=14" },
+	{ id: 5, nombre: "Laura Jiménez", rol: "Atleta", instalacion: "Gimnasio multiuso", fecha: "18/07/2025", hora: "7:00 am – 8:00 am", comentario: "Uso personal (cardio y pesas)", estado: "Rechazada", foto: "https://i.pravatar.cc/32?img=15" },
+	{ id: 6, nombre: "Pedro Méndez", rol: "Atleta", instalacion: "Sala de tenis de mesa", fecha: "19/07/2025", hora: "10:00 am – 11:00 am", comentario: "Entrenamiento con nuevo compañero", estado: "Pendiente", foto: "https://i.pravatar.cc/32?img=16" },
+	{ id: 7, nombre: "Ana Castillo", rol: "Atleta", instalacion: "Pista de atletismo", fecha: "22/07/2025", hora: "6:00 am – 7:00 am", comentario: "Series de velocidad (pretemporada)", estado: "Aprobada", foto: "https://i.pravatar.cc/32?img=17" },
+];
 
 export default function ReservasPage() {
-  const [tab, setTab] = useState(0);
-  const [search, setSearch] = useState("");
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(7);
 
-  const instalaciones = [
-    { nombre: "Cancha Olímpica #1", especialidad: "Baloncesto", tipo: "Cancha techada", capacidad: 120, horarios: "Lun-Vie 8:00 am – 8:00 pm", estado: "Mantenimiento" },
-    { nombre: "Piscina Semiolímpica", especialidad: "Natación", tipo: "Piscina", capacidad: 40, horarios: "Mar-Dom 7:00 am – 5:00 pm", estado: "Mantenimiento" },
-    { nombre: "Salón de Artes Marciales", especialidad: "Karate", tipo: "Salón cerrado", capacidad: 30, horarios: "Lun-Sáb 3:00 pm – 9:00 pm", estado: "Disponible" },
-    { nombre: "Campo de fútbol externo", especialidad: "Fútbol", tipo: "Campo abierto", capacidad: 150, horarios: "Lun-Vie 2:00 pm – 10:00 pm", estado: "Disponible" },
-    { nombre: "Gimnasio multiuso", especialidad: "General", tipo: "Salón techado", capacidad: 100, horarios: "Todos los días 6:00 am – 9:00 pm", estado: "Bloqueada" },
-  ];
+	const pageCount = Math.max(1, Math.ceil(DATA.length / pageSize));
+	const rows = useMemo(() => DATA.slice((page - 1) * pageSize, page * pageSize), [page, pageSize]);
 
-  const filtered = instalaciones.filter((i) =>
-    i.nombre.toLowerCase().includes(search.toLowerCase())
-  );
+	const columns = [
+		{
+			field: "nombre",
+			headerName: "Nombre",
+			flex: 1,
+			minWidth: 260,
+			renderCell: (p) => (
+				<Box display="flex" alignItems="center" gap={1.5}>
+					<img src={p.row.foto} alt={p.row.nombre} width={32} height={32} style={{ borderRadius: "50%", objectFit: "cover" }} />
+					<Box>
+						<Box sx={{ fontWeight: 600 }}>{p.row.nombre}</Box>
+						<Box sx={{ fontSize: 13, color: "text.secondary" }}>{p.row.rol}</Box>
+					</Box>
+				</Box>
+			),
+		},
+		{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 200 },
+		{ field: "fecha", headerName: "Fecha", width: 130 },
+		{ field: "hora", headerName: "Hora", width: 160 },
+		{ field: "comentario", headerName: "Comentario", flex: 1, minWidth: 260 },
+		{ field: "estado", headerName: "Estado", width: 150, renderCell: (p) => <StatusPill value={p.value} /> },
+	];
 
-  return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-        Reservas
-      </Typography>
+	return (
+		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
+			<PageHeader title="Reservas" cta={false} />
 
-      <Tabs
-        value={tab}
-        onChange={(e, newValue) => setTab(newValue)}
-        sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}
-      >
-        <Tab label="Nueva Instalación" />
-        <Tab label="Reportes de Mantenimiento" />
-      </Tabs>
+			<EntityTable
+				rows={rows}
+				columns={columns}
+				loading={false}
+				rowCount={DATA.length}
+				page={page}
+				pageSize={pageSize}
+				onPageChange={setPage}
+				onPageSizeChange={setPageSize}
+			/>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-        <TextField
-          size="small"
-          placeholder="Buscar"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ color: "#9ca3af" }} />
-              </InputAdornment>
-            ),
-          }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ width: 250, bgcolor: "white" }}
-        />
-      </Box>
-
-      <InstalacionesTable data={filtered} />
-    </Box>
-  );
+			<TableFooter
+				page={page}
+				pageCount={pageCount}
+				pageSize={pageSize}
+				onPageChange={setPage}
+				onPageSizeChange={(n) => {
+					setPageSize(n);
+					setPage(1);
+				}}
+			/>
+		</Box>
+	);
 }
