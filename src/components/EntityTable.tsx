@@ -1,7 +1,9 @@
 import * as React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip, Menu, MenuItem } from "@mui/material";
 import MoreHorizRounded from "@mui/icons-material/MoreHorizRounded";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 type Props = {
 	rows: any[];
@@ -12,6 +14,8 @@ type Props = {
 	pageSize: number;
 	onPageChange: (n: number) => void;   // 1-based
 	onPageSizeChange: (n: number) => void;
+	onEdit?: (id: number | string) => void;
+	onDelete?: (id: number | string) => void;
 };
 
 export default function EntityTable({
@@ -46,7 +50,7 @@ export default function EntityTable({
 			getEstimatedRowHeight={() => 64}
 
 			sx={{
-				borderRadius: 3,
+				borderRadius: 1,
 				backgroundColor: "background.paper",
 				border: "1px solid",
 				borderColor: "divider",
