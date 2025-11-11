@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
@@ -7,77 +7,70 @@ import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
 import InstalacionModal from "../components/InstModal";
-import { v4 as uuidv4 } from "uuid";
-
-const DATA_INST = [
-  {
-    id: 1,
-    nombre: "Cancha Olímpica #1",
-    especialidad: "Baloncesto",
-    tipo: "Cancha techada",
-    capacidad: 120,
-    horarios: "Lun–Vie 8:00 am – 8:00 pm",
-    estado: "Mantenimiento",
-  },
-  {
-    id: 3,
-    nombre: "Salón de Artes Marciales",
-    especialidad: "Karate",
-    tipo: "Salón cerrado",
-    capacidad: 30,
-    horarios: "Lun–Sáb 3:00 pm – 9:00 pm",
-    estado: "Disponible",
-  },
-];
-
-const DATA_REPORTES = [
-  {
-    id: 11,
-    nombre: "Cancha Olímpica #1",
-    descripcion: "Daño en tablero",
-    fecha: "15/07/2025",
-    asignado: 120,
-    tipo: "Correctivo",
-    estado: "En Proceso",
-  },
-  {
-    id: 12,
-    nombre: "Piscina Semiolímpica",
-    descripcion: "Fuga de agua",
-    fecha: "14/07/2025",
-    asignado: 40,
-    tipo: "Correctivo",
-    estado: "En Proceso",
-  },
-];
+import {
+	getInstallations,
+	getInstallationReports,
+	createInstallation,
+} from "../services/installations";
 
 export default function InstalacionesPage() {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
-  const [instalaciones, setInstalaciones] = useState([...DATA_INST]);
+  const [instalaciones, setInstalaciones] = useState([]);
+  const [reports, setReports] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadData() {
+      setLoading(true);
+      try {
+        const [instData, reportData] = await Promise.all([
+          getInstallations(),
+          getInstallationReports(),
+        ]);
+        if (!isMounted) return;
+        setInstalaciones(instData);
+        setReports(reportData);
+      } catch (error) {
+        console.error("Error loading installations data", error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // 🔹 Al agregar instalación desde el modal
-  const handleAddInst = (inst) => {
-    const newInst = {
-      id: uuidv4(),
-      ...inst,
-    };
-    setInstalaciones((prev) => [...prev, newInst]);
-    setTab(0); // por si estabas en "Reportes"
+  const handleAddInst = async (inst) => {
+    try {
+      const newInst = await createInstallation(inst);
+      setInstalaciones((prev) => [...prev, newInst]);
+      setTab(0); // por si estabas en "Reportes"
+    } catch (error) {
+      console.error("Error creating installation", error);
+    }
   };
 
   const rows = useMemo(() => {
-    const base = tab === 0 ? instalaciones : DATA_REPORTES;
+    const base = tab === 0 ? instalaciones : reports;
     return base.filter(
       (r) =>
         r.nombre?.toLowerCase().includes(search.toLowerCase()) ||
         r.descripcion?.toLowerCase?.().includes(search.toLowerCase()) ||
         r.especialidad?.toLowerCase?.().includes(search.toLowerCase())
     );
-  }, [tab, search, instalaciones]);
+  }, [tab, search, instalaciones, reports]);
 
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
   const paged = rows.slice(
@@ -164,7 +157,7 @@ export default function InstalacionesPage() {
         key={tab === 0 ? instalaciones.length : "reportes"}
         rows={paged}
         columns={tab === 0 ? columnsInst : columnsRep}
-        loading={false}
+        loading={loading}
         rowCount={rows.length}
         page={page}
         pageSize={pageSize}

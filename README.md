@@ -62,3 +62,18 @@ src/
 ├── App.jsx
 ├── main.jsx
 ├── index.css
+
+---
+
+## ⚙️ Configuración de entorno
+
+Antes de ejecutar cualquier script asegúrate de definir la URL base del backend:
+
+1. Abre el archivo `.env` (ya incluido en el repo).
+2. Ajusta el valor de `VITE_API_URL` para que apunte a tu API Gateway, por ejemplo:
+
+   ```bash
+   VITE_API_URL=https://api.miderec.gob.do/backoffice
+   ```
+
+3. Guarda los cambios y luego corre los comandos habituales (`npm install`, `npm run dev`, etc.). Vite leerá esta variable y los servicios del front consumirán automáticamente ese endpoint.

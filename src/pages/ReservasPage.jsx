@@ -1,26 +1,44 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
-
-const DATA = [
-	{ id: 1, nombre: "María González", rol: "Atleta", instalacion: "Cancha Olímpica #1", fecha: "18/07/2025", hora: "4:00 pm – 6:00 pm", comentario: "Partido de práctica con equipo local", estado: "Aprobada", foto: "https://i.pravatar.cc/32?img=11" },
-	{ id: 2, nombre: "Juan Pérez", rol: "Atleta", instalacion: "Piscina Semiolímpica", fecha: "19/07/2025", hora: "9:00 am – 10:30 am", comentario: "Entrenamiento precompetencia", estado: "Pendiente", foto: "https://i.pravatar.cc/32?img=12" },
-	{ id: 3, nombre: "Rosa Martínez", rol: "Entrenador", instalacion: "Salón de Artes Marciales", fecha: "20/07/2025", hora: "5:00 pm – 7:00 pm", comentario: "Clase extra para alumnos de cinta azul", estado: "Cancelada", foto: "https://i.pravatar.cc/32?img=13" },
-	{ id: 4, nombre: "Carlos Rodríguez", rol: "Atleta", instalacion: "Campo de fútbol externo", fecha: "21/07/2025", hora: "3:00 pm – 5:00 pm", comentario: "Torneo escolar nivel B", estado: "Aprobada", foto: "https://i.pravatar.cc/32?img=14" },
-	{ id: 5, nombre: "Laura Jiménez", rol: "Atleta", instalacion: "Gimnasio multiuso", fecha: "18/07/2025", hora: "7:00 am – 8:00 am", comentario: "Uso personal (cardio y pesas)", estado: "Rechazada", foto: "https://i.pravatar.cc/32?img=15" },
-	{ id: 6, nombre: "Pedro Méndez", rol: "Atleta", instalacion: "Sala de tenis de mesa", fecha: "19/07/2025", hora: "10:00 am – 11:00 am", comentario: "Entrenamiento con nuevo compañero", estado: "Pendiente", foto: "https://i.pravatar.cc/32?img=16" },
-	{ id: 7, nombre: "Ana Castillo", rol: "Atleta", instalacion: "Pista de atletismo", fecha: "22/07/2025", hora: "6:00 am – 7:00 am", comentario: "Series de velocidad (pretemporada)", estado: "Aprobada", foto: "https://i.pravatar.cc/32?img=17" },
-];
+import { getReservations } from "../services/reservations";
 
 export default function ReservasPage() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(7);
+	const [reservations, setReservations] = useState([]);
+	const [loading, setLoading] = useState(true);
 
-	const pageCount = Math.max(1, Math.ceil(DATA.length / pageSize));
-	const rows = useMemo(() => DATA.slice((page - 1) * pageSize, page * pageSize), [page, pageSize]);
+	useEffect(() => {
+		let isMounted = true;
+		setLoading(true);
+
+		getReservations()
+			.then((data) => {
+				if (isMounted) {
+					setReservations(data);
+				}
+			})
+			.catch((error) => console.error("Error loading reservations", error))
+			.finally(() => {
+				if (isMounted) {
+					setLoading(false);
+				}
+			});
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	const pageCount = Math.max(1, Math.ceil(reservations.length / pageSize));
+	const rows = useMemo(
+		() => reservations.slice((page - 1) * pageSize, page * pageSize),
+		[reservations, page, pageSize],
+	);
 
 	const columns = [
 		{
@@ -52,8 +70,8 @@ export default function ReservasPage() {
 			<EntityTable
 				rows={rows}
 				columns={columns}
-				loading={false}
-				rowCount={DATA.length}
+				loading={loading}
+				rowCount={reservations.length}
 				page={page}
 				pageSize={pageSize}
 				onPageChange={setPage}

@@ -1,0 +1,68 @@
+export const installationsMock = [
+  {
+    id: 1,
+    nombre: "Cancha Olímpica #1",
+    especialidad: "Baloncesto",
+    tipo: "Cancha techada",
+    capacidad: 120,
+    horarios: "Lun-Vie 8:00 am – 8:00 pm",
+    estado: "Mantenimiento",
+  },
+  {
+    id: 2,
+    nombre: "Piscina Semiolímpica",
+    especialidad: "Natación",
+    tipo: "Piscina",
+    capacidad: 40,
+    horarios: "Mar-Dom 7:00 am – 5:00 pm",
+    estado: "Mantenimiento",
+  },
+  {
+    id: 3,
+    nombre: "Salón de Artes Marciales",
+    especialidad: "Karate",
+    tipo: "Salón cerrado",
+    capacidad: 30,
+    horarios: "Lun-Sáb 3:00 pm – 9:00 pm",
+    estado: "Disponible",
+  },
+  {
+    id: 4,
+    nombre: "Campo de fútbol externo",
+    especialidad: "Fútbol",
+    tipo: "Campo abierto",
+    capacidad: 150,
+    horarios: "Lun-Vie 2:00 pm – 10:00 pm",
+    estado: "Disponible",
+  },
+  {
+    id: 5,
+    nombre: "Gimnasio multiuso",
+    especialidad: "General",
+    tipo: "Salón techado",
+    capacidad: 100,
+    horarios: "Todos los días 6:00 am – 9:00 pm",
+    estado: "Bloqueada",
+  },
+];
+
+export const installationReportsMock = [
+  {
+    id: 11,
+    nombre: "Cancha Olímpica #1",
+    descripcion: "Daño en tablero",
+    fecha: "15/07/2025",
+    asignado: 120,
+    tipo: "Correctivo",
+    estado: "En Proceso",
+  },
+  {
+    id: 12,
+    nombre: "Piscina Semiolímpica",
+    descripcion: "Fuga de agua",
+    fecha: "14/07/2025",
+    asignado: 40,
+    tipo: "Correctivo",
+    estado: "En Proceso",
+  },
+];

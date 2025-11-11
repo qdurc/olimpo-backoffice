@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -9,20 +9,29 @@ import {
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import InstalacionesTable from "../components/InstalacionesTable";
+import { getInstallations } from "../services/installations";
 
 export default function TorneosPage() {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
+  const [installations, setInstallations] = useState([]);
 
-  const instalaciones = [
-    { nombre: "Cancha Olímpica #1", especialidad: "Baloncesto", tipo: "Cancha techada", capacidad: 120, horarios: "Lun-Vie 8:00 am – 8:00 pm", estado: "Mantenimiento" },
-    { nombre: "Piscina Semiolímpica", especialidad: "Natación", tipo: "Piscina", capacidad: 40, horarios: "Mar-Dom 7:00 am – 5:00 pm", estado: "Mantenimiento" },
-    { nombre: "Salón de Artes Marciales", especialidad: "Karate", tipo: "Salón cerrado", capacidad: 30, horarios: "Lun-Sáb 3:00 pm – 9:00 pm", estado: "Disponible" },
-    { nombre: "Campo de fútbol externo", especialidad: "Fútbol", tipo: "Campo abierto", capacidad: 150, horarios: "Lun-Vie 2:00 pm – 10:00 pm", estado: "Disponible" },
-    { nombre: "Gimnasio multiuso", especialidad: "General", tipo: "Salón techado", capacidad: 100, horarios: "Todos los días 6:00 am – 9:00 pm", estado: "Bloqueada" },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    getInstallations()
+      .then((data) => {
+        if (isMounted) {
+          setInstallations(data);
+        }
+      })
+      .catch((error) => console.error("Error loading installations", error));
 
-  const filtered = instalaciones.filter((i) =>
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filtered = installations.filter((i) =>
     i.nombre.toLowerCase().includes(search.toLowerCase())
   );
 
