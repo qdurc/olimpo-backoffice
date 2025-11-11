@@ -70,10 +70,32 @@ src/
 Antes de ejecutar cualquier script asegúrate de definir la URL base del backend:
 
 1. Abre el archivo `.env` (ya incluido en el repo).
-2. Ajusta el valor de `VITE_API_URL` para que apunte a tu API Gateway, por ejemplo:
+2. Ajusta el valor de `VITE_API_URL` para que apunte a tu API Gateway (o al mock local), por ejemplo:
 
    ```bash
-   VITE_API_URL=https://api.miderec.gob.do/backoffice
+   # para desarrollo con json-server
+   VITE_API_URL=http://localhost:3001
+
+   # para backend real
+   # VITE_API_URL=https://api.miderec.gob.do/backoffice
    ```
 
 3. Guarda los cambios y luego corre los comandos habituales (`npm install`, `npm run dev`, etc.). Vite leerá esta variable y los servicios del front consumirán automáticamente ese endpoint.
+
+---
+
+## 🧪 API mock con json-server
+
+Mientras llega el API Gateway oficial puedes simularlo con el mock incluido:
+
+1. Instala dependencias si aún no lo has hecho: `npm install`.
+2. Inicia el servidor mock en otra terminal:
+
+   ```bash
+   npm run mock:api
+   ```
+
+   Esto levanta `json-server` en `http://localhost:3001` usando los datos de `mocks/api/db.json` y las rutas declaradas en `mocks/api/routes.json`.
+
+3. Asegúrate de que `VITE_API_URL` apunte a `http://localhost:3001`.
+4. Corre el front normalmente (`npm run dev`). Todas las llamadas (`/installations`, `/installation-reports`, `/reservations`, `/dashboard`) responderán con los datos mock y aceptarán operaciones básicas `POST/PUT/DELETE` según lo que provee json-server.

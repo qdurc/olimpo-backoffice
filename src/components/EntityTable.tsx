@@ -2,8 +2,6 @@ import * as React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Box, IconButton, Tooltip, Menu, MenuItem } from "@mui/material";
 import MoreHorizRounded from "@mui/icons-material/MoreHorizRounded";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 type Props = {
 	rows: any[];

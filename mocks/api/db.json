@@ -1,0 +1,240 @@
+{
+  "installations": [
+    {
+      "id": 1,
+      "nombre": "Cancha Olímpica #1",
+      "especialidad": "Baloncesto",
+      "tipo": "Cancha techada",
+      "capacidad": 120,
+      "horarios": "Lun-Vie 8:00 am – 8:00 pm",
+      "estado": "Mantenimiento"
+    },
+    {
+      "id": 2,
+      "nombre": "Piscina Semiolímpica",
+      "especialidad": "Natación",
+      "tipo": "Piscina",
+      "capacidad": 40,
+      "horarios": "Mar-Dom 7:00 am – 5:00 pm",
+      "estado": "Mantenimiento"
+    },
+    {
+      "id": 3,
+      "nombre": "Salón de Artes Marciales",
+      "especialidad": "Karate",
+      "tipo": "Salón cerrado",
+      "capacidad": 30,
+      "horarios": "Lun-Sáb 3:00 pm – 9:00 pm",
+      "estado": "Disponible"
+    },
+    {
+      "id": 4,
+      "nombre": "Campo de fútbol externo",
+      "especialidad": "Fútbol",
+      "tipo": "Campo abierto",
+      "capacidad": 150,
+      "horarios": "Lun-Vie 2:00 pm – 10:00 pm",
+      "estado": "Disponible"
+    },
+    {
+      "id": 5,
+      "nombre": "Gimnasio multiuso",
+      "especialidad": "General",
+      "tipo": "Salón techado",
+      "capacidad": 100,
+      "horarios": "Todos los días 6:00 am – 9:00 pm",
+      "estado": "Bloqueada"
+    }
+  ],
+  "installationReports": [
+    {
+      "id": 11,
+      "nombre": "Cancha Olímpica #1",
+      "descripcion": "Daño en tablero",
+      "fecha": "15/07/2025",
+      "asignado": 120,
+      "tipo": "Correctivo",
+      "estado": "En Proceso"
+    },
+    {
+      "id": 12,
+      "nombre": "Piscina Semiolímpica",
+      "descripcion": "Fuga de agua",
+      "fecha": "14/07/2025",
+      "asignado": 40,
+      "tipo": "Correctivo",
+      "estado": "En Proceso"
+    }
+  ],
+  "reservations": [
+    {
+      "id": 1,
+      "nombre": "María González",
+      "rol": "Atleta",
+      "instalacion": "Cancha Olímpica #1",
+      "fecha": "18/07/2025",
+      "hora": "4:00 pm – 6:00 pm",
+      "comentario": "Partido de práctica con equipo local",
+      "estado": "Aprobada",
+      "foto": "https://i.pravatar.cc/32?img=11"
+    },
+    {
+      "id": 2,
+      "nombre": "Juan Pérez",
+      "rol": "Atleta",
+      "instalacion": "Piscina Semiolímpica",
+      "fecha": "19/07/2025",
+      "hora": "9:00 am – 10:30 am",
+      "comentario": "Entrenamiento precompetencia",
+      "estado": "Pendiente",
+      "foto": "https://i.pravatar.cc/32?img=12"
+    },
+    {
+      "id": 3,
+      "nombre": "Rosa Martínez",
+      "rol": "Entrenador",
+      "instalacion": "Salón de Artes Marciales",
+      "fecha": "20/07/2025",
+      "hora": "5:00 pm – 7:00 pm",
+      "comentario": "Clase extra para alumnos de cinta azul",
+      "estado": "Cancelada",
+      "foto": "https://i.pravatar.cc/32?img=13"
+    },
+    {
+      "id": 4,
+      "nombre": "Carlos Rodríguez",
+      "rol": "Atleta",
+      "instalacion": "Campo de fútbol externo",
+      "fecha": "21/07/2025",
+      "hora": "3:00 pm – 5:00 pm",
+      "comentario": "Torneo escolar nivel B",
+      "estado": "Aprobada",
+      "foto": "https://i.pravatar.cc/32?img=14"
+    },
+    {
+      "id": 5,
+      "nombre": "Laura Jiménez",
+      "rol": "Atleta",
+      "instalacion": "Gimnasio multiuso",
+      "fecha": "18/07/2025",
+      "hora": "7:00 am – 8:00 am",
+      "comentario": "Uso personal (cardio y pesas)",
+      "estado": "Rechazada",
+      "foto": "https://i.pravatar.cc/32?img=15"
+    },
+    {
+      "id": 6,
+      "nombre": "Pedro Méndez",
+      "rol": "Atleta",
+      "instalacion": "Sala de tenis de mesa",
+      "fecha": "19/07/2025",
+      "hora": "10:00 am – 11:00 am",
+      "comentario": "Entrenamiento con nuevo compañero",
+      "estado": "Pendiente",
+      "foto": "https://i.pravatar.cc/32?img=16"
+    },
+    {
+      "id": 7,
+      "nombre": "Ana Castillo",
+      "rol": "Atleta",
+      "instalacion": "Pista de atletismo",
+      "fecha": "22/07/2025",
+      "hora": "6:00 am – 7:00 am",
+      "comentario": "Series de velocidad (pretemporada)",
+      "estado": "Aprobada",
+      "foto": "https://i.pravatar.cc/32?img=17"
+    }
+  ],
+  "dashboard": {
+    "stats": [
+      {
+        "title": "Instalaciones registradas",
+        "value": "7,265",
+        "change": "+11.01%",
+        "trend": "up",
+        "color": "#FFF2F2",
+        "accent": "#D32F2F"
+      },
+      {
+        "title": "Reservas activas",
+        "value": "3,671",
+        "change": "-0.03%",
+        "trend": "down",
+        "color": "#E8F3FF",
+        "accent": "#1565C0"
+      },
+      {
+        "title": "Usuarios registrados",
+        "value": "156",
+        "change": "+15.03%",
+        "trend": "up",
+        "color": "#FFECEF",
+        "accent": "#C2185B"
+      },
+      {
+        "title": "Torneos en curso",
+        "value": "2,318",
+        "change": "+6.08%",
+        "trend": "up",
+        "color": "#E9F3FF",
+        "accent": "#1976D2"
+      }
+    ],
+    "activity": [
+      {
+        "name": "Usuarios actuales",
+        "value": 82.3,
+        "color": "#D32F2F"
+      },
+      {
+        "name": "Nuevos usuarios",
+        "value": 17.7,
+        "color": "#1565C0"
+      }
+    ],
+    "classification": [
+      {
+        "name": "Entrenadores",
+        "value": 25,
+        "color": "#D32F2F"
+      },
+      {
+        "name": "Atletas",
+        "value": 80,
+        "color": "#1565C0"
+      }
+    ],
+    "events": [
+      {
+        "evento": "Torneo de Verano",
+        "participacion": "17.5%",
+        "inscritos": 858,
+        "fecha": "7 Jul. 2025"
+      },
+      {
+        "evento": "Olimpo Basket PRO",
+        "participacion": "10.8%",
+        "inscritos": 1024,
+        "fecha": "5 Jul. 2025"
+      },
+      {
+        "evento": "Olimpo Natación DS",
+        "participacion": "21.3%",
+        "inscritos": 258,
+        "fecha": "12 Jul. 2025"
+      },
+      {
+        "evento": "Liga Intercolegial",
+        "participacion": "31.5%",
+        "inscritos": 1485,
+        "fecha": "10 Jul. 2025"
+      },
+      {
+        "evento": "Carrera Fútbol 2025",
+        "participacion": "12.8%",
+        "inscritos": 612,
+        "fecha": "14 Jul. 2025"
+      }
+    ]
+  }
+}
