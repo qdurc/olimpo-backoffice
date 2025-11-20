@@ -4,7 +4,7 @@ import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
-import { getMaintenances } from "../services/installations";
+import { getMaintenances } from "../services/maintenances";
 
 export default function MantenimientosPage() {
   const [search, setSearch] = useState("");
