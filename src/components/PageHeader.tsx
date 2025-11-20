@@ -1,8 +1,13 @@
-import { Box, Typography, Breadcrumbs, Button } from "@mui/material";
+import { Box, Typography, Breadcrumbs } from "@mui/material";
 
 export default function PageHeader({ title, subtitle, crumbs = [], cta }: {
-	title: string; subtitle?: string; crumbs?: Array<{ label: string; onClick?: () => void }>; cta?: React.ReactNode
+	title: string;
+	subtitle?: string;
+	crumbs?: Array<{ label: string; onClick?: () => void }>;
+	cta?: React.ReactNode | false;
 }) {
+	const action = cta === undefined || cta === false ? null : cta;
+
 	return (
 		<Box mb={3} display="flex" alignItems="center" justifyContent="space-between" gap={2}>
 			<Box>
@@ -14,7 +19,7 @@ export default function PageHeader({ title, subtitle, crumbs = [], cta }: {
 				<Typography variant="h2">{title}</Typography>
 				{subtitle && <Typography variant="subtitle1">{subtitle}</Typography>}
 			</Box>
-			{cta ?? <Button variant="contained">Nuevo</Button>}
+			{action}
 		</Box>
 	);
 }

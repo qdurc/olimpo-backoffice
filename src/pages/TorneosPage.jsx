@@ -31,8 +31,13 @@ export default function TorneosPage() {
     };
   }, []);
 
-  const filtered = installations.filter((i) =>
-    i.nombre.toLowerCase().includes(search.toLowerCase())
+  const term = search.toLowerCase();
+  const filtered = installations.filter(
+    (i) =>
+      i.nombre?.toLowerCase().includes(term) ||
+      i.tipo?.toLowerCase?.().includes(term) ||
+      i.direccion?.toLowerCase?.().includes(term) ||
+      i.estado?.toLowerCase?.().includes(term)
   );
 
   return (

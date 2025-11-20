@@ -15,11 +15,13 @@ export async function apiFetchJson<T = Json>(
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
+	const headers =
+		options.body !== undefined
+			? { "Content-Type": "application/json", ...options.headers }
+			: { ...options.headers };
+
 	const response = await fetch(`${apiBaseUrl}${path}`, {
-		headers: {
-			"Content-Type": "application/json",
-			...options.headers,
-		},
+		headers,
 		...options,
 	});
 

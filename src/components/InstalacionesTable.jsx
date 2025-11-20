@@ -17,10 +17,9 @@ export default function InstalacionesTable({ data }) {
         <TableHead>
           <TableRow>
             <TableCell>Nombre</TableCell>
-            <TableCell>Especialidad</TableCell>
             <TableCell>Tipo</TableCell>
             <TableCell>Capacidad</TableCell>
-            <TableCell>Horarios</TableCell>
+            <TableCell>Dirección</TableCell>
             <TableCell>Estado</TableCell>
           </TableRow>
         </TableHead>
@@ -28,10 +27,9 @@ export default function InstalacionesTable({ data }) {
           {data.map((row, i) => (
             <TableRow key={i} hover>
               <TableCell>{row.nombre}</TableCell>
-              <TableCell>{row.especialidad}</TableCell>
               <TableCell>{row.tipo}</TableCell>
               <TableCell>{row.capacidad}</TableCell>
-              <TableCell>{row.horarios}</TableCell>
+              <TableCell>{row.direccion}</TableCell>
               <TableCell>
                 <StatusChip estado={row.estado} />
               </TableCell>

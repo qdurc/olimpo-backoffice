@@ -1,19 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import { Box, TextField, InputAdornment } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
-import StatusPill from "../components/StatusPill";
-import InstalacionModal from "../components/InstModal";
-import { getInstallations, createInstallation } from "../services/installations";
+import { getMaintenances } from "../services/installations";
 
-export default function InstalacionesPage() {
+export default function MantenimientosPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
-  const [instalaciones, setInstalaciones] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
+  const [mantenimientos, setMantenimientos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,11 +19,11 @@ export default function InstalacionesPage() {
     async function loadData() {
       setLoading(true);
       try {
-        const instData = await getInstallations();
+        const data = await getMaintenances();
         if (!isMounted) return;
-        setInstalaciones(instData);
+        setMantenimientos(data);
       } catch (error) {
-        console.error("Error loading installations data", error);
+        console.error("Error cargando mantenimientos", error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -40,27 +37,16 @@ export default function InstalacionesPage() {
     };
   }, []);
 
-  // 🔹 Al agregar instalación desde el modal
-  const handleAddInst = async (inst) => {
-    try {
-      const newInst = await createInstallation(inst);
-      setInstalaciones((prev) => [...prev, newInst]);
-    } catch (error) {
-      console.error("Error creating installation", error);
-    }
-  };
-
   const rows = useMemo(() => {
     const term = search.toLowerCase();
 
-    return instalaciones.filter(
+    return mantenimientos.filter(
       (r) =>
         r.nombre?.toLowerCase().includes(term) ||
-        r.tipo?.toLowerCase?.().includes(term) ||
-        r.direccion?.toLowerCase?.().includes(term) ||
-        r.estado?.toLowerCase?.().includes(term)
+        r.descripcion?.toLowerCase?.().includes(term) ||
+        r.usuarioId?.toString().includes(term)
     );
-  }, [search, instalaciones]);
+  }, [search, mantenimientos]);
 
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
   const paged = rows.slice(
@@ -68,30 +54,17 @@ export default function InstalacionesPage() {
     (page - 1) * pageSize + pageSize
   );
 
-  const columnsInst = [
-    { field: "nombre", headerName: "Nombre", flex: 1 },
-    { field: "tipo", headerName: "Tipo", flex: 1 },
-    { field: "capacidad", headerName: "Capacidad", width: 120 },
-    { field: "direccion", headerName: "Dirección", flex: 1 },
-    {
-      field: "estado",
-      headerName: "Estado",
-      width: 160,
-      renderCell: (p) => <StatusPill value={p.value} />,
-    },
+  const columns = [
+    { field: "nombre", headerName: "Instalación", flex: 1 },
+    { field: "descripcion", headerName: "Descripción", flex: 1 },
+    { field: "inicio", headerName: "Inicio", width: 180 },
+    { field: "fin", headerName: "Fin", width: 180 },
+    { field: "usuarioId", headerName: "Usuario", width: 120 },
   ];
 
   return (
     <Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
-      <PageHeader
-        title="Instalaciones"
-        subtitle=""
-        cta={
-          <Button variant="contained" onClick={() => setOpenModal(true)}>
-            Nueva Instalación
-          </Button>
-        }
-      />
+      <PageHeader title="Mantenimientos" subtitle="" />
 
       <Box display="flex" alignItems="center" justifyContent="flex-end" mb={1.5}>
         <TextField
@@ -115,7 +88,7 @@ export default function InstalacionesPage() {
 
       <EntityTable
         rows={paged}
-        columns={columnsInst}
+        columns={columns}
         loading={loading}
         rowCount={rows.length}
         page={page}
@@ -133,13 +106,6 @@ export default function InstalacionesPage() {
           setPageSize(n);
           setPage(1);
         }}
-      />
-
-      {/* Modal para agregar instalación */}
-      <InstalacionModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        onAdd={handleAddInst}
       />
     </Box>
   );

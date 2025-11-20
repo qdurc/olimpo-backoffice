@@ -14,12 +14,14 @@ import {
   Event,
   Person,
   EmojiEvents,
+  Build,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   { text: "Dashboard", icon: <Dashboard />, path: "/dashboard" },
   { text: "Instalaciones", icon: <SportsSoccer />, path: "/instalaciones" },
+  { text: "Mantenimientos", icon: <Build />, path: "/mantenimientos" },
   { text: "Reservas", icon: <Event />, path: "/reservas" },
   { text: "Usuario", icon: <Person />, path: "/usuario" },
   { text: "Torneos", icon: <EmojiEvents />, path: "/torneos" },

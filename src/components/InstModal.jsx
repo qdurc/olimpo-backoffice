@@ -16,11 +16,10 @@ import {
 export default function InstalacionModal({ open, onClose, onAdd }) {
   const [form, setForm] = useState({
     nombre: "",
-    especialidad: "",
     tipo: "",
     capacidad: "",
-    horarios: "",
-    estado: "Disponible", // 👈 valor inicial
+    direccion: "",
+    estadoId: "1",
   });
 
   const handleChange = (e) => {
@@ -34,15 +33,15 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
     onAdd({
       ...form,
       capacidad: Number(form.capacidad) || 0,
+      estadoId: form.estadoId,
     });
 
     setForm({
       nombre: "",
-      especialidad: "",
       tipo: "",
       capacidad: "",
-      horarios: "",
-      estado: "Disponible",
+      direccion: "",
+      estadoId: "1",
     });
 
     onClose();
@@ -75,16 +74,6 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
 
           <Grid item xs={12} md={6}>
             <TextField
-              label="Especialidad"
-              name="especialidad"
-              fullWidth
-              value={form.especialidad}
-              onChange={handleChange}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <TextField
               label="Tipo"
               name="tipo"
               fullWidth
@@ -106,10 +95,21 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
 
           <Grid item xs={12} md={6}>
             <TextField
-              label="Horarios"
-              name="horarios"
+              label="Dirección"
+              name="direccion"
               fullWidth
-              value={form.horarios}
+              value={form.direccion}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Estado (ID numérico)"
+              name="estadoId"
+              type="number"
+              fullWidth
+              value={form.estadoId}
               onChange={handleChange}
             />
           </Grid>
