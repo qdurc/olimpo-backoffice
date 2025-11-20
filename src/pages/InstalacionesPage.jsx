@@ -68,18 +68,21 @@ export default function InstalacionesPage() {
     (page - 1) * pageSize + pageSize
   );
 
-  const columnsInst = [
-    { field: "nombre", headerName: "Nombre", flex: 1 },
-    { field: "tipo", headerName: "Tipo", flex: 1 },
-    { field: "capacidad", headerName: "Capacidad", width: 120 },
-    { field: "direccion", headerName: "Dirección", flex: 1 },
-    {
-      field: "estado",
-      headerName: "Estado",
-      width: 160,
-      renderCell: (p) => <StatusPill value={p.value} />,
-    },
-  ];
+  const columnsInst = useMemo(
+    () => [
+      { field: "nombre", headerName: "Nombre", flex: 1 },
+      { field: "tipo", headerName: "Tipo", flex: 1 },
+      { field: "capacidad", headerName: "Capacidad", width: 120 },
+      { field: "direccion", headerName: "Dirección", flex: 1 },
+      {
+        field: "estado",
+        headerName: "Estado",
+        width: 160,
+        renderCell: (p) => <StatusPill value={p.value} />,
+      },
+    ],
+    []
+  );
 
   return (
     <Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>

@@ -23,7 +23,7 @@ export default function MantenimientosPage() {
         if (!isMounted) return;
         setMantenimientos(data);
       } catch (error) {
-        console.error("Error cargando mantenimientos", error);
+        console.error("Error loading maintenance data", error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -54,13 +54,16 @@ export default function MantenimientosPage() {
     (page - 1) * pageSize + pageSize
   );
 
-  const columns = [
-    { field: "nombre", headerName: "Instalación", flex: 1 },
-    { field: "descripcion", headerName: "Descripción", flex: 1 },
-    { field: "inicio", headerName: "Inicio", width: 180 },
-    { field: "fin", headerName: "Fin", width: 180 },
-    { field: "usuarioId", headerName: "Usuario", width: 120 },
-  ];
+  const columns = useMemo(
+    () => [
+      { field: "nombre", headerName: "Instalación", flex: 1 },
+      { field: "descripcion", headerName: "Descripción", flex: 1 },
+      { field: "inicio", headerName: "Inicio", width: 180 },
+      { field: "fin", headerName: "Fin", width: 180 },
+      { field: "usuarioId", headerName: "Usuario", width: 120 },
+    ],
+    []
+  );
 
   return (
     <Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>

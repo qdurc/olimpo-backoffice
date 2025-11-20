@@ -24,7 +24,7 @@ export default function ReservasPage() {
 					setReservations(data);
 				}
 			})
-			.catch((error) => console.error("Error loading reservations", error))
+			.catch((error) => console.error("Error loading reservations data", error))
 			.finally(() => {
 				if (isMounted) {
 					setLoading(false);
@@ -53,14 +53,17 @@ export default function ReservasPage() {
 		[filtered, page, pageSize],
 	);
 
-	const columns = [
-		{ field: "id", headerName: "ID", width: 90 },
-		{ field: "usuarioId", headerName: "Usuario", width: 130 },
-		{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 200 },
-		{ field: "fecha", headerName: "Fecha", width: 130 },
-		{ field: "hora", headerName: "Hora", width: 120 },
-		{ field: "estado", headerName: "Estado", width: 150, renderCell: (p) => <StatusPill value={p.value} /> },
-	];
+	const columns = useMemo(
+		() => [
+			{ field: "id", headerName: "ID", width: 90 },
+			{ field: "usuarioId", headerName: "Usuario", width: 130 },
+			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 200 },
+			{ field: "fecha", headerName: "Fecha", width: 130 },
+			{ field: "hora", headerName: "Hora", width: 120 },
+			{ field: "estado", headerName: "Estado", width: 150, renderCell: (p) => <StatusPill value={p.value} /> },
+		],
+		[],
+	);
 
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>

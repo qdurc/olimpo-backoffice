@@ -19,6 +19,9 @@ export type Installation = {
 	statusId: number | null;
 };
 
+let installationsCache: Installation[] | null = null;
+let installationsPromise: Promise<Installation[]> | null = null;
+
 function normalizeFacility(data: FacilityApi): Installation {
 	const statusId = data.status_ID ?? null;
 	const fallbackId = data.id ?? `facility-${Math.random().toString(36).slice(2)}`;
@@ -46,13 +49,39 @@ export async function getInstallations(): Promise<Installation[]> {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	const facilities = await apiFetchJson<FacilityApi[]>(
-		"/api/Facility/GetAllFacilitiesAsync",
-	);
+	if (installationsCache) {
+		return installationsCache;
+	}
 
-	return Array.isArray(facilities)
-		? facilities.map(normalizeFacility)
-		: [];
+	if (installationsPromise) {
+		return installationsPromise;
+	}
+
+	const request = (async () => {
+		const facilities = await apiFetchJson<FacilityApi[]>(
+			"/api/Facility/GetAllFacilitiesAsync",
+		);
+
+		const normalized = Array.isArray(facilities)
+			? facilities.map(normalizeFacility)
+			: [];
+
+		installationsCache = normalized;
+		return normalized;
+	})();
+
+	installationsPromise = request;
+
+	try {
+		return await request;
+	} finally {
+		installationsPromise = null;
+	}
+}
+
+export function clearInstallationsCache() {
+	installationsCache = null;
+	installationsPromise = null;
 }
 
 export type InstallationPayload = {
@@ -88,5 +117,11 @@ export async function createInstallation(
 		},
 	);
 
-	return normalizeFacility(facility);
+	const normalized = normalizeFacility(facility);
+
+	if (installationsCache) {
+		installationsCache = [...installationsCache, normalized];
+	}
+
+	return normalized;
 }
