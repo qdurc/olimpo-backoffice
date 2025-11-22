@@ -1,7 +1,7 @@
 import * as React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Box, IconButton, Tooltip, Menu, MenuItem } from "@mui/material";
-import MoreHorizRounded from "@mui/icons-material/MoreHorizRounded";
+import { Box } from "@mui/material";
+import RowActionsMenu from "./RowActionsMenu";
 
 type Props = {
 	rows: any[];
@@ -17,7 +17,16 @@ type Props = {
 };
 
 export default function EntityTable({
-	rows, columns, loading, rowCount, page, pageSize, onPageChange, onPageSizeChange
+	rows,
+	columns,
+	loading,
+	rowCount,
+	page,
+	pageSize,
+	onPageChange,
+	onPageSizeChange,
+	onEdit,
+	onDelete,
 }: Props) {
 
 	const actionCol: GridColDef = {
@@ -27,43 +36,42 @@ export default function EntityTable({
 		filterable: false,
 		align: "right",
 		width: 72,
-		renderCell: () => (
-			<Tooltip title="Acciones">
-				<IconButton size="small"><MoreHorizRounded /></IconButton>
-			</Tooltip>
+		renderCell: (params) => (
+			<RowActionsMenu
+				onEdit={onEdit ? () => onEdit(params.id as number | string) : undefined}
+				onDelete={onDelete ? () => onDelete(params.id as number | string) : undefined}
+			/>
 		),
 	};
 
 	return (
-		<DataGrid
-			rows={rows}
-			columns={[...columns, actionCol]}
-			loading={loading}
-			autoHeight
-			hideFooter
-			disableRowSelectionOnClick
-
-			/* ✅ Permite alto automático para que quepan 2 líneas (nombre + rol) */
-			getRowHeight={() => "auto"}
-			getEstimatedRowHeight={() => 64}
-
-			sx={{
-				borderRadius: 1,
-				backgroundColor: "background.paper",
-				border: "1px solid",
-				borderColor: "divider",
-				boxShadow: "0 6px 28px rgba(2,8,20,.06)",
-				"& .MuiDataGrid-columnHeaders": { background: "#FBFCFE" },
-
-				/* ✅ Centra verticalmente el contenido de celdas */
-				"& .MuiDataGrid-cell": { py: 1.25, alignItems: "center" },
-
-				/* ✅ Deja de recortar el contenido (el avatar ya no se corta) */
-				"& .MuiDataGrid-cellContent": { overflow: "visible", whiteSpace: "normal" },
-
-				/* (Opcional) un pequeño resalte al hover como el prototipo */
-				"& .MuiDataGrid-row:hover": { backgroundColor: "rgba(2,8,20,.02)" },
-			}}
-		/>
+		<Box>
+			<DataGrid
+				rows={rows}
+				columns={[...columns, actionCol]}
+				loading={loading}
+				autoHeight
+				hideFooter
+				disableRowSelectionOnClick
+				getRowHeight={() => "auto"}
+				getEstimatedRowHeight={() => 64}
+				sx={{
+					borderRadius: 1,
+					backgroundColor: "background.paper",
+					border: "1px solid",
+					borderColor: "divider",
+					boxShadow: "0 6px 28px rgba(2,8,20,.06)",
+					"& .MuiDataGrid-columnHeaders": { background: "#FBFCFE" },
+					"& .MuiDataGrid-cell": { py: 1.25, alignItems: "center" },
+					"& .MuiDataGrid-cellContent": {
+						overflow: "visible",
+						whiteSpace: "normal",
+					},
+					"& .MuiDataGrid-row:hover": {
+						backgroundColor: "rgba(2,8,20,.02)",
+					},
+				}}
+			/>
+		</Box>
 	);
 }

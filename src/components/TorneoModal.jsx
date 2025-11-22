@@ -1,3 +1,4 @@
+// src/components/TorneoModal.jsx
 import React, { useEffect, useState } from "react";
 import {
 	Dialog,
@@ -12,7 +13,7 @@ import {
 
 const ESTADOS = ["En Curso", "Abierto", "Finalizado"];
 
-const initialForm = {
+const emptyForm = {
 	nombre: "",
 	disciplina: "",
 	categoria: "",
@@ -21,22 +22,38 @@ const initialForm = {
 	estado: "En Curso",
 };
 
-export default function TorneoModal({ open, onClose, onSave }) {
-	const [form, setForm] = useState(initialForm);
+export default function TorneoModal({
+	open,
+	onClose,
+	onSave,
+	mode = "create",          // "create" | "edit"
+	initialData = null,       // datos del torneo cuando se edita
+}) {
+	const [form, setForm] = useState(emptyForm);
 
-	// Cada vez que se abre el modal, reseteamos el formulario
+	// Cuando se abre el modal, si es edición cargamos los datos, si no, limpiamos
 	useEffect(() => {
 		if (open) {
-			setForm(initialForm);
+			if (mode === "edit" && initialData) {
+				setForm({
+					nombre: initialData.nombre ?? "",
+					disciplina: initialData.disciplina ?? "",
+					categoria: initialData.categoria ?? "",
+					fecha: initialData.fecha ?? "",
+					instalacion: initialData.instalacion ?? "",
+					estado: initialData.estado ?? "En Curso",
+				});
+			} else {
+				setForm(emptyForm);
+			}
 		}
-	}, [open]);
+	}, [open, mode, initialData]);
 
 	const handleChange = (field) => (event) => {
 		setForm((prev) => ({ ...prev, [field]: event.target.value }));
 	};
 
 	const handleSubmit = () => {
-		// Validaciones básicas (solo que no estén vacíos los campos clave)
 		if (!form.nombre || !form.disciplina || !form.categoria) return;
 		if (!form.fecha || !form.instalacion) return;
 
@@ -44,9 +61,12 @@ export default function TorneoModal({ open, onClose, onSave }) {
 		onClose();
 	};
 
+	const title = mode === "edit" ? "Editar Torneo" : "Nuevo Torneo";
+	const actionLabel = mode === "edit" ? "Guardar cambios" : "Crear Torneo";
+
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-			<DialogTitle>Nuevo Torneo</DialogTitle>
+			<DialogTitle>{title}</DialogTitle>
 			<DialogContent dividers>
 				<Grid container spacing={2} sx={{ mt: 0.5 }}>
 					<Grid item xs={12}>
@@ -77,7 +97,6 @@ export default function TorneoModal({ open, onClose, onSave }) {
 					</Grid>
 
 					<Grid item xs={12} sm={6}>
-						{/* Puedes cambiar a type="date" si después quieres formatear la fecha */}
 						<TextField
 							label="Fecha"
 							placeholder="25/07/2025"
@@ -119,7 +138,7 @@ export default function TorneoModal({ open, onClose, onSave }) {
 					Cancelar
 				</Button>
 				<Button variant="contained" onClick={handleSubmit}>
-					Guardar
+					{actionLabel}
 				</Button>
 			</DialogActions>
 		</Dialog>

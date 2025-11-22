@@ -80,6 +80,7 @@ export default function TorneosPage() {
 	const [pageSize, setPageSize] = useState(8);
 	const [data, setData] = useState(INITIAL_TORNEOS);
 	const [openModal, setOpenModal] = useState(false);
+	const [editingTorneo, setEditingTorneo] = useState(null);
 
 	const rows = useMemo(() => {
 		const term = search.toLowerCase();
@@ -109,11 +110,40 @@ export default function TorneosPage() {
 		},
 	];
 
-	const handleAddTorneo = (nuevo) => {
-		setData((prev) => [
-			...prev,
-			{ id: prev.length ? prev[prev.length - 1].id + 1 : 1, ...nuevo },
-		]);
+	const handleOpenCreate = () => {
+		setEditingTorneo(null);
+		setOpenModal(true);
+	};
+
+	const handleSaveTorneo = (torneoForm) => {
+		if (editingTorneo) {
+			// Editar existente
+			setData((prev) =>
+				prev.map((t) =>
+					t.id === editingTorneo.id ? { ...t, ...torneoForm } : t
+				)
+			);
+		} else {
+			// Crear nuevo
+			setData((prev) => [
+				...prev,
+				{
+					id: prev.length ? prev[prev.length - 1].id + 1 : 1,
+					...torneoForm,
+				},
+			]);
+		}
+	};
+
+	const handleDeleteTorneo = (id) => {
+		setData((prev) => prev.filter((t) => t.id !== id));
+	};
+
+	const handleEditTorneo = (id) => {
+		const found = data.find((t) => t.id === id);
+		if (!found) return;
+		setEditingTorneo(found);
+		setOpenModal(true);
 	};
 
 	return (
@@ -121,7 +151,7 @@ export default function TorneosPage() {
 			<PageHeader
 				title="Torneos"
 				cta={
-					<Button variant="contained" onClick={() => setOpenModal(true)}>
+					<Button variant="contained" onClick={handleOpenCreate}>
 						Nuevo Torneo
 					</Button>
 				}
@@ -159,6 +189,8 @@ export default function TorneosPage() {
 					setPageSize(n);
 					setPage(1);
 				}}
+				onEdit={handleEditTorneo}
+				onDelete={handleDeleteTorneo}
 			/>
 
 			<TableFooter
@@ -175,7 +207,9 @@ export default function TorneosPage() {
 			<TorneoModal
 				open={openModal}
 				onClose={() => setOpenModal(false)}
-				onSave={handleAddTorneo}
+				onSave={handleSaveTorneo}
+				mode={editingTorneo ? "edit" : "create"}
+				initialData={editingTorneo}
 			/>
 		</Box>
 	);
