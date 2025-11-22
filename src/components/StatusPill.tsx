@@ -13,6 +13,9 @@ const map: Record<string, { bg: string; color: string; label?: string }> = {
 	"Aprobada": { bg: "rgba(16,185,129,.12)", color: "#059669" },
 	"Cancelada": { bg: "rgba(239,68,68,.12)", color: "#DC2626" },
 	"Rechazada": { bg: "rgba(239,68,68,.12)", color: "#DC2626" },
+	"Abierto": { bg: "rgba(16,185,129,.12)", color: "#059669" },
+	"En Curso": { bg: "rgba(251,146,60,.12)", color: "#F59E0B" },
+	"Finalizado": { bg: "rgba(239,68,68,.12)", color: "#DC2626" },
 };
 
 export default function StatusPill({ value }: { value: string }) {
