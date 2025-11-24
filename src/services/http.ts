@@ -41,5 +41,23 @@ export async function apiFetchJson<T = Json>(
 		return null as T;
 	}
 
-	return (await response.json()) as T;
+	const contentType = response.headers.get("content-type") || "";
+
+	// Prefer JSON when the server declares it; fall back to text/empty body to avoid
+	// SyntaxError when some endpoints return no content.
+	if (contentType.includes("application/json")) {
+		return (await response.json()) as T;
+	}
+
+	const text = await response.text();
+	if (!text) {
+		return null as T;
+	}
+
+	try {
+		return JSON.parse(text) as T;
+	} catch {
+		// If it's not JSON, return the raw text as a best-effort value.
+		return text as unknown as T;
+	}
 }

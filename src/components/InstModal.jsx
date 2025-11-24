@@ -13,7 +13,12 @@ import {
   FormControl,
 } from "@mui/material";
 
-export default function InstalacionModal({ open, onClose, onAdd }) {
+export default function InstalacionModal({
+  open,
+  onClose,
+  onSave,
+  initialData = null,
+}) {
   const initialForm = {
     nombre: "",
     tipo: "",
@@ -22,7 +27,27 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
     estadoId: "1",
     estado: "Disponible",
   };
+
+  const isEditing = Boolean(initialData);
   const [form, setForm] = useState(initialForm);
+
+  React.useEffect(() => {
+    if (open && initialData) {
+      setForm({
+        nombre: initialData.nombre ?? "",
+        tipo: initialData.tipo ?? "",
+        capacidad: initialData.capacidad ?? "",
+        direccion: initialData.direccion ?? "",
+        estadoId:
+          initialData.statusId === null || initialData.statusId === undefined
+            ? ""
+            : String(initialData.statusId),
+        estado: initialData.estado ?? "Disponible",
+      });
+    } else if (!open) {
+      setForm(initialForm);
+    }
+  }, [open, initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,21 +59,21 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
 
     const estadoId = form.estadoId === "" ? null : form.estadoId;
 
-    onAdd({
+    onSave?.({
       ...form,
+      id: initialData?.id,
       capacidad: Number(form.capacidad) || 0,
       estadoId,
     });
 
     setForm(initialForm);
-
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700, fontSize: "1.25rem" }}>
-        Nueva Instalación
+        {isEditing ? "Editar Instalación" : "Nueva Instalación"}
       </DialogTitle>
 
       <DialogContent
@@ -134,7 +159,7 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Cancelar</Button>
         <Button variant="contained" onClick={handleSubmit}>
-          Agregar
+          {isEditing ? "Guardar cambios" : "Agregar"}
         </Button>
       </DialogActions>
     </Dialog>

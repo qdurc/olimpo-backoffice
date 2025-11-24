@@ -6,7 +6,12 @@ import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
 import InstalacionModal from "../components/InstModal";
-import { getInstallations, createInstallation } from "../services/installations";
+import {
+  getInstallations,
+  createInstallation,
+  updateInstallation,
+  deleteInstallation,
+} from "../services/installations";
 
 export default function InstalacionesPage() {
   const [search, setSearch] = useState("");
@@ -14,6 +19,7 @@ export default function InstalacionesPage() {
   const [pageSize, setPageSize] = useState(8);
   const [instalaciones, setInstalaciones] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [editingInst, setEditingInst] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,13 +46,30 @@ export default function InstalacionesPage() {
     };
   }, []);
 
-  // 🔹 Al agregar instalación desde el modal
-  const handleAddInst = async (inst) => {
+  const handleSaveInst = async (inst) => {
     try {
-      const newInst = await createInstallation(inst);
-      setInstalaciones((prev) => [...prev, newInst]);
+      if (inst.id) {
+        const updated = await updateInstallation(inst.id, inst);
+        setInstalaciones((prev) =>
+          prev.map((item) => (item.id === updated.id ? updated : item))
+        );
+      } else {
+        const newInst = await createInstallation(inst);
+        setInstalaciones((prev) => [...prev, newInst]);
+      }
     } catch (error) {
-      console.error("Error creating installation", error);
+      console.error("Error saving installation", error);
+    } finally {
+      setEditingInst(null);
+    }
+  };
+
+  const handleDeleteInst = async (id) => {
+    try {
+      await deleteInstallation(id);
+      setInstalaciones((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting installation", error);
     }
   };
 
@@ -90,7 +113,13 @@ export default function InstalacionesPage() {
         title="Instalaciones"
         subtitle=""
         cta={
-          <Button variant="contained" onClick={() => setOpenModal(true)}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setEditingInst(null);
+              setOpenModal(true);
+            }}
+          >
             Nueva Instalación
           </Button>
         }
@@ -125,6 +154,14 @@ export default function InstalacionesPage() {
         pageSize={pageSize}
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
+        onEdit={(id) => {
+          const selected = instalaciones.find((item) => item.id === id);
+          if (selected) {
+            setEditingInst(selected);
+            setOpenModal(true);
+          }
+        }}
+        onDelete={handleDeleteInst}
       />
 
       <TableFooter
@@ -141,8 +178,12 @@ export default function InstalacionesPage() {
       {/* Modal para agregar instalación */}
       <InstalacionModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
-        onAdd={handleAddInst}
+        onClose={() => {
+          setOpenModal(false);
+          setEditingInst(null);
+        }}
+        onSave={handleSaveInst}
+        initialData={editingInst}
       />
     </Box>
   );
