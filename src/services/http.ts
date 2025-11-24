@@ -1,9 +1,14 @@
-const rawApiUrl = import.meta.env.VITE_API_URL ?? "";
+const devApiUrl = import.meta.env.VITE_DEV_API_URL ?? "";
+const prodApiUrl = import.meta.env.VITE_API_URL ?? "";
+const useDevProxy = import.meta.env.DEV && !devApiUrl;
+
+// When using the dev proxy we keep the base empty so requests go through Vite.
+const rawApiUrl = useDevProxy ? "" : devApiUrl || prodApiUrl;
 const normalizedBase =
 	rawApiUrl.endsWith("/") ? rawApiUrl.slice(0, -1) : rawApiUrl;
 
 export const apiBaseUrl = normalizedBase;
-export const isApiConfigured = Boolean(normalizedBase);
+export const isApiConfigured = useDevProxy || Boolean(normalizedBase);
 
 type Json = Record<string, unknown> | Array<unknown> | null;
 

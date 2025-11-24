@@ -14,13 +14,15 @@ import {
 } from "@mui/material";
 
 export default function InstalacionModal({ open, onClose, onAdd }) {
-  const [form, setForm] = useState({
+  const initialForm = {
     nombre: "",
     tipo: "",
     capacidad: "",
     direccion: "",
     estadoId: "1",
-  });
+    estado: "Disponible",
+  };
+  const [form, setForm] = useState(initialForm);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,19 +32,15 @@ export default function InstalacionModal({ open, onClose, onAdd }) {
   const handleSubmit = () => {
     if (!form.nombre.trim()) return;
 
+    const estadoId = form.estadoId === "" ? null : form.estadoId;
+
     onAdd({
       ...form,
       capacidad: Number(form.capacidad) || 0,
-      estadoId: form.estadoId,
+      estadoId,
     });
 
-    setForm({
-      nombre: "",
-      tipo: "",
-      capacidad: "",
-      direccion: "",
-      estadoId: "1",
-    });
+    setForm(initialForm);
 
     onClose();
   };
