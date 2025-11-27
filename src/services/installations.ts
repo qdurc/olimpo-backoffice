@@ -200,7 +200,7 @@ export async function updateInstallation(
 		status_ID: statusId,
 	};
 
-	const facility = await apiFetchJson<FacilityApi>("/api/Facility/UpdateAsync", {
+	const facility = await apiFetchJson<FacilityApi>("/api/Facility/UpdateFacilityAsync", {
 		method: "POST",
 		body: JSON.stringify(body),
 	});

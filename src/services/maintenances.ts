@@ -42,6 +42,12 @@ function parseNum(input?: number | string | null) {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
+function toIsoString(value?: string | null) {
+	if (!value) return undefined;
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
 function normalizeMaintenance(
 	item: MaintenanceApi,
 	facilityMap: Map<number, Installation>,
@@ -133,11 +139,14 @@ export async function createMaintenance(payload: MaintenancePayload): Promise<Ma
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
+	const startDate = toIsoString(payload.inicio);
+	const endDate = toIsoString(payload.fin);
+
 	const body: MaintenanceApi = {
 		facilityId: parseNum(payload.facilityId),
 		description: payload.descripcion,
-		startDate: payload.inicio,
-		endDate: payload.fin,
+		startDate,
+		endDate,
 		userId: parseNum(payload.usuarioId),
 		estatusID: parseNum(payload.estadoId),
 	};
@@ -168,7 +177,6 @@ export async function createMaintenance(payload: MaintenancePayload): Promise<Ma
 	if (maintenancesCache) {
 		maintenancesCache = [...maintenancesCache, normalized];
 	}
-
 	return normalized;
 }
 
@@ -185,12 +193,15 @@ export async function updateMaintenance(
 		throw new Error("Update requiere un id numérico válido");
 	}
 
+	const startDate = toIsoString(payload.inicio);
+	const endDate = toIsoString(payload.fin);
+
 	const body: MaintenanceApi = {
 		id: numericId,
 		facilityId: parseNum(payload.facilityId),
 		description: payload.descripcion,
-		startDate: payload.inicio,
-		endDate: payload.fin,
+		startDate,
+		endDate,
 		userId: parseNum(payload.usuarioId),
 		estatusID: parseNum(payload.estadoId),
 	};

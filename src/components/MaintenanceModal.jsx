@@ -37,6 +37,23 @@ export default function MaintenanceModal({
 	);
 
 	const [form, setForm] = useState(emptyForm);
+	const [errors, setErrors] = useState({});
+
+	const getDefaultRange = () => {
+		const start = new Date();
+		start.setSeconds(0, 0);
+		const end = new Date(start.getTime() + 60 * 60 * 1000);
+		return {
+			inicio: formatDateTimeLocal(start),
+			fin: formatDateTimeLocal(end),
+		};
+	};
+
+	const parseDate = (value) => {
+		if (!value) return null;
+		const date = new Date(value);
+		return Number.isNaN(date.getTime()) ? null : date;
+	};
 
 	useEffect(() => {
 		if (open && initialData) {
@@ -54,8 +71,18 @@ export default function MaintenanceModal({
 						? ""
 						: String(initialData.estadoId),
 			});
+			setErrors({});
+		} else if (open && !initialData) {
+			const defaults = getDefaultRange();
+			setForm((prev) => ({
+				...prev,
+				...emptyForm,
+				...defaults,
+			}));
+			setErrors({});
 		} else if (!open) {
 			setForm(emptyForm);
+			setErrors({});
 		}
 	}, [open, initialData, emptyForm]);
 
@@ -65,15 +92,32 @@ export default function MaintenanceModal({
 	};
 
 	const handleSubmit = () => {
-		if (!form.facilityId) return;
+		const nextErrors = {};
+		const startDate = parseDate(form.inicio);
+		const endDate = parseDate(form.fin);
+
+		if (!form.facilityId) {
+			nextErrors.facilityId = "Selecciona la instalación";
+		}
+		if (!startDate) {
+			nextErrors.inicio = "Ingresa una fecha y hora de inicio válida";
+		}
+		if (!endDate) {
+			nextErrors.fin = "Ingresa una fecha y hora de fin válida";
+		} else if (startDate && endDate < startDate) {
+			nextErrors.fin = "La fecha fin debe ser posterior al inicio";
+		}
+
+		setErrors(nextErrors);
+		if (Object.keys(nextErrors).length) return;
 
 		onSave?.({
 			...form,
 			id: initialData?.id,
 			usuarioId: form.usuarioId === "" ? null : form.usuarioId,
 			estadoId: form.estadoId === "" ? null : form.estadoId,
-			inicio: form.inicio ? new Date(form.inicio).toISOString() : "",
-			fin: form.fin ? new Date(form.fin).toISOString() : "",
+			inicio: startDate.toISOString(),
+			fin: endDate.toISOString(),
 		});
 
 		setForm(emptyForm);
@@ -101,8 +145,11 @@ export default function MaintenanceModal({
 							label="Instalación"
 							name="facilityId"
 							fullWidth
+							required
 							value={form.facilityId}
 							onChange={handleChange}
+							error={Boolean(errors.facilityId)}
+							helperText={errors.facilityId}
 						>
 							{installations.map((inst) => (
 								<MenuItem key={inst.id} value={inst.id}>
@@ -132,7 +179,10 @@ export default function MaintenanceModal({
 							fullWidth
 							value={form.inicio}
 							onChange={handleChange}
+							required
 							InputLabelProps={{ shrink: true }}
+							error={Boolean(errors.inicio)}
+							helperText={errors.inicio}
 						/>
 					</Grid>
 
@@ -144,7 +194,10 @@ export default function MaintenanceModal({
 							fullWidth
 							value={form.fin}
 							onChange={handleChange}
+							required
 							InputLabelProps={{ shrink: true }}
+							error={Boolean(errors.fin)}
+							helperText={errors.fin}
 						/>
 					</Grid>
 
