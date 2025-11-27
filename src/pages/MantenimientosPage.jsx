@@ -1,16 +1,27 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, TextField, InputAdornment } from "@mui/material";
+import { Box, TextField, InputAdornment, Button } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
-import { getMaintenances } from "../services/maintenances";
+import StatusPill from "../components/StatusPill";
+import MaintenanceModal from "../components/MaintenanceModal";
+import {
+  createMaintenance,
+  deleteMaintenance,
+  getMaintenances,
+  updateMaintenance,
+} from "../services/maintenances";
+import { getInstallations } from "../services/installations";
 
 export default function MantenimientosPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
   const [mantenimientos, setMantenimientos] = useState([]);
+  const [instalaciones, setInstalaciones] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,9 +30,11 @@ export default function MantenimientosPage() {
     async function loadData() {
       setLoading(true);
       try {
-        const data = await getMaintenances();
+        const instData = await getInstallations();
+        const maintData = await getMaintenances(instData);
         if (!isMounted) return;
-        setMantenimientos(data);
+        setInstalaciones(instData);
+        setMantenimientos(maintData);
       } catch (error) {
         console.error("Error loading maintenance data", error);
       } finally {
@@ -44,7 +57,8 @@ export default function MantenimientosPage() {
       (r) =>
         r.nombre?.toLowerCase().includes(term) ||
         r.descripcion?.toLowerCase?.().includes(term) ||
-        r.usuarioId?.toString().includes(term)
+        r.usuarioId?.toString().includes(term) ||
+        r.estado?.toLowerCase?.().includes(term)
     );
   }, [search, mantenimientos]);
 
@@ -58,16 +72,75 @@ export default function MantenimientosPage() {
     () => [
       { field: "nombre", headerName: "Instalación", flex: 1 },
       { field: "descripcion", headerName: "Descripción", flex: 1 },
-      { field: "inicio", headerName: "Inicio", width: 180 },
-      { field: "fin", headerName: "Fin", width: 180 },
+      {
+        field: "inicio",
+        headerName: "Inicio",
+        width: 190,
+        renderCell: (p) =>
+          p.value ? new Date(p.value).toLocaleString() : "",
+      },
+      {
+        field: "fin",
+        headerName: "Fin",
+        width: 190,
+        renderCell: (p) =>
+          p.value ? new Date(p.value).toLocaleString() : "",
+      },
       { field: "usuarioId", headerName: "Usuario", width: 120 },
+      {
+        field: "estado",
+        headerName: "Estado",
+        width: 140,
+        renderCell: (p) => <StatusPill value={p.value} />,
+      },
     ],
     []
   );
 
+  const handleSave = async (data) => {
+    try {
+      if (data.id) {
+        const updated = await updateMaintenance(data.id, data);
+        setMantenimientos((prev) =>
+          prev.map((item) => (item.id === updated.id ? updated : item))
+        );
+      } else {
+        const created = await createMaintenance(data);
+        setMantenimientos((prev) => [...prev, created]);
+      }
+    } catch (error) {
+      console.error("Error saving maintenance", error);
+    } finally {
+      setEditing(null);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteMaintenance(id);
+      setMantenimientos((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting maintenance", error);
+    }
+  };
+
   return (
     <Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
-      <PageHeader title="Mantenimientos" subtitle="" />
+      <PageHeader
+        title="Mantenimientos"
+        subtitle=""
+        cta={
+          <Button
+            variant="contained"
+            onClick={() => {
+              setEditing(null);
+              setOpenModal(true);
+            }}
+          >
+            Nuevo mantenimiento
+          </Button>
+        }
+      />
 
       <Box display="flex" alignItems="center" justifyContent="flex-end" mb={1.5}>
         <TextField
@@ -98,6 +171,14 @@ export default function MantenimientosPage() {
         pageSize={pageSize}
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
+        onEdit={(id) => {
+          const selected = mantenimientos.find((item) => item.id === id);
+          if (selected) {
+            setEditing(selected);
+            setOpenModal(true);
+          }
+        }}
+        onDelete={handleDelete}
       />
 
       <TableFooter
@@ -109,6 +190,17 @@ export default function MantenimientosPage() {
           setPageSize(n);
           setPage(1);
         }}
+      />
+
+      <MaintenanceModal
+        open={openModal}
+        onClose={() => {
+          setOpenModal(false);
+          setEditing(null);
+        }}
+        onSave={handleSave}
+        installations={instalaciones}
+        initialData={editing}
       />
     </Box>
   );

@@ -76,7 +76,7 @@ export async function getInstallations(): Promise<Installation[]> {
 
 	const request = (async () => {
 		const facilities = await apiFetchJson<FacilityApi[]>(
-			"/api/Facility/GetAllFacilitiesAsync",
+			"/api/Facility/GetAllFacilitiesAsyncFront",
 		);
 
 		const normalized = Array.isArray(facilities)
@@ -242,7 +242,7 @@ export async function deleteInstallation(id: number | string): Promise<void> {
 		throw new Error("Delete requiere un id numérico válido");
 	}
 
-	await apiFetchJson(`/api/Facility/DeleteFacilityAsync/${numericId}`, {
+	await apiFetchJson(`/api/Facility/DeleteFacilityFront?id=${numericId}`, {
 		method: "DELETE",
 	});
 
