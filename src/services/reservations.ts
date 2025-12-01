@@ -6,7 +6,7 @@ type ReservationApi = {
 	userId?: number;
 	facilityId?: number;
 	reservedDates?: string;
-	status?: number;
+	estatusID?: number | null;
 };
 
 export type Reservation = {
@@ -17,6 +17,15 @@ export type Reservation = {
 	fecha: string;
 	hora: string;
 	estado: string;
+	estadoId: number | null;
+	fechaIso: string;
+};
+
+export type ReservationPayload = {
+	facilityId: number | string | null;
+	usuarioId: number | string | null;
+	fechaIso: string;
+	estadoId?: number | string | null;
 };
 
 function formatDate(dateStr?: string) {
@@ -29,13 +38,30 @@ function formatDate(dateStr?: string) {
 	};
 }
 
-export async function getReservations(
-	facilities?: Installation[],
-): Promise<Reservation[]> {
-	if (!isApiConfigured) {
-		throw new Error("API base URL is not configured (VITE_API_URL missing)");
-	}
+function toIsoString(value?: string | null) {
+	if (!value) return undefined;
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
 
+function toDotNetDateTime(value?: string | null) {
+	if (!value) return undefined;
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return undefined;
+	const pad = (n: number, size = 2) => n.toString().padStart(size, "0");
+	// Format without timezone (e.g., 2025-11-27T01:16:35.100) to match API samples
+	const ms = date.getMilliseconds();
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(ms, 3)}`;
+}
+
+function parseNum(value: number | string | null | undefined) {
+	if (value === null || value === undefined) return null;
+	if (typeof value === "number" && Number.isFinite(value)) return value;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
+function buildFacilityMap(facilities?: Installation[]) {
 	const facilityMap = new Map<number, Installation>();
 	if (facilities?.length) {
 		facilities.forEach((f) => {
@@ -43,38 +69,154 @@ export async function getReservations(
 				facilityMap.set(f.id, f);
 			}
 		});
-	} else {
+	}
+	return facilityMap;
+}
+
+function normalizeReservation(
+	item: ReservationApi,
+	facilityMap: Map<number, Installation>,
+): Reservation {
+	const { fecha, hora } = formatDate(item.reservedDates);
+	const facilityName =
+		(item.facilityId !== undefined && facilityMap.get(item.facilityId)?.nombre) ||
+		(item.facilityId !== undefined ? `Instalación ${item.facilityId}` : "Sin instalación");
+
+	const estadoId = item.estatusID ?? null;
+	const fechaIso = toIsoString(item.reservedDates) ?? "";
+
+	return {
+		id: item.id ?? `reservation-${Math.random().toString(36).slice(2)}`,
+		usuarioId: item.userId ?? null,
+		facilityId: item.facilityId ?? null,
+		instalacion: facilityName,
+		fecha,
+		hora,
+		estado: estadoId !== null ? String(estadoId) : "Sin estado",
+		estadoId,
+		fechaIso,
+	};
+}
+
+export async function getReservations(
+	facilities?: Installation[],
+): Promise<Reservation[]> {
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
+
+	let facilityMap = buildFacilityMap(facilities);
+	if (!facilityMap.size) {
 		const freshFacilities = await getInstallations();
-		freshFacilities.forEach((f) => {
-			if (typeof f.id === "number") {
-				facilityMap.set(f.id, f);
-			}
-		});
+		facilityMap = buildFacilityMap(freshFacilities);
 	}
 
 	const data = await apiFetchJson<ReservationApi[]>(
-		"/api/Reservation/GetReservations",
+		"/api/Reservation/GetAllReservationsFront",
 	);
 
 	return Array.isArray(data)
-		? data.map((r) => {
-				const { fecha, hora } = formatDate(r.reservedDates);
-				const facilityName =
-					(r.facilityId !== undefined && facilityMap.get(r.facilityId)?.nombre) ||
-					(r.facilityId !== undefined ? `Instalación ${r.facilityId}` : "Sin instalación");
-
-				return {
-					id: r.id ?? `reservation-${Math.random().toString(36).slice(2)}`,
-					usuarioId: r.userId ?? null,
-					facilityId: r.facilityId ?? null,
-					instalacion: facilityName,
-					fecha,
-					hora,
-					estado:
-						typeof r.status === "number"
-							? String(r.status)
-							: r.status ?? "Sin estado",
-				};
-			})
+		? data.map((r) => normalizeReservation(r, facilityMap))
 		: [];
+}
+
+export async function createReservation(payload: ReservationPayload) {
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
+
+	const facilityId = parseNum(payload.facilityId);
+	const userId = parseNum(payload.usuarioId);
+	const estadoId = parseNum(payload.estadoId ?? null);
+
+	const body: ReservationApi = {
+		facilityId: facilityId ?? undefined,
+		userId: userId ?? undefined,
+		// API seems to expect DateTime without timezone (matching GET payload)
+		reservedDates: toDotNetDateTime(payload.fechaIso),
+		estatusID: estadoId,
+	};
+
+	const created = await apiFetchJson<ReservationApi>("/api/Reservation/AddReservation", {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
+
+	const facilities = await getInstallations();
+	const facilityMap = buildFacilityMap(facilities);
+
+	return normalizeReservation(
+		{
+			...body,
+			...created,
+			facilityId: body.facilityId ?? created?.facilityId,
+			userId: body.userId ?? created?.userId,
+			reservedDates: body.reservedDates ?? created?.reservedDates,
+			estatusID: body.estatusID ?? created?.estatusID,
+		},
+		facilityMap,
+	);
+}
+
+export async function updateReservation(
+	id: number | string,
+	payload: ReservationPayload,
+) {
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
+
+	const numericId = typeof id === "number" ? id : Number(id);
+	if (!Number.isFinite(numericId)) {
+		throw new Error("Update requiere un id numérico válido");
+	}
+
+	const facilityId = parseNum(payload.facilityId);
+	const userId = parseNum(payload.usuarioId);
+	const estadoId = parseNum(payload.estadoId ?? null);
+
+	const body: ReservationApi = {
+		id: numericId,
+		facilityId: facilityId ?? undefined,
+		userId: userId ?? undefined,
+		// API seems to expect DateTime without timezone (matching GET payload)
+		reservedDates: toDotNetDateTime(payload.fechaIso),
+		estatusID: estadoId,
+	};
+
+	const updated = await apiFetchJson<ReservationApi>("/api/Reservation/UpdateReservation", {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
+
+	const facilities = await getInstallations();
+	const facilityMap = buildFacilityMap(facilities);
+
+	return normalizeReservation(
+		{
+			...body,
+			...updated,
+			facilityId: body.facilityId ?? updated?.facilityId,
+			userId: body.userId ?? updated?.userId,
+			reservedDates: body.reservedDates ?? updated?.reservedDates,
+			estatusID: body.estatusID ?? updated?.estatusID,
+		},
+		facilityMap,
+	);
+}
+
+export async function deleteReservation(id: number | string): Promise<void> {
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
+
+	const numericId = typeof id === "number" ? id : Number(id);
+	if (!Number.isFinite(numericId)) {
+		throw new Error("Delete requiere un id numérico válido");
+	}
+
+	const params = new URLSearchParams({ reservationId: String(numericId) });
+	await apiFetchJson(`/api/Reservation/DeleteReservation?${params.toString()}`, {
+		method: "DELETE",
+	});
 }

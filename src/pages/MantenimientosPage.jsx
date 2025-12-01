@@ -116,9 +116,17 @@ export default function MantenimientosPage() {
   };
 
   const handleDelete = async (id) => {
+    const numericId = typeof id === "number" ? id : Number(id);
+    if (!Number.isFinite(numericId)) {
+      console.error("Delete requiere un id numérico válido");
+      return;
+    }
+
     try {
-      await deleteMaintenance(id);
-      setMantenimientos((prev) => prev.filter((item) => item.id !== id));
+      await deleteMaintenance(numericId);
+      setMantenimientos((prev) =>
+        prev.filter((item) => Number(item.id) !== numericId)
+      );
     } catch (error) {
       console.error("Error deleting maintenance", error);
     }

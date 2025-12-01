@@ -1,11 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, TextField, InputAdornment } from "@mui/material";
+import { Box, TextField, InputAdornment, Button } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
-import { getReservations } from "../services/reservations";
+import ReservationModal from "../components/ReservationModal";
+import {
+	createReservation,
+	deleteReservation,
+	getReservations,
+	updateReservation,
+} from "../services/reservations";
+import { getInstallations } from "../services/installations";
 
 export default function ReservasPage() {
 	const [page, setPage] = useState(1);
@@ -13,23 +20,29 @@ export default function ReservasPage() {
 	const [reservations, setReservations] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [search, setSearch] = useState("");
+	const [editing, setEditing] = useState(null);
+	const [installations, setInstallations] = useState([]);
+	const [openModal, setOpenModal] = useState(false);
 
 	useEffect(() => {
 		let isMounted = true;
 		setLoading(true);
 
-		getReservations()
-			.then((data) => {
-				if (isMounted) {
-					setReservations(data);
-				}
-			})
-			.catch((error) => console.error("Error loading reservations data", error))
-			.finally(() => {
+		(async () => {
+			try {
+				const instData = await getInstallations();
+				const resData = await getReservations(instData);
+				if (!isMounted) return;
+				setInstallations(instData);
+				setReservations(resData);
+			} catch (error) {
+				console.error("Error loading reservations data", error);
+			} finally {
 				if (isMounted) {
 					setLoading(false);
 				}
-			});
+			}
+		})();
 
 		return () => {
 			isMounted = false;
@@ -65,9 +78,55 @@ export default function ReservasPage() {
 		[],
 	);
 
+	const handleSave = async (data) => {
+		try {
+			if (data.id) {
+				const updated = await updateReservation(data.id, data);
+				setReservations((prev) =>
+					prev.map((item) => (item.id === updated.id ? updated : item)),
+				);
+			} else {
+				const created = await createReservation(data);
+				setReservations((prev) => [...prev, created]);
+			}
+		} catch (error) {
+			console.error("Error saving reservation", error);
+		} finally {
+			setEditing(null);
+		}
+	};
+
+	const handleDelete = async (id) => {
+		const numericId = typeof id === "number" ? id : Number(id);
+		if (!Number.isFinite(numericId)) {
+			console.error("Delete requiere un id numérico válido");
+			return;
+		}
+
+		try {
+			await deleteReservation(numericId);
+			setReservations((prev) => prev.filter((item) => Number(item.id) !== numericId));
+		} catch (error) {
+			console.error("Error deleting reservation", error);
+		}
+	};
+
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
-			<PageHeader title="Reservas" cta={false} />
+			<PageHeader
+				title="Reservas"
+				cta={
+					<Button
+						variant="contained"
+						onClick={() => {
+							setEditing(null);
+							setOpenModal(true);
+						}}
+					>
+						Nueva reserva
+					</Button>
+				}
+			/>
 
 			<Box display="flex" alignItems="center" justifyContent="flex-end" mb={1.5}>
 				<TextField
@@ -98,6 +157,14 @@ export default function ReservasPage() {
 				pageSize={pageSize}
 				onPageChange={setPage}
 				onPageSizeChange={setPageSize}
+				onEdit={(id) => {
+					const selected = reservations.find((item) => item.id === id);
+					if (selected) {
+						setEditing(selected);
+						setOpenModal(true);
+					}
+				}}
+				onDelete={handleDelete}
 			/>
 
 			<TableFooter
@@ -109,6 +176,17 @@ export default function ReservasPage() {
 					setPageSize(n);
 					setPage(1);
 				}}
+			/>
+
+			<ReservationModal
+				open={openModal}
+				onClose={() => {
+					setOpenModal(false);
+					setEditing(null);
+				}}
+				onSave={handleSave}
+				installations={installations}
+				initialData={editing}
 			/>
 		</Box>
 	);

@@ -236,11 +236,14 @@ export async function deleteMaintenance(id: number | string): Promise<void> {
 		throw new Error("Delete requiere un id numérico válido");
 	}
 
-	await apiFetchJson(`/api/Maintenance/DeleteMaintenanceById?id=${numericId}`, {
+	const params = new URLSearchParams({ id: String(numericId) });
+	await apiFetchJson(`/api/Maintenance/DeleteMaintenanceById?${params.toString()}`, {
 		method: "DELETE",
 	});
 
 	if (maintenancesCache) {
-		maintenancesCache = maintenancesCache.filter((item) => item.id !== id);
+		maintenancesCache = maintenancesCache.filter(
+			(item) => Number(item.id) !== numericId,
+		);
 	}
 }
