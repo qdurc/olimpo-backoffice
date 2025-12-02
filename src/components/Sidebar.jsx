@@ -23,7 +23,7 @@ const menuItems = [
   { text: "Instalaciones", icon: <SportsSoccer />, path: "/instalaciones" },
   { text: "Mantenimientos", icon: <Build />, path: "/mantenimientos" },
   { text: "Reservas", icon: <Event />, path: "/reservas" },
-  { text: "Usuario", icon: <Person />, path: "/usuario" },
+  { text: "Usuarios", icon: <Person />, path: "/usuario" },
   { text: "Torneos", icon: <EmojiEvents />, path: "/torneos" },
 ];
 

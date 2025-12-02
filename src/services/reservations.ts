@@ -61,6 +61,46 @@ function parseNum(value: number | string | null | undefined) {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
+function buildReservationBody(payload: ReservationPayload, id?: number): ReservationApi {
+	const facilityId = parseNum(payload.facilityId);
+	const userId = parseNum(payload.usuarioId);
+	const estadoId = parseNum(payload.estadoId ?? null);
+	const reservedDates = toDotNetDateTime(payload.fechaIso);
+
+	if (!facilityId || facilityId <= 0) {
+		throw new Error("Selecciona una instalación válida antes de guardar.");
+	}
+
+	if (!userId || userId <= 0) {
+		throw new Error("Ingresa un usuario válido (userId) antes de guardar.");
+	}
+
+	if (!reservedDates) {
+		throw new Error("La fecha/hora de la reserva no es válida.");
+	}
+
+	return {
+		...(typeof id === "number" ? { id } : {}),
+		facilityId,
+		userId,
+		reservedDates,
+		estatusID: estadoId ?? undefined,
+	};
+}
+
+function mapReservationError(error: unknown) {
+	if (error instanceof Error) {
+		if (error.message?.includes("status 500")) {
+			return new Error(
+				"No se pudo guardar la reserva (500). Verifica que el Usuario ID exista, la instalación sea válida y que la fecha/hora esté completa.",
+			);
+		}
+		return error;
+	}
+
+	return new Error("No se pudo guardar la reserva.");
+}
+
 function buildFacilityMap(facilities?: Installation[]) {
 	const facilityMap = new Map<number, Installation>();
 	if (facilities?.length) {
@@ -125,22 +165,17 @@ export async function createReservation(payload: ReservationPayload) {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	const facilityId = parseNum(payload.facilityId);
-	const userId = parseNum(payload.usuarioId);
-	const estadoId = parseNum(payload.estadoId ?? null);
+	const body = buildReservationBody(payload);
 
-	const body: ReservationApi = {
-		facilityId: facilityId ?? undefined,
-		userId: userId ?? undefined,
-		// API seems to expect DateTime without timezone (matching GET payload)
-		reservedDates: toDotNetDateTime(payload.fechaIso),
-		estatusID: estadoId,
-	};
-
-	const created = await apiFetchJson<ReservationApi>("/api/Reservation/AddReservation", {
-		method: "POST",
-		body: JSON.stringify(body),
-	});
+	let created: ReservationApi;
+	try {
+		created = await apiFetchJson<ReservationApi>("/api/Reservation/AddReservation", {
+			method: "POST",
+			body: JSON.stringify(body),
+		});
+	} catch (error) {
+		throw mapReservationError(error);
+	}
 
 	const facilities = await getInstallations();
 	const facilityMap = buildFacilityMap(facilities);
@@ -171,23 +206,17 @@ export async function updateReservation(
 		throw new Error("Update requiere un id numérico válido");
 	}
 
-	const facilityId = parseNum(payload.facilityId);
-	const userId = parseNum(payload.usuarioId);
-	const estadoId = parseNum(payload.estadoId ?? null);
+	const body = buildReservationBody(payload, numericId);
 
-	const body: ReservationApi = {
-		id: numericId,
-		facilityId: facilityId ?? undefined,
-		userId: userId ?? undefined,
-		// API seems to expect DateTime without timezone (matching GET payload)
-		reservedDates: toDotNetDateTime(payload.fechaIso),
-		estatusID: estadoId,
-	};
-
-	const updated = await apiFetchJson<ReservationApi>("/api/Reservation/UpdateReservation", {
-		method: "POST",
-		body: JSON.stringify(body),
-	});
+	let updated: ReservationApi;
+	try {
+		updated = await apiFetchJson<ReservationApi>("/api/Reservation/UpdateReservation", {
+			method: "POST",
+			body: JSON.stringify(body),
+		});
+	} catch (error) {
+		throw mapReservationError(error);
+	}
 
 	const facilities = await getInstallations();
 	const facilityMap = buildFacilityMap(facilities);

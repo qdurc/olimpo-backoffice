@@ -8,6 +8,7 @@ import {
 	Button,
 	Grid,
 	MenuItem,
+	Alert,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -36,6 +37,7 @@ export default function ReservationModal({
 
 	const [form, setForm] = useState(emptyForm);
 	const [errors, setErrors] = useState({});
+	const [submitError, setSubmitError] = useState("");
 
 	useEffect(() => {
 		if (open && initialData) {
@@ -52,12 +54,15 @@ export default function ReservationModal({
 						: String(initialData.estadoId),
 			});
 			setErrors({});
+			setSubmitError("");
 		} else if (open && !initialData) {
 			setForm(emptyForm);
 			setErrors({});
+			setSubmitError("");
 		} else if (!open) {
 			setForm(emptyForm);
 			setErrors({});
+			setSubmitError("");
 		}
 	}, [open, initialData, emptyForm]);
 
@@ -66,7 +71,7 @@ export default function ReservationModal({
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const nextErrors = {};
 		const date = form.fechaIso ? new Date(form.fechaIso) : null;
 		const facilityIdNum = form.facilityId === "" ? NaN : Number(form.facilityId);
@@ -89,16 +94,26 @@ export default function ReservationModal({
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
 
-		onSave?.({
-			...form,
-			fechaIso: date.toISOString(),
-			id: initialData?.id,
-			facilityId: facilityIdNum,
-			usuarioId: userIdNum,
-			estadoId: estadoIdNum,
-		});
+		setSubmitError("");
 
-		onClose?.();
+		try {
+			await onSave?.({
+				...form,
+				fechaIso: date.toISOString(),
+				id: initialData?.id,
+				facilityId: facilityIdNum,
+				usuarioId: userIdNum,
+				estadoId: estadoIdNum,
+			});
+			onClose?.();
+		} catch (error) {
+			console.error("Error saving reservation", error);
+			const message =
+				error instanceof Error
+					? error.message
+					: "No se pudo guardar la reserva. Intenta de nuevo.";
+			setSubmitError(message);
+		}
 	};
 
 	return (
@@ -173,6 +188,12 @@ export default function ReservationModal({
 						/>
 					</Grid>
 				</Grid>
+
+				{submitError ? (
+					<Alert severity="error" sx={{ mt: 2 }}>
+						{submitError}
+					</Alert>
+				) : null}
 			</DialogContent>
 
 			<DialogActions sx={{ px: 3, pb: 2 }}>

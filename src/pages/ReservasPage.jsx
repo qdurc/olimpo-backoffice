@@ -89,10 +89,10 @@ export default function ReservasPage() {
 				const created = await createReservation(data);
 				setReservations((prev) => [...prev, created]);
 			}
+			setEditing(null);
 		} catch (error) {
 			console.error("Error saving reservation", error);
-		} finally {
-			setEditing(null);
+			throw error;
 		}
 	};
 
