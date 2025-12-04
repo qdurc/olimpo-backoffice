@@ -61,7 +61,18 @@ export default function EntityTable({
 					border: "1px solid",
 					borderColor: "divider",
 					boxShadow: "0 6px 28px rgba(2,8,20,.06)",
-					"& .MuiDataGrid-columnHeaders": { background: "#FBFCFE" },
+					"& .MuiDataGrid-columnHeaders": {
+						background: "#f7f8fa",
+						backgroundColor: "#f7f8fa",
+					},
+					"& .MuiDataGrid-columnHeader": {
+						background: "#f7f8fa",
+						backgroundColor: "#f7f8fa",
+					},
+					"& .MuiDataGrid-columnHeaderTitle": {
+						fontWeight: 700,
+						color: "#1f2937",
+					},
 					"& .MuiDataGrid-cell": { py: 1.25, alignItems: "center" },
 					"& .MuiDataGrid-cellContent": {
 						overflow: "visible",

@@ -334,8 +334,8 @@ const DashboardPage = () => {
           </Typography>
           <TableContainer>
             <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: "#f9fafb" }}>
+              <TableHead sx={{ bgcolor: "#f7f8fa" }}>
+                <TableRow>
                   <TableCell sx={{ fontWeight: 700, color: neutralText }}>Evento</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: neutralText }}>Participación</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: neutralText }}>Inscritos</TableCell>

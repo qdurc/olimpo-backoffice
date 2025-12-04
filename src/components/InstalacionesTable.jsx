@@ -14,13 +14,13 @@ export default function InstalacionesTable({ data }) {
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
       <Table>
-        <TableHead>
+        <TableHead sx={{ bgcolor: "#f7f8fa" }}>
           <TableRow>
-            <TableCell>Nombre</TableCell>
-            <TableCell>Tipo</TableCell>
-            <TableCell>Capacidad</TableCell>
-            <TableCell>Dirección</TableCell>
-            <TableCell>Estado</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#1f2937" }}>Nombre</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#1f2937" }}>Tipo</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#1f2937" }}>Capacidad</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#1f2937" }}>Dirección</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: "#1f2937" }}>Estado</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
