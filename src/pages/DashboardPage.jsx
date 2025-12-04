@@ -142,7 +142,14 @@ const DashboardPage = () => {
   ));
 
   return (
-    <Box sx={{ flexGrow: 1, p: 4, bgcolor: "#f3f4f6", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: { xs: 2, md: 4 },
+        bgcolor: "transparent",
+        minHeight: "100vh",
+      }}
+    >
       <Typography variant="h4" sx={{ fontWeight: 800, mb: 3, color: "#111827" }}>
         Dashboard
       </Typography>
