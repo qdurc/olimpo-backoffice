@@ -209,11 +209,11 @@ const DashboardPage = () => {
             </Typography>
             <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{activityLegend}</Box>
           </Box>
-          <Box sx={{ flex: 1, position: "relative", minHeight: 360, width: "100%" }}>
+          <Box sx={{ flex: 1, position: "relative", minHeight: 260, width: "100%" }}>
             <ResponsiveContainer>
               <RadialBarChart
                 innerRadius="60%"
-                outerRadius="125%"
+                outerRadius="108%"
                 data={[
                   {
                     name: currentActivity.label,
@@ -272,7 +272,7 @@ const DashboardPage = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#1f2937" }}>
             Clasificación
           </Typography>
-          <Box sx={{ flex: 1, minHeight: 360, width: "100%" }}>
+          <Box sx={{ flex: 1, minHeight: 260, width: "100%" }}>
             <ResponsiveContainer>
               <PieChart>
                 <Pie
@@ -281,8 +281,8 @@ const DashboardPage = () => {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={105}
+                  innerRadius={46}
+                  outerRadius={82}
                   paddingAngle={4}
                 >
                   {classification.map((entry, index) => (
@@ -372,7 +372,7 @@ const DashboardPage = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#1f2937" }}>
             Distribución
           </Typography>
-          <Box sx={{ flex: 1, minHeight: 360, width: "100%" }}>
+          <Box sx={{ flex: 1, minHeight: 260, width: "100%" }}>
             <ResponsiveContainer>
               <PieChart>
                 <Pie
@@ -380,8 +380,8 @@ const DashboardPage = () => {
                   dataKey="value"
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={105}
+                  innerRadius={48}
+                  outerRadius={84}
                   paddingAngle={4}
                 >
                   {classification.map((entry, index) => (
@@ -393,8 +393,8 @@ const DashboardPage = () => {
                   dataKey="value"
                   cx="50%"
                   cy="50%"
-                  innerRadius={42}
-                  outerRadius={68}
+                  innerRadius={30}
+                  outerRadius={50}
                   paddingAngle={2}
                 >
                   {activity.map((entry, index) => (
