@@ -16,8 +16,14 @@ export default function PageHeader({ title, subtitle, crumbs = [], cta }: {
 						{crumbs.map((c, i) => <Typography key={i} variant="body2" color="text.secondary">{c.label}</Typography>)}
 					</Breadcrumbs>
 				)}
-				<Typography variant="h2">{title}</Typography>
-				{subtitle && <Typography variant="subtitle1">{subtitle}</Typography>}
+				<Typography variant="h2" sx={{ color: "#111827", fontWeight: 800 }}>
+					{title}
+				</Typography>
+				{subtitle && (
+					<Typography variant="subtitle1" sx={{ color: "#111827" }}>
+						{subtitle}
+					</Typography>
+				)}
 			</Box>
 			{action}
 		</Box>

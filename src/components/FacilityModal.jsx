@@ -128,7 +128,7 @@ export default function FacilityModal({
           onChange={handleChange}
         />
 
-        <FormControl fullWidth>
+        {/* <FormControl fullWidth>
           <InputLabel>Estado</InputLabel>
           <Select
             name="estado"
@@ -140,7 +140,7 @@ export default function FacilityModal({
             <MenuItem value="Mantenimiento">Mantenimiento</MenuItem>
             <MenuItem value="Bloqueada">Bloqueada</MenuItem>
           </Select>
-        </FormControl>
+        </FormControl> */}
       </DialogContent>
 
       <DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
