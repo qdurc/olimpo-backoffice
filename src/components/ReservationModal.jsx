@@ -117,7 +117,7 @@ export default function ReservationModal({
 	};
 
 	return (
-		<Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
 			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
 				{initialData ? "Editar reserva" : "Nueva reserva"}
 			</DialogTitle>

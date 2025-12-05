@@ -71,7 +71,7 @@ export default function FacilityModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
         {isEditing ? "Editar Instalación" : "Nueva Instalación"}
       </DialogTitle>

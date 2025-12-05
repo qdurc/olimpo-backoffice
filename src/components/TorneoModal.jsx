@@ -121,7 +121,7 @@ export default function TorneoModal({
 	};
 
 return (
-		<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
 			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
 				{initialData ? "Editar Torneo" : "Nuevo Torneo"}
 			</DialogTitle>
