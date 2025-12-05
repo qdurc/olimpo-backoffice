@@ -4,43 +4,43 @@ export const dashboardStats = [
     value: "7,265",
     change: "+11.01%",
     trend: "up",
-    color: "#FFF2F2",
-    accent: "#D32F2F",
+    color: "#F5F5F5",
+    accent: "#00205B",
   },
   {
     title: "Reservas activas",
     value: "3,671",
     change: "-0.03%",
     trend: "down",
-    color: "#E8F3FF",
-    accent: "#1565C0",
+    color: "#F5F5F5",
+    accent: "#ED1C24",
   },
   {
     title: "Usuarios registrados",
     value: "156",
     change: "+15.03%",
     trend: "up",
-    color: "#FFECEF",
-    accent: "#C2185B",
+    color: "#F5F5F5",
+    accent: "#3366CC",
   },
   {
     title: "Torneos en curso",
     value: "2,318",
     change: "+6.08%",
     trend: "up",
-    color: "#E9F3FF",
-    accent: "#1976D2",
+    color: "#F5F5F5",
+    accent: "#00205B",
   },
 ];
 
 export const dashboardActivityData = [
-  { name: "Usuarios actuales", value: 82.3, color: "#D32F2F" },
-  { name: "Nuevos usuarios", value: 17.7, color: "#1565C0" },
+  { name: "Usuarios actuales", value: 82.3, color: "#00205B" },
+  { name: "Nuevos usuarios", value: 17.7, color: "#3366CC" },
 ];
 
 export const dashboardClassificationData = [
-  { name: "Entrenadores", value: 25, color: "#D32F2F" },
-  { name: "Atletas", value: 80, color: "#1565C0" },
+  { name: "Entrenadores", value: 25, color: "#3366CC" },
+  { name: "Atletas", value: 80, color: "#ED1C24" },
 ];
 
 export const upcomingEvents = [

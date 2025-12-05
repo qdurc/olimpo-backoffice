@@ -2,16 +2,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Box } from "@mui/material";
 import Sidebar from "./components/Sidebar";
 import DashboardPage from "./pages/DashboardPage";
-import InstalacionesPage from "./pages/InstalacionesPage";
-import MantenimientosPage from "./pages/MantenimientosPage";
-import UsuariosPage from "./pages/UsuariosPage";
-import ReservasPage from "./pages/ReservasPage";
-import TorneosPage from "./pages/TorneosPage";
+import FacilitiesPage from "./pages/FacilitiesPage";
+import MaintenancePage from "./pages/MaintenancePage";
+import UsersPage from "./pages/UsersPage";
+import ReservationsPage from "./pages/ReservationsPage";
+import TournamentsPage from "./pages/TournamentsPage";
 
 function App() {
   return (
     <Router>
-      <Box sx={{ display: "flex", bgcolor: "#f8f9fa", minHeight: "100vh" }}>
+      <Box sx={{ display: "flex", bgcolor: "#F5F5F5", minHeight: "100vh" }}>
         {/* Sidebar permanente */}
         <Sidebar />
 
@@ -20,11 +20,11 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/instalaciones" element={<InstalacionesPage />} />
-            <Route path="/mantenimientos" element={<MantenimientosPage />} />
-            <Route path="/usuario" element={<UsuariosPage />} />
-            <Route path="/reservas" element={<ReservasPage />} />
-            <Route path="/torneos" element={<TorneosPage />} />
+            <Route path="/instalaciones" element={<FacilitiesPage />} />
+            <Route path="/mantenimientos" element={<MaintenancePage />} />
+            <Route path="/usuario" element={<UsersPage />} />
+            <Route path="/reservas" element={<ReservationsPage />} />
+            <Route path="/torneos" element={<TournamentsPage />} />
           </Routes>
         </Box>
       </Box>

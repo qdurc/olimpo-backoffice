@@ -52,7 +52,7 @@ const DATA = [
 	},
 ];
 
-export default function UsuariosPage() {
+export default function UsersPage() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(7);
 	const [search, setSearch] = useState("");

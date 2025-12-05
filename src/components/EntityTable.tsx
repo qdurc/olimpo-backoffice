@@ -58,28 +58,27 @@ export default function EntityTable({
 				sx={{
 					borderRadius: 1,
 					backgroundColor: "background.paper",
-					border: "1px solid",
-					borderColor: "divider",
-					boxShadow: "0 6px 28px rgba(2,8,20,.06)",
+					border: "1px solid #e5e7eb",
+					boxShadow: "0 6px 28px rgba(17,24,39,0.06)",
 					"& .MuiDataGrid-columnHeaders": {
-						background: "#f7f8fa",
-						backgroundColor: "#f7f8fa",
+						background: "#F5F5F5",
+						backgroundColor: "#F5F5F5",
 					},
 					"& .MuiDataGrid-columnHeader": {
-						background: "#f7f8fa",
-						backgroundColor: "#f7f8fa",
+						background: "#F5F5F5",
+						backgroundColor: "#F5F5F5",
 					},
 					"& .MuiDataGrid-columnHeaderTitle": {
 						fontWeight: 700,
-						color: "#1f2937",
+						color: "#111827",
 					},
-					"& .MuiDataGrid-cell": { py: 1.25, alignItems: "center" },
+					"& .MuiDataGrid-cell": { py: 1.25, alignItems: "center", color: "#111827" },
 					"& .MuiDataGrid-cellContent": {
 						overflow: "visible",
 						whiteSpace: "normal",
 					},
 					"& .MuiDataGrid-row:hover": {
-						backgroundColor: "rgba(2,8,20,.02)",
+						backgroundColor: "#F5F5F5",
 					},
 				}}
 			/>

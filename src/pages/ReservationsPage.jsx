@@ -14,7 +14,7 @@ import {
 } from "../services/reservations";
 import { getInstallations } from "../services/installations";
 
-export default function ReservasPage() {
+export default function ReservationsPage() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(8);
 	const [reservations, setReservations] = useState([]);

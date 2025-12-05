@@ -1,27 +1,25 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, TextField, InputAdornment, Button } from "@mui/material";
+import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
-import MaintenanceModal from "../components/MaintenanceModal";
+import FacilityModal from "../components/FacilityModal";
 import {
-  createMaintenance,
-  deleteMaintenance,
-  getMaintenances,
-  updateMaintenance,
-} from "../services/maintenances";
-import { getInstallations } from "../services/installations";
+  getInstallations,
+  createInstallation,
+  updateInstallation,
+  deleteInstallation,
+} from "../services/installations";
 
-export default function MantenimientosPage() {
+export default function FacilitiesPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
-  const [mantenimientos, setMantenimientos] = useState([]);
   const [instalaciones, setInstalaciones] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const [editing, setEditing] = useState(null);
+  const [editingInst, setEditingInst] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,12 +29,10 @@ export default function MantenimientosPage() {
       setLoading(true);
       try {
         const instData = await getInstallations();
-        const maintData = await getMaintenances(instData);
         if (!isMounted) return;
         setInstalaciones(instData);
-        setMantenimientos(maintData);
       } catch (error) {
-        console.error("Error loading maintenance data", error);
+        console.error("Error loading installations data", error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -50,17 +46,44 @@ export default function MantenimientosPage() {
     };
   }, []);
 
+  const handleSaveInst = async (inst) => {
+    try {
+      if (inst.id) {
+        const updated = await updateInstallation(inst.id, inst);
+        setInstalaciones((prev) =>
+          prev.map((item) => (item.id === updated.id ? updated : item))
+        );
+      } else {
+        const newInst = await createInstallation(inst);
+        setInstalaciones((prev) => [...prev, newInst]);
+      }
+    } catch (error) {
+      console.error("Error saving installation", error);
+    } finally {
+      setEditingInst(null);
+    }
+  };
+
+  const handleDeleteInst = async (id) => {
+    try {
+      await deleteInstallation(id);
+      setInstalaciones((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting installation", error);
+    }
+  };
+
   const rows = useMemo(() => {
     const term = search.toLowerCase();
 
-    return mantenimientos.filter(
+    return instalaciones.filter(
       (r) =>
         r.nombre?.toLowerCase().includes(term) ||
-        r.descripcion?.toLowerCase?.().includes(term) ||
-        r.usuarioId?.toString().includes(term) ||
+        r.tipo?.toLowerCase?.().includes(term) ||
+        r.direccion?.toLowerCase?.().includes(term) ||
         r.estado?.toLowerCase?.().includes(term)
     );
-  }, [search, mantenimientos]);
+  }, [search, instalaciones]);
 
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
   const paged = rows.slice(
@@ -68,84 +91,36 @@ export default function MantenimientosPage() {
     (page - 1) * pageSize + pageSize
   );
 
-  const columns = useMemo(
+  const columnsInst = useMemo(
     () => [
-      { field: "nombre", headerName: "Instalación", flex: 1 },
-      { field: "descripcion", headerName: "Descripción", flex: 1 },
-      {
-        field: "inicio",
-        headerName: "Inicio",
-        width: 190,
-        renderCell: (p) =>
-          p.value ? new Date(p.value).toLocaleString() : "",
-      },
-      {
-        field: "fin",
-        headerName: "Fin",
-        width: 190,
-        renderCell: (p) =>
-          p.value ? new Date(p.value).toLocaleString() : "",
-      },
-      { field: "usuarioId", headerName: "Usuario", width: 120 },
+      { field: "nombre", headerName: "Nombre", flex: 1 },
+      { field: "tipo", headerName: "Tipo", flex: 1 },
+      { field: "capacidad", headerName: "Capacidad", width: 120 },
+      { field: "direccion", headerName: "Dirección", flex: 1 },
       {
         field: "estado",
         headerName: "Estado",
-        width: 140,
+        width: 160,
         renderCell: (p) => <StatusPill value={p.value} />,
       },
     ],
     []
   );
 
-  const handleSave = async (data) => {
-    try {
-      if (data.id) {
-        const updated = await updateMaintenance(data.id, data);
-        setMantenimientos((prev) =>
-          prev.map((item) => (item.id === updated.id ? updated : item))
-        );
-      } else {
-        const created = await createMaintenance(data);
-        setMantenimientos((prev) => [...prev, created]);
-      }
-    } catch (error) {
-      console.error("Error saving maintenance", error);
-    } finally {
-      setEditing(null);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    const numericId = typeof id === "number" ? id : Number(id);
-    if (!Number.isFinite(numericId)) {
-      console.error("Delete requiere un id numérico válido");
-      return;
-    }
-
-    try {
-      await deleteMaintenance(numericId);
-      setMantenimientos((prev) =>
-        prev.filter((item) => Number(item.id) !== numericId)
-      );
-    } catch (error) {
-      console.error("Error deleting maintenance", error);
-    }
-  };
-
   return (
     <Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
       <PageHeader
-        title="Mantenimientos"
+        title="Instalaciones"
         subtitle=""
         cta={
           <Button
             variant="contained"
             onClick={() => {
-              setEditing(null);
+              setEditingInst(null);
               setOpenModal(true);
             }}
           >
-            Nuevo mantenimiento
+            Nueva Instalación
           </Button>
         }
       />
@@ -172,7 +147,7 @@ export default function MantenimientosPage() {
 
       <EntityTable
         rows={paged}
-        columns={columns}
+        columns={columnsInst}
         loading={loading}
         rowCount={rows.length}
         page={page}
@@ -180,13 +155,13 @@ export default function MantenimientosPage() {
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
         onEdit={(id) => {
-          const selected = mantenimientos.find((item) => item.id === id);
+          const selected = instalaciones.find((item) => item.id === id);
           if (selected) {
-            setEditing(selected);
+            setEditingInst(selected);
             setOpenModal(true);
           }
         }}
-        onDelete={handleDelete}
+        onDelete={handleDeleteInst}
       />
 
       <TableFooter
@@ -200,15 +175,15 @@ export default function MantenimientosPage() {
         }}
       />
 
-      <MaintenanceModal
+      {/* Modal para agregar instalación */}
+      <FacilityModal
         open={openModal}
         onClose={() => {
           setOpenModal(false);
-          setEditing(null);
+          setEditingInst(null);
         }}
-        onSave={handleSave}
-        installations={instalaciones}
-        initialData={editing}
+        onSave={handleSaveInst}
+        initialData={editingInst}
       />
     </Box>
   );

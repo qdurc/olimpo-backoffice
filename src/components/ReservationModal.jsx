@@ -6,9 +6,9 @@ import {
 	DialogActions,
 	TextField,
 	Button,
-	Grid,
 	MenuItem,
 	Alert,
+	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -117,77 +117,69 @@ export default function ReservationModal({
 	};
 
 	return (
-		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.25rem" }}>
+		<Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
 				{initialData ? "Editar reserva" : "Nueva reserva"}
 			</DialogTitle>
 
 			<DialogContent
 				sx={{
-					pt: 2,
-					px: 3,
+					pt: 1,
+					px: 4,
 					pb: 2,
-					"& .MuiTextField-root": { mt: 1 },
+					display: "flex",
+					flexDirection: "column",
+					gap: 2,
 				}}
 			>
-				<Grid container spacing={2}>
-					<Grid item xs={12}>
-						<TextField
-							select
-							label="Instalación"
-							name="facilityId"
-							fullWidth
-							required
-							value={form.facilityId}
-							onChange={handleChange}
-							error={Boolean(errors.facilityId)}
-							helperText={errors.facilityId}
-						>
-							{installations.map((inst) => (
-								<MenuItem key={inst.id} value={inst.id}>
-									{inst.nombre}
-								</MenuItem>
-							))}
-						</TextField>
-					</Grid>
+				<TextField
+					select
+					label="Instalación"
+					name="facilityId"
+					fullWidth
+					required
+					value={form.facilityId}
+					onChange={handleChange}
+					error={Boolean(errors.facilityId)}
+					helperText={errors.facilityId}
+				>
+					{installations.map((inst) => (
+						<MenuItem key={inst.id} value={inst.id}>
+							{inst.nombre}
+						</MenuItem>
+					))}
+				</TextField>
 
-					<Grid item xs={12} md={6}>
-						<TextField
-							label="Usuario ID"
-							name="usuarioId"
-							type="number"
-							fullWidth
-							value={form.usuarioId}
-							onChange={handleChange}
-						/>
-					</Grid>
+				<TextField
+					label="Usuario ID"
+					name="usuarioId"
+					type="number"
+					fullWidth
+					value={form.usuarioId}
+					onChange={handleChange}
+				/>
 
-					<Grid item xs={12} md={6}>
-						<TextField
-							label="Estado (estatusID)"
-							name="estadoId"
-							type="number"
-							fullWidth
-							value={form.estadoId}
-							onChange={handleChange}
-						/>
-					</Grid>
+				<TextField
+					label="Estado (estatusID)"
+					name="estadoId"
+					type="number"
+					fullWidth
+					value={form.estadoId}
+					onChange={handleChange}
+				/>
 
-					<Grid item xs={12}>
-						<TextField
-							label="Fecha y hora"
-							name="fechaIso"
-							type="datetime-local"
-							fullWidth
-							value={form.fechaIso}
-							onChange={handleChange}
-							required
-							InputLabelProps={{ shrink: true }}
-							error={Boolean(errors.fechaIso)}
-							helperText={errors.fechaIso}
-						/>
-					</Grid>
-				</Grid>
+				<TextField
+					label="Fecha y hora"
+					name="fechaIso"
+					type="datetime-local"
+					fullWidth
+					value={form.fechaIso}
+					onChange={handleChange}
+					required
+					InputLabelProps={{ shrink: true }}
+					error={Boolean(errors.fechaIso)}
+					helperText={errors.fechaIso}
+				/>
 
 				{submitError ? (
 					<Alert severity="error" sx={{ mt: 2 }}>
@@ -196,9 +188,11 @@ export default function ReservationModal({
 				) : null}
 			</DialogContent>
 
-			<DialogActions sx={{ px: 3, pb: 2 }}>
-				<Button onClick={onClose}>Cancelar</Button>
-				<Button variant="contained" onClick={handleSubmit}>
+			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
+				<Button onClick={onClose} color="inherit">
+					Cancelar
+				</Button>
+				<Button variant="contained" onClick={handleSubmit} sx={{ minWidth: 140 }}>
 					{initialData ? "Guardar cambios" : "Agregar"}
 				</Button>
 			</DialogActions>

@@ -7,8 +7,8 @@ import {
 	DialogActions,
 	TextField,
 	Button,
-	Grid,
 	MenuItem,
+	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -120,108 +120,105 @@ export default function TorneoModal({
 		onClose?.();
 	};
 
-	return (
-		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-			<DialogTitle>{initialData ? "Editar Torneo" : "Nuevo Torneo"}</DialogTitle>
-			<DialogContent dividers>
-				<Grid container spacing={2} sx={{ mt: 0.5 }}>
-					<Grid item xs={12}>
-						<TextField
-							label="Nombre"
-							name="nombre"
-							fullWidth
-							value={form.nombre}
-							onChange={handleChange}
-							required
-							error={Boolean(errors.nombre)}
-							helperText={errors.nombre}
-						/>
-					</Grid>
+return (
+		<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
+				{initialData ? "Editar Torneo" : "Nuevo Torneo"}
+			</DialogTitle>
+			<DialogContent
+				sx={{
+					pt: 1,
+					px: 4,
+					pb: 2,
+					display: "flex",
+					flexDirection: "column",
+					gap: 2,
+				}}
+			>
+				<TextField
+					label="Nombre"
+					name="nombre"
+					fullWidth
+					value={form.nombre}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.nombre)}
+					helperText={errors.nombre}
+				/>
 
-					<Grid item xs={12} sm={6}>
-						<TextField
-							label="Categoría (categoryID)"
-							name="categoriaId"
-							type="number"
-							fullWidth
-							value={form.categoriaId}
-							onChange={handleChange}
-							required
-							error={Boolean(errors.categoriaId)}
-							helperText={errors.categoriaId}
-						/>
-					</Grid>
+				<TextField
+					label="Categoría (categoryID)"
+					name="categoriaId"
+					type="number"
+					fullWidth
+					value={form.categoriaId}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.categoriaId)}
+					helperText={errors.categoriaId}
+				/>
 
-					<Grid item xs={12} sm={6}>
-						<TextField
-							label="Disciplina (disciplineID)"
-							name="disciplinaId"
-							type="number"
-							fullWidth
-							value={form.disciplinaId}
-							onChange={handleChange}
-							required
-							error={Boolean(errors.disciplinaId)}
-							helperText={errors.disciplinaId}
-						/>
-					</Grid>
+				<TextField
+					label="Disciplina (disciplineID)"
+					name="disciplinaId"
+					type="number"
+					fullWidth
+					value={form.disciplinaId}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.disciplinaId)}
+					helperText={errors.disciplinaId}
+				/>
 
-					<Grid item xs={12} sm={6}>
-						<TextField
-							label="Estado (estatusID)"
-							name="estadoId"
-							type="number"
-							fullWidth
-							value={form.estadoId}
-							onChange={handleChange}
-							required
-							error={Boolean(errors.estadoId)}
-							helperText={errors.estadoId}
-						/>
-					</Grid>
+				<TextField
+					label="Estado (estatusID)"
+					name="estadoId"
+					type="number"
+					fullWidth
+					value={form.estadoId}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.estadoId)}
+					helperText={errors.estadoId}
+				/>
 
-					<Grid item xs={12} sm={6}>
-						<TextField
-							select
-							label="Instalación"
-							name="facilityId"
-							fullWidth
-							value={form.facilityId}
-							onChange={handleChange}
-							required
-							error={Boolean(errors.facilityId)}
-							helperText={errors.facilityId}
-						>
-							{installations.map((inst) => (
-								<MenuItem key={inst.id} value={inst.id}>
-									{inst.nombre}
-								</MenuItem>
-							))}
-						</TextField>
-					</Grid>
+				<TextField
+					select
+					label="Instalación"
+					name="facilityId"
+					fullWidth
+					value={form.facilityId}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.facilityId)}
+					helperText={errors.facilityId}
+				>
+					{installations.map((inst) => (
+						<MenuItem key={inst.id} value={inst.id}>
+							{inst.nombre}
+						</MenuItem>
+					))}
+				</TextField>
 
-					<Grid item xs={12}>
-						<TextField
-							label="Fecha"
-							name="fechaIso"
-							type="datetime-local"
-							fullWidth
-							value={form.fechaIso}
-							onChange={handleChange}
-							required
-							InputLabelProps={{ shrink: true }}
-							error={Boolean(errors.fechaIso)}
-							helperText={errors.fechaIso}
-						/>
-					</Grid>
-				</Grid>
+				<TextField
+					label="Fecha"
+					name="fechaIso"
+					type="datetime-local"
+					fullWidth
+					value={form.fechaIso}
+					onChange={handleChange}
+					required
+					InputLabelProps={{ shrink: true }}
+					error={Boolean(errors.fechaIso)}
+					helperText={errors.fechaIso}
+				/>
 			</DialogContent>
 
-			<DialogActions>
+			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
 				<Button onClick={onClose} color="inherit">
 					Cancelar
 				</Button>
-				<Button variant="contained" onClick={handleSubmit}>
+				<Button variant="contained" onClick={handleSubmit} sx={{ minWidth: 160 }}>
 					{initialData ? "Guardar cambios" : "Crear Torneo"}
 				</Button>
 			</DialogActions>

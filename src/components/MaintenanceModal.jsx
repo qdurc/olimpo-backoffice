@@ -6,8 +6,8 @@ import {
 	DialogActions,
 	TextField,
 	Button,
-	Grid,
 	MenuItem,
+	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -124,110 +124,100 @@ export default function MaintenanceModal({
 		onClose?.();
 	};
 
-	return (
-		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.25rem" }}>
+return (
+		<Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
 				{initialData ? "Editar mantenimiento" : "Nuevo mantenimiento"}
 			</DialogTitle>
 
 			<DialogContent
 				sx={{
-					pt: 2,
-					px: 3,
+					pt: 1,
+					px: 4,
 					pb: 2,
-					"& .MuiTextField-root": { mt: 1 },
+					display: "flex",
+					flexDirection: "column",
+					gap: 2,
 				}}
 			>
-				<Grid container spacing={2}>
-					<Grid item xs={12}>
-						<TextField
-							select
-							label="Instalación"
-							name="facilityId"
-							fullWidth
-							required
-							value={form.facilityId}
-							onChange={handleChange}
-							error={Boolean(errors.facilityId)}
-							helperText={errors.facilityId}
-						>
-							{installations.map((inst) => (
-								<MenuItem key={inst.id} value={inst.id}>
-									{inst.nombre}
-								</MenuItem>
-							))}
-						</TextField>
-					</Grid>
+				<TextField
+					select
+					label="Instalación"
+					name="facilityId"
+					fullWidth
+					required
+					value={form.facilityId}
+					onChange={handleChange}
+					error={Boolean(errors.facilityId)}
+					helperText={errors.facilityId}
+				>
+					{installations.map((inst) => (
+						<MenuItem key={inst.id} value={inst.id}>
+							{inst.nombre}
+						</MenuItem>
+					))}
+				</TextField>
 
-					<Grid item xs={12}>
-						<TextField
-							label="Descripción"
-							name="descripcion"
-							fullWidth
-							multiline
-							minRows={2}
-							value={form.descripcion}
-							onChange={handleChange}
-						/>
-					</Grid>
+				<TextField
+					label="Descripción"
+					name="descripcion"
+					fullWidth
+					multiline
+					minRows={2}
+					value={form.descripcion}
+					onChange={handleChange}
+				/>
 
-					<Grid item xs={12} md={6}>
-						<TextField
-							label="Inicio"
-							name="inicio"
-							type="datetime-local"
-							fullWidth
-							value={form.inicio}
-							onChange={handleChange}
-							required
-							InputLabelProps={{ shrink: true }}
-							error={Boolean(errors.inicio)}
-							helperText={errors.inicio}
-						/>
-					</Grid>
+				<TextField
+					label="Inicio"
+					name="inicio"
+					type="datetime-local"
+					fullWidth
+					value={form.inicio}
+					onChange={handleChange}
+					required
+					InputLabelProps={{ shrink: true }}
+					error={Boolean(errors.inicio)}
+					helperText={errors.inicio}
+				/>
 
-					<Grid item xs={12} md={6}>
-						<TextField
-							label="Fin"
-							name="fin"
-							type="datetime-local"
-							fullWidth
-							value={form.fin}
-							onChange={handleChange}
-							required
-							InputLabelProps={{ shrink: true }}
-							error={Boolean(errors.fin)}
-							helperText={errors.fin}
-						/>
-					</Grid>
+				<TextField
+					label="Fin"
+					name="fin"
+					type="datetime-local"
+					fullWidth
+					value={form.fin}
+					onChange={handleChange}
+					required
+					InputLabelProps={{ shrink: true }}
+					error={Boolean(errors.fin)}
+					helperText={errors.fin}
+				/>
 
-					<Grid item xs={12} md={6}>
-						<TextField
-							label="Usuario ID"
-							name="usuarioId"
-							type="number"
-							fullWidth
-							value={form.usuarioId}
-							onChange={handleChange}
-						/>
-					</Grid>
+				<TextField
+					label="Usuario ID"
+					name="usuarioId"
+					type="number"
+					fullWidth
+					value={form.usuarioId}
+					onChange={handleChange}
+				/>
 
-					<Grid item xs={12} md={6}>
-						<TextField
-							label="Estado (estatusID)"
-							name="estadoId"
-							type="number"
-							fullWidth
-							value={form.estadoId}
-							onChange={handleChange}
-						/>
-					</Grid>
-				</Grid>
+				<TextField
+					label="Estado (estatusID)"
+					name="estadoId"
+					type="number"
+					fullWidth
+					value={form.estadoId}
+					onChange={handleChange}
+				/>
 			</DialogContent>
 
-			<DialogActions sx={{ px: 3, pb: 2 }}>
-				<Button onClick={onClose}>Cancelar</Button>
-				<Button variant="contained" onClick={handleSubmit}>
+			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
+				<Button onClick={onClose} color="inherit">
+					Cancelar
+				</Button>
+				<Button variant="contained" onClick={handleSubmit} sx={{ minWidth: 140 }}>
 					{initialData ? "Guardar cambios" : "Agregar"}
 				</Button>
 			</DialogActions>

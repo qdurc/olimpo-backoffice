@@ -48,19 +48,19 @@ const StatCard = ({ title, value, change, trend }) => {
       elevation={0}
       sx={{
         border: cardBorder,
-        bgcolor: "#fff",
-        p: 2.5,
-        borderRadius: 3,
+        bgcolor: "#FFFFFF",
+        p: 1.75,
+        borderRadius: 1.5,
         display: "flex",
         flexDirection: "column",
-        gap: 0.5,
+        gap: 0.4,
         height: "100%",
       }}
     >
       <Typography variant="caption" sx={{ color: neutralText }}>
         {title}
       </Typography>
-      <Typography variant="h5" sx={{ fontWeight: 800, color: "#1f2937" }}>
+      <Typography variant="h5" sx={{ fontWeight: 800, color: "#111827" }}>
         {value}
       </Typography>
       <Chip
@@ -194,7 +194,7 @@ const DashboardPage = () => {
           elevation={0}
           sx={{
             border: cardBorder,
-            bgcolor: "#fff",
+            bgcolor: "#FFFFFF",
             p: 3,
             borderRadius: 3,
             height: "100%",
@@ -218,7 +218,7 @@ const DashboardPage = () => {
                   {
                     name: currentActivity.label,
                     value: currentActivity.value,
-                    fill: "#6b7280",
+                    fill: "#3366CC",
                   },
                 ]}
                 startAngle={220}
@@ -231,7 +231,7 @@ const DashboardPage = () => {
                 />
                 <RadialBar
                   minAngle={15}
-                  background={{ fill: "#e5e7eb" }}
+                  background={{ fill: "#C0C0C0" }}
                   cornerRadius={14}
                   dataKey="value"
                 />
@@ -260,7 +260,7 @@ const DashboardPage = () => {
           elevation={0}
           sx={{
             border: cardBorder,
-            bgcolor: "#fff",
+            bgcolor: "#FFFFFF",
             p: 3,
             borderRadius: 3,
             height: "100%",
@@ -323,7 +323,7 @@ const DashboardPage = () => {
           elevation={0}
           sx={{
             border: cardBorder,
-            bgcolor: "#fff",
+            bgcolor: "#FFFFFF",
             p: 3,
             borderRadius: 3,
             height: "100%",
@@ -334,21 +334,21 @@ const DashboardPage = () => {
           </Typography>
           <TableContainer>
             <Table size="small">
-              <TableHead sx={{ bgcolor: "#f7f8fa" }}>
+              <TableHead sx={{ bgcolor: "#F5F5F5" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, color: neutralText }}>Evento</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: neutralText }}>Participación</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: neutralText }}>Inscritos</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: neutralText }}>Fecha</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#111827" }}>Evento</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#111827" }}>Participación</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#111827" }}>Inscritos</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#111827" }}>Fecha</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {events.map((e, i) => (
-                  <TableRow key={i} hover sx={{ "&:hover": { bgcolor: "#f3f4f6" } }}>
+                  <TableRow key={i} hover sx={{ "&:hover": { bgcolor: "#F5F5F5" } }}>
                     <TableCell sx={{ color: "#111827", fontWeight: 600 }}>{e.evento}</TableCell>
-                    <TableCell sx={{ color: neutralText }}>{e.participacion}</TableCell>
-                    <TableCell sx={{ color: neutralText }}>{e.inscritos}</TableCell>
-                    <TableCell sx={{ color: neutralText }}>{e.fecha}</TableCell>
+                    <TableCell sx={{ color: "#111827" }}>{e.participacion}</TableCell>
+                    <TableCell sx={{ color: "#111827" }}>{e.inscritos}</TableCell>
+                    <TableCell sx={{ color: "#111827" }}>{e.fecha}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -360,7 +360,7 @@ const DashboardPage = () => {
           elevation={0}
           sx={{
             border: cardBorder,
-            bgcolor: "#fff",
+            bgcolor: "#FFFFFF",
             p: 3,
             borderRadius: 3,
             height: "100%",

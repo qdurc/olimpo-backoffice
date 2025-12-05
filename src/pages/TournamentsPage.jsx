@@ -15,7 +15,7 @@ import {
 } from "../services/tournaments";
 import { getInstallations } from "../services/installations";
 
-export default function TorneosPage() {
+export default function TournamentsPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(8);

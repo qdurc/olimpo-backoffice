@@ -7,6 +7,7 @@ import {
   ListItemText,
   Box,
   Typography,
+  ButtonBase,
 } from "@mui/material";
 import {
   Dashboard,
@@ -17,6 +18,7 @@ import {
   Build,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
+import logo from "../assets/olimpo-logo.png";
 
 const menuItems = [
   { text: "Dashboard", icon: <Dashboard />, path: "/dashboard" },
@@ -41,12 +43,35 @@ export default function Sidebar() {
           boxSizing: "border-box",
           bgcolor: "#fff",
           borderRight: "1px solid #e5e7eb",
+          borderRadius: 1,
         },
       }}
     >
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#d32f2f" }}>
-          🏛️ OLIMPO
+      <Box
+        component={ButtonBase}
+        onClick={() => navigate("/dashboard")}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          p: 1,
+          borderRadius: 1,
+          gap: .5,
+          cursor: "pointer",
+        }}
+      >
+        <Box
+          component="img"
+          src={logo}
+          alt="Logo Olimpo"
+          sx={{ width: 150, height: 100, objectFit: "contain" }}
+        />
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", color: "#d32f2f", textAlign: "center" }}
+        >
+          OLIMPO
         </Typography>
       </Box>
 
