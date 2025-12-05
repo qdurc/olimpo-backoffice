@@ -49,7 +49,7 @@ const StatCard = ({ title, value, change, trend }) => {
       sx={{
         border: cardBorder,
         bgcolor: "#FFFFFF",
-        p: 1.75,
+        p: 1.5,
         borderRadius: 1.5,
         display: "flex",
         flexDirection: "column",

@@ -55,6 +55,14 @@ export default function EntityTable({
 				disableRowSelectionOnClick
 				getRowHeight={() => "auto"}
 				getEstimatedRowHeight={() => 64}
+				localeText={{
+					columnMenuSortAsc: "Orden ascendente",
+					columnMenuSortDesc: "Orden descendente",
+					columnMenuUnsort: "Quitar orden",
+					columnMenuFilter: "Filtrar",
+					columnMenuHideColumn: "Ocultar columna",
+					columnMenuManageColumns: "Administrar columnas",
+				}}
 				sx={{
 					borderRadius: 1,
 					backgroundColor: "background.paper",

@@ -10,7 +10,7 @@ export default function TableFooter({
 	return (
 		<Box display="flex" alignItems="center" justifyContent="space-between" p={2}>
 			<Box display="flex" alignItems="center" gap={1.5}>
-				<Typography variant="body2" color="text.secondary">Show result:</Typography>
+				<Typography variant="body2" sx={{ color: "#000000" }}>Mostrar resultados:</Typography>
 				<FormControl size="small">
 					<Select
 						value={pageSize}
