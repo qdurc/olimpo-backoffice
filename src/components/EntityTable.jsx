@@ -7,11 +7,6 @@ export default function EntityTable({
 	rows,
 	columns,
 	loading,
-	rowCount,
-	page,
-	pageSize,
-	onPageChange,
-	onPageSizeChange,
 	onEdit,
 	onDelete,
 }) {

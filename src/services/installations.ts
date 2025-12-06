@@ -22,6 +22,27 @@ export type Installation = {
 let installationsCache: Installation[] | null = null;
 let installationsPromise: Promise<Installation[]> | null = null;
 
+type FacilityApiResponse = {
+	data?: FacilityApi[] | FacilityApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type FacilitySingleResponse = {
+	data?: FacilityApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type DeleteFacilityResponse = {
+	data?: boolean | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
 function normalizeFacility(
 	data?: FacilityApi | null,
 	fallback?: Installation,
@@ -61,6 +82,18 @@ function parseStatusId(statusId?: number | string | null) {
 	return Number.isNaN(parsed) ? null : parsed;
 }
 
+function isPlaceholderFacility(facility?: FacilityApi | null) {
+	if (!facility) return false;
+	const hasDefaultStrings =
+		facility.name === "string" &&
+		facility.type === "string" &&
+		facility.address === "string";
+	const hasDefaultNumbers =
+		(facility.capacity === 0 || facility.capacity === undefined) &&
+		(facility.status_ID === 0 || facility.status_ID === undefined || facility.status_ID === null);
+	return hasDefaultStrings && hasDefaultNumbers;
+}
+
 export async function getInstallations(): Promise<Installation[]> {
 	if (!isApiConfigured) {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
@@ -75,13 +108,17 @@ export async function getInstallations(): Promise<Installation[]> {
 	}
 
 	const request = (async () => {
-		const facilities = await apiFetchJson<FacilityApi[]>(
+		const response = await apiFetchJson<FacilityApiResponse | FacilityApi[]>(
 			"/api/Facility/GetAllFacilitiesAsyncFront",
 		);
 
-		const normalized = Array.isArray(facilities)
-			? facilities.map((facility) => normalizeFacility(facility))
-			: [];
+		const facilities = Array.isArray(response)
+			? response
+			: Array.isArray(response?.data)
+				? response.data
+				: [];
+
+		const normalized = facilities.map((facility) => normalizeFacility(facility));
 
 		installationsCache = normalized;
 		return normalized;
@@ -205,6 +242,14 @@ export async function updateInstallation(
 		body: JSON.stringify(body),
 	});
 
+	const response =
+		typeof facility === "object" && facility !== null && "data" in facility
+			? (facility as FacilitySingleResponse)
+			: null;
+
+	const facilityData = response ? response.data : facility;
+	const shouldUseFallback = isPlaceholderFacility(facilityData);
+
 	const fallbackNormalized: Installation = {
 		id: numericId,
 		nombre: payload.nombre,
@@ -219,8 +264,8 @@ export async function updateInstallation(
 	};
 
 	const normalized =
-		facility && typeof facility === "object"
-			? normalizeFacility({ ...facility, id: numericId }, fallbackNormalized)
+		facilityData && typeof facilityData === "object" && !shouldUseFallback
+			? normalizeFacility({ ...facilityData, id: numericId }, fallbackNormalized)
 			: fallbackNormalized;
 
 	if (installationsCache) {
@@ -244,6 +289,18 @@ export async function deleteInstallation(id: number | string): Promise<void> {
 
 	await apiFetchJson(`/api/Facility/DeleteFacilityFront?id=${numericId}`, {
 		method: "DELETE",
+	}).then((res: DeleteFacilityResponse | unknown) => {
+		// Si la API indica fallo, propagamos un error para manejarlo en la UI.
+		if (
+			res &&
+			typeof res === "object" &&
+			"success" in res &&
+			(res as DeleteFacilityResponse).success === false
+		) {
+			const message =
+				(res as DeleteFacilityResponse).message ?? "No se pudo eliminar la instalación";
+			throw new Error(message);
+		}
 	});
 
 	if (installationsCache) {

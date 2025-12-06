@@ -35,6 +35,27 @@ export type MaintenancePayload = {
 let maintenancesCache: Maintenance[] | null = null;
 let maintenancesPromise: Promise<Maintenance[]> | null = null;
 
+type MaintenanceApiResponse = {
+	data?: MaintenanceApi[] | MaintenanceApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type MaintenanceSingleResponse = {
+	data?: MaintenanceApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type DeleteMaintenanceResponse = {
+	data?: boolean | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
 function parseNum(input?: number | string | null) {
 	if (input === null || input === undefined) return undefined;
 	if (typeof input === "number" && Number.isFinite(input)) return input;
@@ -108,13 +129,17 @@ export async function getMaintenances(
 
 	const request = (async () => {
 		const facilityMap = await buildFacilityMap(facilities);
-		const maintenances = await apiFetchJson<MaintenanceApi[]>(
+		const maintenancesResponse = await apiFetchJson<MaintenanceApiResponse | MaintenanceApi[]>(
 			"/api/Maintenance/GetAllMaintenancesFront",
 		);
 
-		const normalized = Array.isArray(maintenances)
-			? maintenances.map((m) => normalizeMaintenance(m, facilityMap))
-			: [];
+		const maintenances = Array.isArray(maintenancesResponse)
+			? maintenancesResponse
+			: Array.isArray(maintenancesResponse?.data)
+				? maintenancesResponse.data
+				: [];
+
+		const normalized = maintenances.map((m) => normalizeMaintenance(m, facilityMap));
 
 		maintenancesCache = normalized;
 		return normalized;
@@ -206,7 +231,7 @@ export async function updateMaintenance(
 		estatusID: parseNum(payload.estadoId),
 	};
 
-	const updated = await apiFetchJson<MaintenanceApi>(
+	const updated = await apiFetchJson<MaintenanceApi | MaintenanceSingleResponse>(
 		"/api/Maintenance/UpdateMaintenance",
 		{
 			method: "POST",
@@ -214,8 +239,18 @@ export async function updateMaintenance(
 		},
 	);
 
+	const response =
+		typeof updated === "object" && updated !== null && "data" in updated
+			? (updated as MaintenanceSingleResponse)
+			: null;
+
+	const maintenanceData = response ? response.data : updated;
+
 	const facilityMap = await buildFacilityMap();
-	const normalized = normalizeMaintenance({ ...body, ...updated }, facilityMap);
+	const normalized = normalizeMaintenance(
+		{ ...body, ...(maintenanceData || {}) },
+		facilityMap,
+	);
 
 	if (maintenancesCache) {
 		maintenancesCache = maintenancesCache.map((item) =>
@@ -239,6 +274,18 @@ export async function deleteMaintenance(id: number | string): Promise<void> {
 	const params = new URLSearchParams({ id: String(numericId) });
 	await apiFetchJson(`/api/Maintenance/DeleteMaintenanceById?${params.toString()}`, {
 		method: "DELETE",
+	}).then((res: DeleteMaintenanceResponse | unknown) => {
+		if (
+			res &&
+			typeof res === "object" &&
+			"success" in res &&
+			(res as DeleteMaintenanceResponse).success === false
+		) {
+			const message =
+				(res as DeleteMaintenanceResponse).message ??
+				"No se pudo eliminar el mantenimiento";
+			throw new Error(message);
+		}
 	});
 
 	if (maintenancesCache) {

@@ -28,6 +28,27 @@ export type ReservationPayload = {
 	estadoId?: number | string | null;
 };
 
+type ReservationApiResponse = {
+	data?: ReservationApi[] | ReservationApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type ReservationSingleResponse = {
+	data?: ReservationApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type DeleteReservationResponse = {
+	data?: boolean | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
 function formatDate(dateStr?: string) {
 	if (!dateStr) return { fecha: "", hora: "" };
 	const d = new Date(dateStr);
@@ -151,13 +172,17 @@ export async function getReservations(
 		facilityMap = buildFacilityMap(freshFacilities);
 	}
 
-	const data = await apiFetchJson<ReservationApi[]>(
+	const data = await apiFetchJson<ReservationApiResponse | ReservationApi[]>(
 		"/api/Reservation/GetAllReservationsFront",
 	);
 
-	return Array.isArray(data)
-		? data.map((r) => normalizeReservation(r, facilityMap))
-		: [];
+	const reservations = Array.isArray(data)
+		? data
+		: Array.isArray(data?.data)
+			? data.data
+			: [];
+
+	return reservations.map((r) => normalizeReservation(r, facilityMap));
 }
 
 export async function createReservation(payload: ReservationPayload) {
@@ -167,15 +192,25 @@ export async function createReservation(payload: ReservationPayload) {
 
 	const body = buildReservationBody(payload);
 
-	let created: ReservationApi;
+	let created: ReservationApi | ReservationSingleResponse;
 	try {
-		created = await apiFetchJson<ReservationApi>("/api/Reservation/AddReservation", {
-			method: "POST",
-			body: JSON.stringify(body),
-		});
+		created = await apiFetchJson<ReservationApi | ReservationSingleResponse>(
+			"/api/Reservation/AddReservation",
+			{
+				method: "POST",
+				body: JSON.stringify(body),
+			},
+		);
 	} catch (error) {
 		throw mapReservationError(error);
 	}
+
+	const response =
+		typeof created === "object" && created !== null && "data" in created
+			? (created as ReservationSingleResponse)
+			: null;
+
+	const reservationData = response ? response.data : created;
 
 	const facilities = await getInstallations();
 	const facilityMap = buildFacilityMap(facilities);
@@ -183,11 +218,11 @@ export async function createReservation(payload: ReservationPayload) {
 	return normalizeReservation(
 		{
 			...body,
-			...created,
-			facilityId: body.facilityId ?? created?.facilityId,
-			userId: body.userId ?? created?.userId,
-			reservedDates: body.reservedDates ?? created?.reservedDates,
-			estatusID: body.estatusID ?? created?.estatusID,
+			...(reservationData || {}),
+			facilityId: body.facilityId ?? reservationData?.facilityId,
+			userId: body.userId ?? reservationData?.userId,
+			reservedDates: body.reservedDates ?? reservationData?.reservedDates,
+			estatusID: body.estatusID ?? reservationData?.estatusID,
 		},
 		facilityMap,
 	);
@@ -208,15 +243,25 @@ export async function updateReservation(
 
 	const body = buildReservationBody(payload, numericId);
 
-	let updated: ReservationApi;
+	let updated: ReservationApi | ReservationSingleResponse;
 	try {
-		updated = await apiFetchJson<ReservationApi>("/api/Reservation/UpdateReservation", {
-			method: "POST",
-			body: JSON.stringify(body),
-		});
+		updated = await apiFetchJson<ReservationApi | ReservationSingleResponse>(
+			"/api/Reservation/UpdateReservation",
+			{
+				method: "POST",
+				body: JSON.stringify(body),
+			},
+		);
 	} catch (error) {
 		throw mapReservationError(error);
 	}
+
+	const response =
+		typeof updated === "object" && updated !== null && "data" in updated
+			? (updated as ReservationSingleResponse)
+			: null;
+
+	const reservationData = response ? response.data : updated;
 
 	const facilities = await getInstallations();
 	const facilityMap = buildFacilityMap(facilities);
@@ -224,11 +269,11 @@ export async function updateReservation(
 	return normalizeReservation(
 		{
 			...body,
-			...updated,
-			facilityId: body.facilityId ?? updated?.facilityId,
-			userId: body.userId ?? updated?.userId,
-			reservedDates: body.reservedDates ?? updated?.reservedDates,
-			estatusID: body.estatusID ?? updated?.estatusID,
+			...(reservationData || {}),
+			facilityId: body.facilityId ?? reservationData?.facilityId,
+			userId: body.userId ?? reservationData?.userId,
+			reservedDates: body.reservedDates ?? reservationData?.reservedDates,
+			estatusID: body.estatusID ?? reservationData?.estatusID,
 		},
 		facilityMap,
 	);
@@ -247,5 +292,17 @@ export async function deleteReservation(id: number | string): Promise<void> {
 	const params = new URLSearchParams({ reservationId: String(numericId) });
 	await apiFetchJson(`/api/Reservation/DeleteReservation?${params.toString()}`, {
 		method: "DELETE",
+	}).then((res: DeleteReservationResponse | unknown) => {
+		if (
+			res &&
+			typeof res === "object" &&
+			"success" in res &&
+			(res as DeleteReservationResponse).success === false
+		) {
+			const message =
+				(res as DeleteReservationResponse).message ??
+				"No se pudo eliminar la reserva";
+			throw new Error(message);
+		}
 	});
 }

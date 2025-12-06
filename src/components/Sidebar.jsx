@@ -16,13 +16,15 @@ import {
   Person,
   EmojiEvents,
   Build,
+  SportsBasketball,
+  HolidayVillage,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
-import logo from "../assets/olimpo-logo.png";
+import logo from "../assets/Miderec-logo-2020.png";
 
 const menuItems = [
   { text: "Dashboard", icon: <Dashboard />, path: "/dashboard" },
-  { text: "Instalaciones", icon: <SportsSoccer />, path: "/instalaciones" },
+  { text: "Instalaciones", icon: <HolidayVillage />, path: "/instalaciones" },
   { text: "Mantenimientos", icon: <Build />, path: "/mantenimientos" },
   { text: "Reservas", icon: <Event />, path: "/reservas" },
   { text: "Usuarios", icon: <Person />, path: "/usuario" },
