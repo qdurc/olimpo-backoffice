@@ -7,20 +7,30 @@ import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
 import TorneoModal from "../components/TorneoModal";
+
 import {
 	createTournament,
 	deleteTournament,
 	getTournaments,
 	updateTournament,
 } from "../services/tournaments";
-import { getInstallations } from "../services/installations";
+
+import { getTournamentViewModel } from "../services/tournamentViewModel";
 
 export default function TournamentsPage() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(8);
+
 	const [torneos, setTorneos] = useState([]);
-	const [installations, setInstallations] = useState([]);
+	const [viewModel, setViewModel] = useState({
+		facilities: [],
+		estatus: [],
+		categories: [],
+		disciplines: [],
+		encargados: [],
+	});
+
 	const [openModal, setOpenModal] = useState(false);
 	const [editingTorneo, setEditingTorneo] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -31,17 +41,15 @@ export default function TournamentsPage() {
 		async function loadData() {
 			setLoading(true);
 			try {
-				const instData = await getInstallations();
-				const torneosData = await getTournaments(instData);
+				const vm = await getTournamentViewModel();
+				const torneosData = await getTournaments(vm.facilities);
 				if (!isMounted) return;
-				setInstallations(instData);
+				setViewModel(vm);
 				setTorneos(torneosData);
 			} catch (error) {
 				console.error("Error loading tournaments data", error);
 			} finally {
-				if (isMounted) {
-					setLoading(false);
-				}
+				if (isMounted) setLoading(false);
 			}
 		}
 
@@ -58,7 +66,10 @@ export default function TournamentsPage() {
 				t.nombre?.toLowerCase().includes(term) ||
 				t.disciplina?.toLowerCase?.().includes(term) ||
 				t.categoria?.toLowerCase?.().includes(term) ||
-				t.instalacion?.toLowerCase?.().includes(term),
+				t.instalacion?.toLowerCase?.().includes(term) ||
+				t.supervisor?.toLowerCase?.().includes(term) ||
+				t.descripcion?.toLowerCase?.().includes(term) ||
+				t.normas?.toLowerCase?.().includes(term)
 		);
 	}, [search, torneos]);
 
@@ -67,11 +78,14 @@ export default function TournamentsPage() {
 
 	const columns = useMemo(
 		() => [
-			{ field: "nombre", headerName: "Nombre", flex: 1, minWidth: 220 },
+			{ field: "nombre", headerName: "Nombre", flex: 1, minWidth: 200 },
 			{ field: "disciplina", headerName: "Disciplina", flex: 1 },
-			{ field: "categoria", headerName: "Categoria", flex: 1 },
-			{ field: "fecha", headerName: "Fecha", width: 170 },
-			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 220 },
+			{ field: "categoria", headerName: "Categoría", flex: 1 },
+			{ field: "descripcion", headerName: "Descripción", flex: 1, minWidth: 200 },
+			{ field: "normas", headerName: "Normas", flex: 1, minWidth: 200 },
+			{ field: "fecha", headerName: "Fecha", width: 180 },
+			{ field: "instalacion", headerName: "Instalación", flex: 1 },
+			{ field: "supervisor", headerName: "Encargado", flex: 1, minWidth: 180 },
 			{
 				field: "estado",
 				headerName: "Estado",
@@ -79,7 +93,7 @@ export default function TournamentsPage() {
 				renderCell: (p) => <StatusPill value={p.value} />,
 			},
 		],
-		[],
+		[]
 	);
 
 	const handleOpenCreate = () => {
@@ -92,9 +106,7 @@ export default function TournamentsPage() {
 			if (editingTorneo?.id) {
 				const updated = await updateTournament(editingTorneo.id, torneoForm);
 				setTorneos((prev) =>
-					prev.map((t) =>
-						Number(t.id) === Number(updated.id) ? updated : t,
-					),
+					prev.map((t) => (Number(t.id) === Number(updated.id) ? updated : t))
 				);
 			} else {
 				const created = await createTournament(torneoForm);
@@ -104,11 +116,12 @@ export default function TournamentsPage() {
 			console.error("Error saving tournament", error);
 		} finally {
 			setEditingTorneo(null);
+			setOpenModal(false);
 		}
 	};
 
 	const handleDeleteTorneo = async (id) => {
-		const numericId = typeof id === "number" ? id : Number(id);
+		const numericId = Number(id);
 		if (!Number.isFinite(numericId)) {
 			console.error("Delete requiere un id numérico válido");
 			return;
@@ -123,7 +136,7 @@ export default function TournamentsPage() {
 	};
 
 	const handleEditTorneo = (id) => {
-		const found = torneos.find((t) => t.id === id);
+		const found = torneos.find((t) => Number(t.id) === Number(id));
 		if (!found) return;
 		setEditingTorneo(found);
 		setOpenModal(true);
@@ -195,7 +208,7 @@ export default function TournamentsPage() {
 				}}
 				onSave={handleSaveTorneo}
 				initialData={editingTorneo}
-				installations={installations}
+				viewModel={viewModel}
 			/>
 		</Box>
 	);

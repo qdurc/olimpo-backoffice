@@ -1,4 +1,3 @@
-// src/components/TorneoModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
 	Dialog,
@@ -8,7 +7,6 @@ import {
 	TextField,
 	Button,
 	MenuItem,
-	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -23,18 +21,21 @@ export default function TorneoModal({
 	onClose,
 	onSave,
 	initialData = null,
-	installations = [],
+	viewModel = { categories: [], disciplines: [], estatus: [], facilities: [], encargados: [] },
 }) {
 	const emptyForm = useMemo(
 		() => ({
 			nombre: "",
+			descripcion: "",
+			normas: "",
 			categoriaId: "",
 			disciplinaId: "",
 			estadoId: "",
 			facilityId: "",
+			supervisorId: "",
 			fechaIso: "",
 		}),
-		[],
+		[]
 	);
 
 	const [form, setForm] = useState(emptyForm);
@@ -44,29 +45,17 @@ export default function TorneoModal({
 		if (open && initialData) {
 			setForm({
 				nombre: initialData.nombre ?? "",
-				categoriaId:
-					initialData.categoriaId === null || initialData.categoriaId === undefined
-						? ""
-						: String(initialData.categoriaId),
-				disciplinaId:
-					initialData.disciplinaId === null || initialData.disciplinaId === undefined
-						? ""
-						: String(initialData.disciplinaId),
-				estadoId:
-					initialData.estadoId === null || initialData.estadoId === undefined
-						? ""
-						: String(initialData.estadoId),
-				facilityId:
-					initialData.facilityId === null || initialData.facilityId === undefined
-						? ""
-						: String(initialData.facilityId),
+				descripcion: initialData.descripcion ?? "",
+				normas: initialData.normas ?? "",
+				categoriaId: initialData.categoriaId ? String(initialData.categoriaId) : "",
+				disciplinaId: initialData.disciplinaId ? String(initialData.disciplinaId) : "",
+				estadoId: initialData.estadoId ? String(initialData.estadoId) : "",
+				facilityId: initialData.facilityId ? String(initialData.facilityId) : "",
+				supervisorId: initialData.supervisorId ? String(initialData.supervisorId) : "",
 				fechaIso: formatDateTimeLocal(initialData.fechaIso),
 			});
 			setErrors({});
 		} else if (open) {
-			setForm(emptyForm);
-			setErrors({});
-		} else {
 			setForm(emptyForm);
 			setErrors({});
 		}
@@ -85,24 +74,41 @@ export default function TorneoModal({
 		const disciplinaNum = form.disciplinaId === "" ? NaN : Number(form.disciplinaId);
 		const estadoNum = form.estadoId === "" ? NaN : Number(form.estadoId);
 		const facilityNum = form.facilityId === "" ? NaN : Number(form.facilityId);
+		const supervisorNum = form.supervisorId === "" ? NaN : Number(form.supervisorId);
 
 		if (!form.nombre.trim()) {
 			nextErrors.nombre = "Ingresa un nombre";
 		}
+		if (!form.descripcion?.trim()) {
+			nextErrors.descripcion = "Ingresa una descripción";
+		}
+		if (!form.normas?.trim()) {
+			nextErrors.normas = "Ingresa las normas";
+		}
 		if (!Number.isFinite(categoriaNum) || categoriaNum <= 0) {
-			nextErrors.categoriaId = "Ingresa un categoryID válido";
+			nextErrors.categoriaId = "Selecciona una categoría válida";
 		}
 		if (!Number.isFinite(disciplinaNum) || disciplinaNum <= 0) {
-			nextErrors.disciplinaId = "Ingresa un disciplineID válido";
+			nextErrors.disciplinaId = "Selecciona una disciplina válida";
 		}
-		if (!Number.isFinite(estadoNum) || estadoNum <= 0) {
-			nextErrors.estadoId = "Ingresa un estatusID válido";
+		if (!Number.isFinite(estadoNum) || (estadoNum !== 1 && estadoNum !== 2 && estadoNum <= 0)) {
+			// tu API exigía 1 o 2 pero si en futuro aceptan más, puedes relajar
+			nextErrors.estadoId = "Selecciona un estado válido (1 o 2)";
 		}
 		if (!Number.isFinite(facilityNum) || facilityNum <= 0) {
 			nextErrors.facilityId = "Selecciona una instalación válida";
 		}
+		if (!Number.isFinite(supervisorNum) || supervisorNum <= 0) {
+			nextErrors.supervisorId = "Selecciona un encargado válido";
+		}
 		if (!date || Number.isNaN(date.getTime())) {
 			nextErrors.fechaIso = "Ingresa una fecha válida";
+		} else {
+			// opcional: evitar fechas en el pasado
+			const now = new Date();
+			if (date.getTime() < now.getTime()) {
+				nextErrors.fechaIso = "La fecha no puede estar en el pasado";
+			}
 		}
 
 		setErrors(nextErrors);
@@ -111,20 +117,25 @@ export default function TorneoModal({
 		onSave?.({
 			id: initialData?.id,
 			nombre: form.nombre.trim(),
-			categoriaId: categoriaNum,
-			disciplinaId: disciplinaNum,
-			estadoId: estadoNum,
-			facilityId: facilityNum,
+			descripcion: form.descripcion.trim(),
+			normas: form.normas.trim(),
+			categoriaId: Number(form.categoriaId),
+			disciplinaId: Number(form.disciplinaId),
+			estadoId: Number(form.estadoId),
+			facilityId: Number(form.facilityId),
+			supervisorId: Number(form.supervisorId),
 			fechaIso: date.toISOString(),
 		});
+
 		onClose?.();
 	};
 
-return (
-		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+	return (
+		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
 			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
 				{initialData ? "Editar Torneo" : "Nuevo Torneo"}
 			</DialogTitle>
+
 			<DialogContent
 				sx={{
 					pt: 1,
@@ -147,55 +158,117 @@ return (
 				/>
 
 				<TextField
-					label="Categoría (categoryID)"
-					name="categoriaId"
-					type="number"
+					label="Descripción"
+					name="descripcion"
 					fullWidth
+					multiline
+					minRows={2}
+					value={form.descripcion}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.descripcion)}
+					helperText={errors.descripcion}
+				/>
+
+				<TextField
+					label="Normas"
+					name="normas"
+					fullWidth
+					multiline
+					minRows={2}
+					value={form.normas}
+					onChange={handleChange}
+					required
+					error={Boolean(errors.normas)}
+					helperText={errors.normas}
+				/>
+
+				<TextField
+					select
+					label="Categoría"
+					name="categoriaId"
+					fullWidth
+					required
 					value={form.categoriaId}
 					onChange={handleChange}
-					required
 					error={Boolean(errors.categoriaId)}
 					helperText={errors.categoriaId}
-				/>
+				>
+					{viewModel.categories.map((c) => (
+						<MenuItem key={c.id} value={c.id}>
+							{c.descripcion}
+						</MenuItem>
+					))}
+				</TextField>
 
 				<TextField
-					label="Disciplina (disciplineID)"
+					select
+					label="Disciplina"
 					name="disciplinaId"
-					type="number"
 					fullWidth
+					required
 					value={form.disciplinaId}
 					onChange={handleChange}
-					required
 					error={Boolean(errors.disciplinaId)}
 					helperText={errors.disciplinaId}
-				/>
+				>
+					{viewModel.disciplines.map((d) => (
+						<MenuItem key={d.id} value={d.id}>
+							{d.descripcion}
+						</MenuItem>
+					))}
+				</TextField>
 
 				<TextField
-					label="Estado (estatusID)"
+					select
+					label="Estado"
 					name="estadoId"
-					type="number"
 					fullWidth
+					required
 					value={form.estadoId}
 					onChange={handleChange}
-					required
 					error={Boolean(errors.estadoId)}
 					helperText={errors.estadoId}
-				/>
+				>
+					{viewModel.estatus.map((e) => (
+						<MenuItem key={e.estatusID} value={e.estatusID}>
+							{e.descripcion}
+						</MenuItem>
+					))}
+				</TextField>
 
 				<TextField
 					select
 					label="Instalación"
 					name="facilityId"
 					fullWidth
+					required
 					value={form.facilityId}
 					onChange={handleChange}
-					required
 					error={Boolean(errors.facilityId)}
 					helperText={errors.facilityId}
 				>
-					{installations.map((inst) => (
-						<MenuItem key={inst.id} value={inst.id}>
-							{inst.nombre}
+					{viewModel.facilities.map((f) => (
+						<MenuItem key={f.id} value={f.id}>
+							{f.name}
+						</MenuItem>
+					))}
+				</TextField>
+
+				<TextField
+					select
+					label="Encargado"
+					name="supervisorId"
+					fullWidth
+					required
+					value={form.supervisorId}
+					onChange={handleChange}
+					error={Boolean(errors.supervisorId)}
+					helperText={errors.supervisorId}
+				>
+					{viewModel.encargados.map((p) => (
+						<MenuItem key={p.id} value={p.id}>
+							{p.fullName}
 						</MenuItem>
 					))}
 				</TextField>
@@ -205,9 +278,9 @@ return (
 					name="fechaIso"
 					type="datetime-local"
 					fullWidth
+					required
 					value={form.fechaIso}
 					onChange={handleChange}
-					required
 					InputLabelProps={{ shrink: true }}
 					error={Boolean(errors.fechaIso)}
 					helperText={errors.fechaIso}
