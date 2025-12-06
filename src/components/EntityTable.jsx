@@ -1,20 +1,7 @@
 import * as React from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import { Box } from "@mui/material";
 import RowActionsMenu from "./RowActionsMenu";
-
-type Props = {
-	rows: any[];
-	columns: GridColDef[];
-	loading: boolean;
-	rowCount: number;
-	page: number;        // 1-based
-	pageSize: number;
-	onPageChange: (n: number) => void;   // 1-based
-	onPageSizeChange: (n: number) => void;
-	onEdit?: (id: number | string) => void;
-	onDelete?: (id: number | string) => void;
-};
 
 export default function EntityTable({
 	rows,
@@ -27,9 +14,9 @@ export default function EntityTable({
 	onPageSizeChange,
 	onEdit,
 	onDelete,
-}: Props) {
+}) {
 
-	const actionCol: GridColDef = {
+	const actionCol = {
 		field: "__more",
 		headerName: "",
 		sortable: false,
@@ -38,8 +25,8 @@ export default function EntityTable({
 		width: 72,
 		renderCell: (params) => (
 			<RowActionsMenu
-				onEdit={onEdit ? () => onEdit(params.id as number | string) : undefined}
-				onDelete={onDelete ? () => onDelete(params.id as number | string) : undefined}
+				onEdit={onEdit ? () => onEdit(params.id) : undefined}
+				onDelete={onDelete ? () => onDelete(params.id) : undefined}
 			/>
 		),
 	};

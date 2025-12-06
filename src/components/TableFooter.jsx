@@ -1,11 +1,7 @@
-import * as React from "react";
-import { Box, FormControl, InputLabel, MenuItem, Select, Typography, Pagination } from "@mui/material";
+import { Box, FormControl, MenuItem, Select, Typography, Pagination } from "@mui/material";
 
 export default function TableFooter({
 	page, pageCount, pageSize, onPageChange, onPageSizeChange,
-}: {
-	page: number; pageCount: number; pageSize: number;
-	onPageChange: (n: number) => void; onPageSizeChange: (n: number) => void;
 }) {
 	return (
 		<Box display="flex" alignItems="center" justifyContent="space-between" p={2}>

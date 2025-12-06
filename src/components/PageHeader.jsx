@@ -1,11 +1,6 @@
 import { Box, Typography, Breadcrumbs } from "@mui/material";
 
-export default function PageHeader({ title, subtitle, crumbs = [], cta }: {
-	title: string;
-	subtitle?: string;
-	crumbs?: Array<{ label: string; onClick?: () => void }>;
-	cta?: React.ReactNode | false;
-}) {
+export default function PageHeader({ title, subtitle, crumbs = [], cta }) {
 	const action = cta === undefined || cta === false ? null : cta;
 
 	return (

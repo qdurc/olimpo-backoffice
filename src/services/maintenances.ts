@@ -36,10 +36,10 @@ let maintenancesCache: Maintenance[] | null = null;
 let maintenancesPromise: Promise<Maintenance[]> | null = null;
 
 function parseNum(input?: number | string | null) {
-	if (input === null || input === undefined) return null;
+	if (input === null || input === undefined) return undefined;
 	if (typeof input === "number" && Number.isFinite(input)) return input;
 	const parsed = Number(input);
-	return Number.isFinite(parsed) ? parsed : null;
+	return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function toIsoString(value?: string | null) {

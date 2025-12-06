@@ -80,7 +80,7 @@ export async function getInstallations(): Promise<Installation[]> {
 		);
 
 		const normalized = Array.isArray(facilities)
-			? facilities.map(normalizeFacility)
+			? facilities.map((facility) => normalizeFacility(facility))
 			: [];
 
 		installationsCache = normalized;
@@ -220,7 +220,7 @@ export async function updateInstallation(
 
 	const normalized =
 		facility && typeof facility === "object"
-			? normalizeFacility({ ...facility, id: id ?? facility.id }, fallbackNormalized)
+			? normalizeFacility({ ...facility, id: numericId }, fallbackNormalized)
 			: fallbackNormalized;
 
 	if (installationsCache) {

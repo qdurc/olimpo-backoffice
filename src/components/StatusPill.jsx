@@ -5,7 +5,7 @@ const primaryBg = "rgba(0,32,91,0.12)";
 const supportBg = "rgba(51,102,204,0.12)";
 const alertBg = "rgba(237,28,36,0.12)";
 
-const map: Record<string, { bg: string; color: string; label?: string }> = {
+const map = {
 	"Disponible": { bg: primaryBg, color: "#00205B" },
 	"Resuelto": { bg: primaryBg, color: "#00205B" },
 	"Aprobada": { bg: primaryBg, color: "#00205B" },
@@ -22,7 +22,7 @@ const map: Record<string, { bg: string; color: string; label?: string }> = {
 	"Finalizado": { bg: primaryBg, color: "#00205B" },
 };
 
-export default function StatusPill({ value }: { value: string }) {
+export default function StatusPill({ value }) {
 	const s = map[value] ?? { bg: primaryBg, color: "#00205B" };
 	return (
 		<Chip
