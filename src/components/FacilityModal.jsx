@@ -9,20 +9,20 @@ import {
 	MenuItem,
 } from "@mui/material";
 
+const initialForm = {
+	nombre: "",
+	tipo: "",
+	capacidad: "",
+	direccion: "",
+	estadoId: "1", // por defecto activo
+};
+
 export default function FacilityModal({
 	open,
 	onClose,
 	onSave,
 	initialData = null,
 }) {
-	const initialForm = {
-		nombre: "",
-		tipo: "",
-		capacidad: "",
-		direccion: "",
-		estadoId: "1", // por defecto activo
-	};
-
 	const mapEstado = {
 		"1": "Activo",
 		"2": "Inactivo",
