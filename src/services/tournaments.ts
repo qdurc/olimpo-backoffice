@@ -103,9 +103,6 @@ async function resolveFacilityMap(facilities?: Installation[]) {
 	return buildFacilityMap(fresh);
 }
 
-/**
- * Obtiene view model (categorias, disciplinas, estatus, encargados) y construye mapas
- */
 async function getViewMaps(): Promise<{
 	catMap: Map<number, string>;
 	discMap: Map<number, string>;

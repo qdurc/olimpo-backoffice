@@ -78,7 +78,7 @@ export default function TournamentsPage() {
 
 	const columns = useMemo(
 		() => [
-			{ field: "nombre", headerName: "Nombre", width: 180 },
+			{ field: "nombre", headerName: "Nombre", width: 185 },
 			{ field: "disciplina", headerName: "Disciplina", width: 130 },
 			{ field: "categoria", headerName: "Categoría", width: 130 },
 			{ field: "descripcion", headerName: "Descripción", width: 170 },

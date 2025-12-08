@@ -1,35 +1,50 @@
 import { apiFetchJson, isApiConfigured } from "./http";
 
-/** Tipo de la API */
 type FacilityApi = {
 	id?: number;
 	name?: string;
 	type?: string;
 	capacity?: number;
 	address?: string;
-	status?: string | number | null;  // GET devuelve string
-	status_ID?: number | null;         // POST/UPDATE usa número
+	status?: string | number | null;
+	status_ID?: number | null;
 };
 
-/** Tipo interno */
 export type Installation = {
 	id: number | string;
 	nombre: string;
 	tipo: string;
 	capacidad: number;
 	direccion: string;
-	estado: string;         // siempre string
-	statusId: number | null; // solo para enviar
+	estado: string;
+	statusId: number | null;
 };
 
 let installationsCache: Installation[] | null = null;
 let installationsPromise: Promise<Installation[]> | null = null;
 
-/** Normalizador */
-function normalizeFacility(
-	data?: FacilityApi | null,
-	fallback?: Installation
-): Installation {
+type FacilityApiResponse = {
+	data?: FacilityApi[] | FacilityApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type FacilitySingleResponse = {
+	data?: FacilityApi | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+type DeleteFacilityResponse = {
+	data?: boolean | null;
+	errors?: unknown[];
+	success?: boolean;
+	message?: string;
+};
+
+function normalizeFacility(data?: FacilityApi | null, fallback?: Installation): Installation {
 	if (!data) {
 		return (
 			fallback ?? {
@@ -44,57 +59,81 @@ function normalizeFacility(
 		);
 	}
 
-	/** 1) ESTADO REAL */
-	let estado = fallback?.estado ?? "Sin estado";
+	const numFromStatus =
+		typeof data.status === "number"
+			? data.status
+			: typeof data.status === "string" && !Number.isNaN(Number(data.status))
+				? Number(data.status)
+				: null;
 
-	// Si el back devuelve string (GET)
-	if (typeof data.status === "string") {
-		estado = data.status;
-	}
+	const statusNumeric =
+		typeof data.status === "number"
+			? data.status
+			: typeof data.status_ID === "number"
+				? data.status_ID
+				: numFromStatus;
 
-	/** 2) STATUS ID */
-	let statusId = fallback?.statusId ?? null;
+	const statusTextFromNumber =
+		statusNumeric === 1
+			? "Activo"
+			: statusNumeric === 2
+				? "Inactivo"
+				: null;
 
-	if (typeof data.status === "number") {
-		statusId = data.status;
-	}
+	const statusId =
+		statusNumeric ??
+		(typeof data.status === "number" ? data.status : undefined) ??
+		data.status_ID ??
+		fallback?.statusId ??
+		null;
 
-	if (typeof data.status_ID === "number") {
-		statusId = data.status_ID;
-	}
+	const fallbackId =
+		data.id ??
+		fallback?.id ??
+		`facility-${Math.random().toString(36).slice(2)}`;
 
 	return {
-		id:
-			data.id ??
-			fallback?.id ??
-			`facility-${Math.random().toString(36).slice(2)}`,
-
+		id: fallbackId,
 		nombre: data.name ?? fallback?.nombre ?? "",
 		tipo: data.type ?? fallback?.tipo ?? "",
 		capacidad: data.capacity ?? fallback?.capacidad ?? 0,
 		direccion: data.address ?? fallback?.direccion ?? "",
-		estado,
+		estado:
+			typeof data.status === "string"
+				? data.status
+				: statusTextFromNumber ??
+					(typeof data.status === "number"
+						? String(data.status)
+						: typeof data.status_ID === "number"
+							? String(data.status_ID)
+							: fallback?.estado ?? "Sin estado"),
 		statusId,
 	};
 }
 
-function parseStatusId(value?: number | string | null) {
-	if (value === null || value === undefined) return null;
-	const n = Number(value);
-	return Number.isNaN(n) ? null : n;
+function parseStatusId(statusId?: number | string | null) {
+	if (statusId === null || statusId === undefined) return null;
+	if (typeof statusId === "number" && !Number.isNaN(statusId)) return statusId;
+	const parsed = Number(statusId);
+	return Number.isNaN(parsed) ? null : parsed;
 }
 
-/** GET ALL */
 export async function getInstallations(): Promise<Installation[]> {
-	if (!isApiConfigured)
-		throw new Error("API base URL is not configured");
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
 
-	if (installationsCache) return installationsCache;
-	if (installationsPromise) return installationsPromise;
+	if (installationsCache) {
+		return installationsCache;
+	}
+
+	if (installationsPromise) {
+		return installationsPromise;
+	}
 
 	const request = (async () => {
 		const response = await apiFetchJson<FacilityApiResponse | FacilityApi[]>(
-			"/api/Facility/GetAllFacilitiesAsyncFront"
+			"/api/Facility/GetAllFacilitiesAsyncFront",
 		);
 
 		const facilities = Array.isArray(response)
@@ -103,7 +142,7 @@ export async function getInstallations(): Promise<Installation[]> {
 				? response.data
 				: [];
 
-		const normalized = facilities.map((f) => normalizeFacility(f));
+		const normalized = facilities.map((facility) => normalizeFacility(facility));
 
 		installationsCache = normalized;
 		return normalized;
@@ -123,11 +162,21 @@ export function clearInstallationsCache() {
 	installationsPromise = null;
 }
 
-/** CREATE */
+export type InstallationPayload = {
+	nombre: string;
+	tipo: string;
+	capacidad: number;
+	direccion: string;
+	estadoId?: number | string | null;
+	estado?: string;
+};
+
 export async function createInstallation(
-	payload: InstallationPayload
+	payload: InstallationPayload,
 ): Promise<Installation> {
-	if (!isApiConfigured) throw new Error("API base URL is not configured");
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
 
 	const statusId = parseStatusId(payload.estadoId);
 
@@ -139,50 +188,69 @@ export async function createInstallation(
 		status_ID: statusId,
 	};
 
-	const raw = await apiFetchJson<FacilitySingleResponse | FacilityApi>(
+	const facility = await apiFetchJson<FacilityApi>(
 		"/api/Facility/AddFacilityAsync",
 		{
 			method: "POST",
 			body: JSON.stringify(body),
-		}
+		},
 	);
 
-	const facilityData =
-		typeof raw === "object" && raw !== null && "data" in raw ? raw.data : raw;
-
-	// ⛔ El POST NO devuelve status string → usamos fallback del payload
-	const fallback: Installation = {
+	let normalized = normalizeFacility(facility, {
 		id: `facility-${Math.random().toString(36).slice(2)}`,
 		nombre: payload.nombre,
 		tipo: payload.tipo,
 		capacidad: payload.capacidad,
 		direccion: payload.direccion,
-		estado: "",            // será rellenado por normalize
+		estado:
+			typeof payload.estadoId === "number" || typeof payload.estadoId === "string"
+				? String(payload.estadoId)
+				: payload.estado ?? "Sin estado",
 		statusId,
-	};
-
-	const normalized = normalizeFacility(facilityData, fallback);
+	});
 
 	if (installationsCache) {
 		installationsCache = [...installationsCache, normalized];
 	}
 
-	clearInstallationsCache();
+	// Si la API no devuelve un id numérico, refrescamos la lista para obtenerlo.
+	if (typeof normalized.id !== "number" || Number.isNaN(normalized.id)) {
+		try {
+			clearInstallationsCache();
+			const fresh = await getInstallations();
+			// Buscamos coincidencia por los campos enviados.
+			const bestMatch = fresh.find(
+				(item) =>
+					item.nombre === payload.nombre &&
+					item.tipo === payload.tipo &&
+					item.capacidad === payload.capacidad &&
+					item.direccion === payload.direccion,
+			);
+			if (bestMatch) {
+				normalized = bestMatch;
+			}
+			installationsCache = fresh;
+		} catch (error) {
+			console.error("No se pudo refrescar instalaciones tras crear", error);
+		}
+	}
 
 	return normalized;
 }
 
-/** UPDATE */
 export async function updateInstallation(
 	id: number | string,
-	payload: InstallationPayload
+	payload: InstallationPayload,
 ): Promise<Installation> {
-	if (!isApiConfigured) throw new Error("API base URL is not configured");
-
-	const numericId = Number(id);
-	if (!Number.isFinite(numericId)) throw new Error("ID inválido");
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
 
 	const statusId = parseStatusId(payload.estadoId);
+	const numericId = typeof id === "number" ? id : Number(id);
+	if (!Number.isFinite(numericId)) {
+		throw new Error("Update requiere un id numérico válido");
+	}
 
 	const body: FacilityApi = {
 		id: numericId,
@@ -193,53 +261,72 @@ export async function updateInstallation(
 		status_ID: statusId,
 	};
 
-	const raw = await apiFetchJson<FacilitySingleResponse | FacilityApi>(
-		"/api/Facility/UpdateFacilityAsync",
-		{
-			method: "POST",
-			body: JSON.stringify(body),
-		}
-	);
+	const facility = await apiFetchJson<FacilityApi>("/api/Facility/UpdateFacilityAsync", {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
 
-	const facilityData =
-		typeof raw === "object" && raw !== null && "data" in raw ? raw.data : raw;
+	const response =
+		typeof facility === "object" && facility !== null && "data" in facility
+			? (facility as FacilitySingleResponse)
+			: null;
 
-	// ⛔ PUT tampoco devuelve estado string → mantenemos el fallback viejo
-	const fallback: Installation = {
+	const facilityData = response ? response.data : facility;
+
+	const fallbackNormalized: Installation = {
 		id: numericId,
 		nombre: payload.nombre,
 		tipo: payload.tipo,
 		capacidad: payload.capacidad,
 		direccion: payload.direccion,
-		estado: "",  // normalize lo corregirá
-		statusId,
+		estado:
+			typeof payload.estadoId === "number" || typeof payload.estadoId === "string"
+				? String(payload.estadoId)
+				: payload.estado ?? "Sin estado",
+		statusId: parseStatusId(payload.estadoId),
 	};
 
-	const normalized = normalizeFacility(facilityData, fallback);
+	const normalized =
+		facilityData && typeof facilityData === "object"
+			? normalizeFacility({ ...facilityData, id: numericId }, fallbackNormalized)
+			: fallbackNormalized;
 
 	if (installationsCache) {
-		installationsCache = installationsCache.map((i) =>
-			i.id === numericId ? normalized : i
+		installationsCache = installationsCache.map((item) =>
+			item.id === id ? normalized : item,
 		);
 	}
-
-	clearInstallationsCache();
 
 	return normalized;
 }
 
-/** DELETE */
 export async function deleteInstallation(id: number | string): Promise<void> {
-	if (!isApiConfigured) throw new Error("API base URL is not configured");
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
 
-	const numericId = Number(id);
-	if (!Number.isFinite(numericId)) throw new Error("ID inválido");
+	const numericId = typeof id === "number" ? id : Number(id);
+	if (!Number.isFinite(numericId)) {
+		throw new Error("Delete requiere un id numérico válido");
+	}
 
 	await apiFetchJson(`/api/Facility/DeleteFacilityFront?id=${numericId}`, {
 		method: "DELETE",
+	}).then((res: DeleteFacilityResponse | unknown) => {
+		// Si la API indica fallo, propagamos un error para manejarlo en la UI.
+		if (
+			res &&
+			typeof res === "object" &&
+			"success" in res &&
+			(res as DeleteFacilityResponse).success === false
+		) {
+			const message =
+				(res as DeleteFacilityResponse).message ?? "No se pudo eliminar la instalación";
+			throw new Error(message);
+		}
 	});
 
 	if (installationsCache) {
-		installationsCache = installationsCache.filter((i) => i.id !== numericId);
+		installationsCache = installationsCache.filter((item) => item.id !== id);
 	}
 }

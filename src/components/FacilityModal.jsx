@@ -6,6 +6,7 @@ import {
 	DialogActions,
 	TextField,
 	Button,
+	MenuItem,
 } from "@mui/material";
 
 export default function FacilityModal({
@@ -22,6 +23,19 @@ export default function FacilityModal({
 		estadoId: "1", // por defecto activo
 	};
 
+	const mapEstado = {
+		"1": "Activo",
+		"2": "Inactivo",
+	};
+
+	const mapEstadoReverse = (estado) => {
+		const normalized = String(estado ?? "").toLowerCase();
+		if (normalized === "activo") return "1";
+		if (normalized === "inactivo") return "2";
+		if (!Number.isNaN(Number(estado))) return String(estado);
+		return "";
+	};
+
 	const isEditing = Boolean(initialData);
 	const [form, setForm] = useState(initialForm);
 
@@ -34,7 +48,9 @@ export default function FacilityModal({
 				direccion: initialData.direccion ?? "",
 				estadoId:
 					initialData.statusId === null || initialData.statusId === undefined
-						? ""
+						? initialData.estado
+							? mapEstadoReverse(initialData.estado)
+							: ""
 						: String(initialData.statusId),
 			});
 		} else if (!open) {
@@ -51,12 +67,14 @@ export default function FacilityModal({
 		if (!form.nombre.trim()) return;
 
 		const estadoId = form.estadoId === "" ? null : Number(form.estadoId);
+		const estadoTexto = estadoId ? mapEstado[String(estadoId)] ?? String(estadoId) : "";
 
 		onSave?.({
 			...form,
 			id: initialData?.id,
 			capacidad: Number(form.capacidad) || 0,
-			estadoId, // se envía como número a la API
+			estadoId,
+			estado: estadoTexto,
 		});
 
 		setForm(initialForm);
@@ -113,13 +131,18 @@ export default function FacilityModal({
 				/>
 
 				<TextField
-					label="Estado (ID numérico)"
+					select
+					label="Estado"
 					name="estadoId"
-					type="number"
 					fullWidth
 					value={form.estadoId}
 					onChange={handleChange}
-				/>
+					helperText="1 Activo, 2 Inactivo"
+				>
+					<MenuItem value="">Selecciona</MenuItem>
+					<MenuItem value="1">1 - Activo</MenuItem>
+					<MenuItem value="2">2 - Inactivo</MenuItem>
+				</TextField>
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
