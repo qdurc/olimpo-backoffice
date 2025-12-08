@@ -11,13 +11,14 @@ import {
 } from "@mui/material";
 import {
   Dashboard,
-  SportsSoccer,
   Event,
   Person,
   EmojiEvents,
   Build,
-  SportsBasketball,
   HolidayVillage,
+  SportsBasketball,
+  AssignmentInd,
+  Category,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/Miderec-logo-2020.png";
@@ -28,6 +29,9 @@ const menuItems = [
   { text: "Mantenimientos", icon: <Build />, path: "/mantenimientos" },
   { text: "Reservas", icon: <Event />, path: "/reservas" },
   { text: "Usuarios", icon: <Person />, path: "/usuario" },
+  { text: "Encargados", icon: <AssignmentInd />, path: "/encargado" },
+  { text: "Disciplinas", icon: <SportsBasketball />, path: "/disciplina" },
+  { text: "Categorías", icon: <Category />, path: "/categoria" },
   { text: "Torneos", icon: <EmojiEvents />, path: "/torneos" },
 ];
 

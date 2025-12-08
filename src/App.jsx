@@ -7,6 +7,9 @@ import MaintenancePage from "./pages/MaintenancePage";
 import UsersPage from "./pages/UsersPage";
 import ReservationsPage from "./pages/ReservationsPage";
 import TournamentsPage from "./pages/TournamentsPage";
+import ManagersPage from "./pages/ManagersPage";
+import DisciplinesPage from "./pages/DisciplinesPage";
+import CategoriesPage from "./pages/CategoriesPage";
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
             <Route path="/instalaciones" element={<FacilitiesPage />} />
             <Route path="/mantenimientos" element={<MaintenancePage />} />
             <Route path="/usuario" element={<UsersPage />} />
+            <Route path="/encargado" element={<ManagersPage />} />
+            <Route path="/disciplina" element={<DisciplinesPage />} />
+            <Route path="/categoria" element={<CategoriesPage />} />
             <Route path="/reservas" element={<ReservationsPage />} />
             <Route path="/torneos" element={<TournamentsPage />} />
           </Routes>

@@ -78,18 +78,18 @@ export default function TournamentsPage() {
 
 	const columns = useMemo(
 		() => [
-			{ field: "nombre", headerName: "Nombre", flex: 1, minWidth: 200 },
-			{ field: "disciplina", headerName: "Disciplina", flex: 1 },
-			{ field: "categoria", headerName: "Categoría", flex: 1 },
-			{ field: "descripcion", headerName: "Descripción", flex: 1, minWidth: 200 },
-			{ field: "normas", headerName: "Normas", flex: 1, minWidth: 200 },
-			{ field: "fecha", headerName: "Fecha", width: 180 },
-			{ field: "instalacion", headerName: "Instalación", flex: 1 },
-			{ field: "supervisor", headerName: "Encargado", flex: 1, minWidth: 180 },
+			{ field: "nombre", headerName: "Nombre", width: 180 },
+			{ field: "disciplina", headerName: "Disciplina", width: 130 },
+			{ field: "categoria", headerName: "Categoría", width: 130 },
+			{ field: "descripcion", headerName: "Descripción", width: 170 },
+			{ field: "normas", headerName: "Normas", width: 150 },
+			{ field: "fecha", headerName: "Fecha", width: 150 },
+			{ field: "instalacion", headerName: "Instalación", width: 150 },
+			{ field: "supervisor", headerName: "Encargado", width: 130 },
 			{
 				field: "estado",
 				headerName: "Estado",
-				width: 140,
+				width: 100,
 				renderCell: (p) => <StatusPill value={p.value} />,
 			},
 		],

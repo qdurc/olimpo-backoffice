@@ -31,22 +31,18 @@ type TournamentApi = {
 export type Tournament = {
 	id: number | string;
 	nombre: string;
-
 	descripcion: string;
 	normas: string;
-
 	categoriaId: number | null;
 	disciplinaId: number | null;
 	estadoId: number | null;
 	facilityId: number | null;
 	supervisorId: number | null;
-
 	categoria: string;
 	disciplina: string;
 	estado: string;
-	instalacion: string;
+	instalacion: string | false;
 	supervisor: string;
-
 	fecha: string;
 	fechaIso: string;
 };
@@ -118,7 +114,7 @@ async function getViewMaps(): Promise<{
 	facilityMapSimple: Map<number, string>;
 }> {
 	const vmRaw = await getTournamentViewModel();
-	const vm = (vmRaw as any) as ViewModel;
+	const vm = vmRaw as unknown as ViewModel;
 
 	const catMap = new Map<number, string>();
 	(vm.categories ?? []).forEach((c) => {
@@ -131,14 +127,14 @@ async function getViewMaps(): Promise<{
 	});
 
 	const statusMap = new Map<number, string>();
-	(vm.estatus ?? []).forEach((s) => {
+	(vm.estatus ?? []).forEach((s: any) => {
 		// en el view model estatus tiene estatusID y descripcion
-		if ((s as any)?.estatusID !== undefined) statusMap.set(Number((s as any).estatusID), (s as any).descripcion ?? String((s as any).estatusID));
+		if (s?.estatusID !== undefined) statusMap.set(Number(s.estatusID), s.descripcion ?? String(s.estatusID));
 	});
 
 	const encMap = new Map<number, string>();
 	(vm.encargados ?? []).forEach((e) => {
-		if (e?.id !== undefined) encMap.set(Number(e.id), e.fullName ?? String(e.id));
+		if (e?.id !== undefined) encMap.set(Number(e.id), (e as any).fullName ?? String(e.id));
 	});
 
 	const facilityMapSimple = new Map<number, string>();
@@ -191,22 +187,18 @@ function normalizeTournament(
 	return {
 		id: item.id ?? `tournament-${Math.random().toString(36).slice(2)}`,
 		nombre: item.name ?? "",
-
 		descripcion: item.description ?? "",
 		normas: item.rules ?? "",
-
 		categoriaId: categoryId ?? null,
 		disciplinaId: disciplineId ?? null,
 		estadoId: estadoId ?? null,
 		facilityId: facilityId ?? null,
 		supervisorId: supervisorId ?? null,
-
 		categoria,
 		disciplina,
 		estado,
 		instalacion: facilityName,
 		supervisor,
-
 		fechaIso: item.date ?? "",
 		fecha: formatDateTime(item.date),
 	};
