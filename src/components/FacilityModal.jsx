@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
 	Dialog,
 	DialogTitle,
@@ -8,14 +8,7 @@ import {
 	Button,
 	MenuItem,
 } from "@mui/material";
-
-const initialForm = {
-	nombre: "",
-	tipo: "",
-	capacidad: "",
-	direccion: "",
-	estadoId: "1", // por defecto activo
-};
+import { installationStatuses } from "../services/installations";
 
 export default function FacilityModal({
 	open,
@@ -23,21 +16,31 @@ export default function FacilityModal({
 	onSave,
 	initialData = null,
 }) {
-	const mapEstado = {
-		"1": "Activo",
-		"2": "Inactivo",
-	};
-
-	const mapEstadoReverse = (estado) => {
-		const normalized = String(estado ?? "").toLowerCase();
-		if (normalized === "activo") return "1";
-		if (normalized === "inactivo") return "2";
-		if (!Number.isNaN(Number(estado))) return String(estado);
-		return "";
-	};
+	const initialForm = useMemo(
+		() => ({
+			nombre: "",
+			tipo: "",
+			capacidad: "",
+			direccion: "",
+			estadoId: "",
+		}),
+		[],
+	);
 
 	const isEditing = Boolean(initialData);
 	const [form, setForm] = useState(initialForm);
+
+	const normalizeStatusId = (value) => {
+		if (value === null || value === undefined) return "";
+		const asString = String(value);
+		const byId = installationStatuses.find((s) => String(s.id) === asString);
+		if (byId) return asString;
+		const normalizedLabel = asString.toLowerCase().trim();
+		const byLabel = installationStatuses.find(
+			(s) => typeof s.label === "string" && s.label.toLowerCase().trim() === normalizedLabel,
+		);
+		return byLabel ? String(byLabel.id) : "";
+	};
 
 	React.useEffect(() => {
 		if (open && initialData) {
@@ -48,15 +51,19 @@ export default function FacilityModal({
 				direccion: initialData.direccion ?? "",
 				estadoId:
 					initialData.statusId === null || initialData.statusId === undefined
-						? initialData.estado
-							? mapEstadoReverse(initialData.estado)
-							: ""
-						: String(initialData.statusId),
+						? normalizeStatusId(initialData.estado)
+						: normalizeStatusId(initialData.statusId),
 			});
+		} else if (open && !initialData) {
+			const defaultStatus =
+				installationStatuses.find((s) => s.id === 1)?.id?.toString?.() ||
+				installationStatuses[0]?.id?.toString?.() ||
+				"";
+			setForm({ ...initialForm, estadoId: defaultStatus });
 		} else if (!open) {
 			setForm(initialForm);
 		}
-	}, [open, initialData]);
+	}, [open, initialData, initialForm]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -67,7 +74,10 @@ export default function FacilityModal({
 		if (!form.nombre.trim()) return;
 
 		const estadoId = form.estadoId === "" ? null : Number(form.estadoId);
-		const estadoTexto = estadoId ? mapEstado[String(estadoId)] ?? String(estadoId) : "";
+		const estadoTexto =
+			estadoId !== null
+				? installationStatuses.find((s) => s.id === estadoId)?.label ?? String(estadoId)
+				: "";
 
 		onSave?.({
 			...form,
@@ -137,11 +147,14 @@ export default function FacilityModal({
 					fullWidth
 					value={form.estadoId}
 					onChange={handleChange}
-					helperText="1 Activo, 2 Inactivo"
+					required
 				>
 					<MenuItem value="">Selecciona</MenuItem>
-					<MenuItem value="1">1 - Activo</MenuItem>
-					<MenuItem value="2">2 - Inactivo</MenuItem>
+					{installationStatuses.map((status) => (
+						<MenuItem key={status.id} value={status.id}>
+							{status.label}
+						</MenuItem>
+					))}
 				</TextField>
 			</DialogContent>
 

@@ -1,6 +1,11 @@
 import { apiFetchJson, isApiConfigured } from "./http";
 import { getInstallations, type Installation } from "./installations";
 
+export const reservationStatuses = [
+	{ id: 1, label: "Activo" },
+	{ id: 2, label: "Inactivo" },
+];
+
 type ReservationApi = {
 	id?: number;
 	userId?: number;
@@ -145,6 +150,10 @@ function normalizeReservation(
 
 	const estadoId = item.estatusID ?? null;
 	const fechaIso = toIsoString(item.reservedDates) ?? "";
+	const statusText =
+		estadoId !== null
+			? reservationStatuses.find((s) => s.id === estadoId)?.label ?? String(estadoId)
+			: "Sin estado";
 
 	return {
 		id: item.id ?? `reservation-${Math.random().toString(36).slice(2)}`,
@@ -153,7 +162,7 @@ function normalizeReservation(
 		instalacion: facilityName,
 		fecha,
 		hora,
-		estado: estadoId !== null ? String(estadoId) : "Sin estado",
+		estado: statusText,
 		estadoId,
 		fechaIso,
 	};
@@ -210,22 +219,23 @@ export async function createReservation(payload: ReservationPayload) {
 			? (created as ReservationSingleResponse)
 			: null;
 
-	const reservationData = response ? response.data : created;
+	const reservationData: ReservationApi | null = response
+		? response.data ?? null
+		: (created as ReservationApi | null);
 
 	const facilities = await getInstallations();
 	const facilityMap = buildFacilityMap(facilities);
 
-	return normalizeReservation(
-		{
-			...body,
-			...(reservationData || {}),
-			facilityId: body.facilityId ?? reservationData?.facilityId,
-			userId: body.userId ?? reservationData?.userId,
-			reservedDates: body.reservedDates ?? reservationData?.reservedDates,
-			estatusID: body.estatusID ?? reservationData?.estatusID,
-		},
-		facilityMap,
-	);
+	const merged: ReservationApi = {
+		...body,
+		...(reservationData || {}),
+		facilityId: body.facilityId ?? reservationData?.facilityId,
+		userId: body.userId ?? reservationData?.userId,
+		reservedDates: body.reservedDates ?? reservationData?.reservedDates,
+		estatusID: body.estatusID ?? reservationData?.estatusID,
+	};
+
+	return normalizeReservation(merged, facilityMap);
 }
 
 export async function updateReservation(
@@ -261,22 +271,23 @@ export async function updateReservation(
 			? (updated as ReservationSingleResponse)
 			: null;
 
-	const reservationData = response ? response.data : updated;
+	const reservationData: ReservationApi | null = response
+		? response.data ?? null
+		: (updated as ReservationApi | null);
 
 	const facilities = await getInstallations();
 	const facilityMap = buildFacilityMap(facilities);
 
-	return normalizeReservation(
-		{
-			...body,
-			...(reservationData || {}),
-			facilityId: body.facilityId ?? reservationData?.facilityId,
-			userId: body.userId ?? reservationData?.userId,
-			reservedDates: body.reservedDates ?? reservationData?.reservedDates,
-			estatusID: body.estatusID ?? reservationData?.estatusID,
-		},
-		facilityMap,
-	);
+	const merged: ReservationApi = {
+		...body,
+		...(reservationData || {}),
+		facilityId: body.facilityId ?? reservationData?.facilityId,
+		userId: body.userId ?? reservationData?.userId,
+		reservedDates: body.reservedDates ?? reservationData?.reservedDates,
+		estatusID: body.estatusID ?? reservationData?.estatusID,
+	};
+
+	return normalizeReservation(merged, facilityMap);
 }
 
 export async function deleteReservation(id: number | string): Promise<void> {

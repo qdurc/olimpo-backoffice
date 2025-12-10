@@ -11,6 +11,7 @@ import {
   deleteMaintenance,
   getMaintenances,
   updateMaintenance,
+  maintenanceStatuses,
 } from "../services/maintenances";
 import { getInstallations } from "../services/installations";
 
@@ -208,6 +209,7 @@ export default function MaintenancePage() {
         }}
         onSave={handleSave}
         installations={instalaciones}
+        statuses={maintenanceStatuses}
         initialData={editing}
       />
     </Box>

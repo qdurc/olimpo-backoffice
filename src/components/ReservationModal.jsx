@@ -23,6 +23,7 @@ export default function ReservationModal({
 	onClose,
 	onSave,
 	installations = [],
+	statuses = [],
 	initialData = null,
 }) {
 	const emptyForm = useMemo(
@@ -56,7 +57,11 @@ export default function ReservationModal({
 			setErrors({});
 			setSubmitError("");
 		} else if (open && !initialData) {
-			setForm(emptyForm);
+			const defaultStatus =
+				statuses.find((s) => s.id === 1)?.id?.toString?.() ||
+				statuses[0]?.id?.toString?.() ||
+				"";
+			setForm({ ...emptyForm, estadoId: defaultStatus });
 			setErrors({});
 			setSubmitError("");
 		} else if (!open) {
@@ -160,13 +165,22 @@ export default function ReservationModal({
 				/>
 
 				<TextField
-					label="Estado (estatusID)"
+					select
+					label="Estado"
 					name="estadoId"
-					type="number"
 					fullWidth
 					value={form.estadoId}
 					onChange={handleChange}
-				/>
+					required
+					error={Boolean(errors.estadoId)}
+					helperText={errors.estadoId}
+					>
+						{statuses.map((status) => (
+							<MenuItem key={status.id} value={status.id}>
+								{status.label}
+							</MenuItem>
+						))}
+					</TextField>
 
 				<TextField
 					label="Fecha y hora"

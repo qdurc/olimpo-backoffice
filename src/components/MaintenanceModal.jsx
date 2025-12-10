@@ -7,7 +7,6 @@ import {
 	TextField,
 	Button,
 	MenuItem,
-	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -22,6 +21,7 @@ export default function MaintenanceModal({
 	onClose,
 	onSave,
 	installations = [],
+	statuses = [],
 	initialData = null,
 }) {
 	const emptyForm = useMemo(
@@ -55,8 +55,30 @@ export default function MaintenanceModal({
 		return Number.isNaN(date.getTime()) ? null : date;
 	};
 
+	const normalizeStatusId = (value) => {
+		if (value === null || value === undefined) return "";
+		const asString = String(value);
+		const byId = statuses.find((s) => String(s.id) === asString);
+		if (byId) return asString;
+		const normalizedLabel = asString.toLowerCase().trim();
+		const byLabel = statuses.find(
+			(s) => typeof s.label === "string" && s.label.toLowerCase().trim() === normalizedLabel,
+		);
+		return byLabel ? String(byLabel.id) : "";
+	};
+
 	useEffect(() => {
 		if (open && initialData) {
+			const normalizedStatusRaw =
+				normalizeStatusId(
+					initialData.estadoId === null || initialData.estadoId === undefined
+						? initialData.estado
+						: initialData.estadoId,
+				);
+			const normalizedStatus =
+				normalizedStatusRaw ||
+				(statuses[0]?.id !== undefined ? String(statuses[0].id) : "");
+
 			setForm({
 				facilityId: initialData.facilityId ?? "",
 				descripcion: initialData.descripcion ?? "",
@@ -66,25 +88,27 @@ export default function MaintenanceModal({
 					initialData.usuarioId === null || initialData.usuarioId === undefined
 						? ""
 						: String(initialData.usuarioId),
-				estadoId:
-					initialData.estadoId === null || initialData.estadoId === undefined
-						? ""
-						: String(initialData.estadoId),
+				estadoId: normalizedStatus,
 			});
 			setErrors({});
 		} else if (open && !initialData) {
 			const defaults = getDefaultRange();
+			const defaultStatus =
+				statuses.find((s) => s.id === 1)?.id?.toString?.() ||
+				statuses[0]?.id?.toString?.() ||
+				"";
 			setForm((prev) => ({
 				...prev,
 				...emptyForm,
 				...defaults,
+				estadoId: defaultStatus,
 			}));
 			setErrors({});
 		} else if (!open) {
 			setForm(emptyForm);
 			setErrors({});
 		}
-	}, [open, initialData, emptyForm]);
+	}, [open, initialData, emptyForm, statuses]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -115,7 +139,7 @@ export default function MaintenanceModal({
 			...form,
 			id: initialData?.id,
 			usuarioId: form.usuarioId === "" ? null : form.usuarioId,
-			estadoId: form.estadoId === "" ? null : form.estadoId,
+			estadoId: form.estadoId === "" ? null : Number(form.estadoId),
 			inicio: startDate.toISOString(),
 			fin: endDate.toISOString(),
 		});
@@ -124,7 +148,7 @@ export default function MaintenanceModal({
 		onClose?.();
 	};
 
-return (
+	return (
 		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
 			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.3rem" }}>
 				{initialData ? "Editar mantenimiento" : "Nuevo mantenimiento"}
@@ -196,21 +220,31 @@ return (
 
 				<TextField
 					label="Usuario ID"
-					name="usuarioId"
-					type="number"
-					fullWidth
-					value={form.usuarioId}
-					onChange={handleChange}
-				/>
+				name="usuarioId"
+				type="number"
+				fullWidth
+				value={form.usuarioId}
+				onChange={handleChange}
+			/>
 
 				<TextField
-					label="Estado (estatusID)"
+					select
+					label="Estado"
 					name="estadoId"
-					type="number"
 					fullWidth
 					value={form.estadoId}
 					onChange={handleChange}
-				/>
+					required
+					error={Boolean(errors.estadoId)}
+					helperText={errors.estadoId}
+				>
+					<MenuItem value="">Selecciona</MenuItem>
+					{statuses.map((status) => (
+						<MenuItem key={status.id} value={String(status.id)}>
+							{status.label}
+						</MenuItem>
+					))}
+				</TextField>
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>

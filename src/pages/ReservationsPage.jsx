@@ -11,6 +11,7 @@ import {
 	deleteReservation,
 	getReservations,
 	updateReservation,
+	reservationStatuses,
 } from "../services/reservations";
 import { getInstallations } from "../services/installations";
 
@@ -186,6 +187,7 @@ export default function ReservationsPage() {
 				}}
 				onSave={handleSave}
 				installations={installations}
+				statuses={reservationStatuses}
 				initialData={editing}
 			/>
 		</Box>

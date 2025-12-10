@@ -10,6 +10,13 @@ type FacilityApi = {
 	status_ID?: number | null;
 };
 
+export const installationStatuses = [
+	{ id: 1, label: "Activo" },
+	{ id: 2, label: "Inactivo" },
+	{ id: 3, label: "En Mantenimiento" },
+	{ id: 4, label: "Reservado" },
+];
+
 export type Installation = {
 	id: number | string;
 	nombre: string;
@@ -78,7 +85,11 @@ function normalizeFacility(data?: FacilityApi | null, fallback?: Installation): 
 			? "Activo"
 			: statusNumeric === 2
 				? "Inactivo"
-				: null;
+				: statusNumeric === 3
+					? "En Mantenimiento"
+					: statusNumeric === 4
+						? "Reservado"
+						: null;
 
 	const statusId =
 		statusNumeric ??

@@ -11,6 +11,13 @@ type MaintenanceApi = {
 	estatusID?: number | null;
 };
 
+export const maintenanceStatuses = [
+	{ id: 1, label: "Activo" },
+	{ id: 2, label: "Inactivo" },
+	{ id: 3, label: "En Mantenimiento" },
+	{ id: 4, label: "Reservado" },
+];
+
 export type Maintenance = {
 	id: number | string;
 	facilityId: number | null;
@@ -63,6 +70,13 @@ function parseNum(input?: number | string | null) {
 	return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+function normalizeStatusId(value: number | string | null | undefined) {
+	if (value === null || value === undefined) return null;
+	if (typeof value === "number" && Number.isFinite(value)) return value;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
 function toIsoString(value?: string | null) {
 	if (!value) return undefined;
 	const date = new Date(value);
@@ -74,7 +88,11 @@ function normalizeMaintenance(
 	facilityMap: Map<number, Installation>,
 ): Maintenance {
 	const facilityId = item.facilityId ?? null;
-	const statusId = item.estatusID ?? null;
+	const statusId = normalizeStatusId(item.estatusID) ?? null;
+	const statusText =
+		statusId !== null
+			? maintenanceStatuses.find((s) => s.id === statusId)?.label ?? String(statusId)
+			: "Sin estado";
 	const facilityName =
 		(facilityId !== null && facilityMap.get(facilityId)?.nombre) ||
 		(facilityId !== null ? `Instalación ${facilityId}` : "Sin instalación");
@@ -88,7 +106,7 @@ function normalizeMaintenance(
 		fin: item.endDate ?? "",
 		usuarioId: item.userId ?? null,
 		estadoId: statusId,
-		estado: statusId !== null ? String(statusId) : "Sin estado",
+		estado: statusText,
 	};
 }
 
