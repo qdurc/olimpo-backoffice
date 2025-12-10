@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { Box } from "@mui/material";
 import Sidebar from "./components/Sidebar";
 import DashboardPage from "./pages/DashboardPage";
@@ -10,30 +16,45 @@ import TournamentsPage from "./pages/TournamentsPage";
 import ManagersPage from "./pages/ManagersPage";
 import DisciplinesPage from "./pages/DisciplinesPage";
 import CategoriesPage from "./pages/CategoriesPage";
+import LoginPage from "./pages/LoginPage";
+
+function AppLayout() {
+  const location = useLocation();
+  const showSidebar = location.pathname !== "/login";
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        bgcolor: showSidebar ? "#F5F5F5" : "#fff",
+        minHeight: "100vh",
+      }}
+    >
+      {showSidebar && <Sidebar />}
+
+      <Box component="main" sx={{ flexGrow: 1, p: showSidebar ? 3 : 0 }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/instalaciones" element={<FacilitiesPage />} />
+          <Route path="/mantenimientos" element={<MaintenancePage />} />
+          <Route path="/usuario" element={<UsersPage />} />
+          <Route path="/encargado" element={<ManagersPage />} />
+          <Route path="/disciplina" element={<DisciplinesPage />} />
+          <Route path="/categoria" element={<CategoriesPage />} />
+          <Route path="/reservas" element={<ReservationsPage />} />
+          <Route path="/torneos" element={<TournamentsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </Box>
+    </Box>
+  );
+}
 
 function App() {
   return (
     <Router>
-      <Box sx={{ display: "flex", bgcolor: "#F5F5F5", minHeight: "100vh" }}>
-        {/* Sidebar permanente */}
-        <Sidebar />
-
-        {/* Contenedor de páginas */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/instalaciones" element={<FacilitiesPage />} />
-            <Route path="/mantenimientos" element={<MaintenancePage />} />
-            <Route path="/usuario" element={<UsersPage />} />
-            <Route path="/encargado" element={<ManagersPage />} />
-            <Route path="/disciplina" element={<DisciplinesPage />} />
-            <Route path="/categoria" element={<CategoriesPage />} />
-            <Route path="/reservas" element={<ReservationsPage />} />
-            <Route path="/torneos" element={<TournamentsPage />} />
-          </Routes>
-        </Box>
-      </Box>
+      <AppLayout />
     </Router>
   );
 }

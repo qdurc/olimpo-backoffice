@@ -19,6 +19,7 @@ import {
   SportsBasketball,
   AssignmentInd,
   Category,
+  Logout,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/Miderec-logo-2020.png";
@@ -53,67 +54,94 @@ export default function Sidebar() {
         },
       }}
     >
-      <Box
-        component={ButtonBase}
-        onClick={() => navigate("/dashboard")}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
-          p: 1,
-          borderRadius: 1,
-          gap: .5,
-          cursor: "pointer",
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <Box
-          component="img"
-          src={logo}
-          alt="Logo Olimpo"
-          sx={{ width: 150, height: 100, objectFit: "contain" }}
-        />
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: "bold", color: "#d32f2f", textAlign: "center" }}
+          component={ButtonBase}
+          onClick={() => navigate("/dashboard")}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+            p: 1,
+            borderRadius: 1,
+            gap: 0.5,
+            cursor: "pointer",
+          }}
         >
-          OLIMPO
-        </Typography>
-      </Box>
+          <Box
+            component="img"
+            src={logo}
+            alt="Logo Olimpo"
+            sx={{ width: 150, height: 100, objectFit: "contain" }}
+          />
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: "bold", color: "#d32f2f", textAlign: "center" }}
+          >
+            OLIMPO
+          </Typography>
+        </Box>
 
-      <List>
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+        <List sx={{ flexGrow: 1 }}>
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
 
-          return (
-            <ListItemButton
-              key={item.text}
-              onClick={() => navigate(item.path)}
-              sx={{
-                bgcolor: isActive ? "#f3f4f6" : "transparent",
-                mx: 1,
-                borderRadius: 1,
-                "&:hover": { bgcolor: "#f5f5f5" },
-              }}
-            >
-              <ListItemIcon
+            return (
+              <ListItemButton
+                key={item.text}
+                onClick={() => navigate(item.path)}
                 sx={{
-                  color: isActive ? "#d32f2f" : "#6b7280",
+                  bgcolor: isActive ? "#f3f4f6" : "transparent",
+                  mx: 1,
+                  borderRadius: 1,
+                  "&:hover": { bgcolor: "#f5f5f5" },
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                primaryTypographyProps={{
-                  fontWeight: isActive ? "bold" : "normal",
-                  color: isActive ? "#d32f2f" : "inherit",
-                }}
-              />
-            </ListItemButton>
-          );
-        })}
-      </List>
+                <ListItemIcon
+                  sx={{
+                    color: isActive ? "#d32f2f" : "#6b7280",
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontWeight: isActive ? "bold" : "normal",
+                    color: isActive ? "#d32f2f" : "inherit",
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+
+        <Box
+          sx={{
+            p: 1,
+            borderTop: "1px solid #e5e7eb",
+          }}
+        >
+          <ListItemButton
+            onClick={() => navigate("/login")}
+            sx={{
+              mx: 0.5,
+              borderRadius: 1,
+              bgcolor: "#f9fafb",
+              "&:hover": { bgcolor: "#f3f4f6" },
+            }}
+          >
+            <ListItemIcon sx={{ color: "#6b7280" }}>
+              <Logout />
+            </ListItemIcon>
+            <ListItemText
+              primary="Cerrar sesión"
+              primaryTypographyProps={{ color: "#111827", fontWeight: "bold" }}
+            />
+          </ListItemButton>
+        </Box>
+      </Box>
     </Drawer>
   );
 }
