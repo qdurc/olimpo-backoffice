@@ -87,11 +87,11 @@ export default function MaintenancePage() {
         renderCell: (p) =>
           p.value ? new Date(p.value).toLocaleString() : "",
       },
-      { field: "usuarioId", headerName: "Usuario", width: 120 },
+      { field: "usuarioId", headerName: "Usuario", width: 100 },
       {
         field: "estado",
         headerName: "Estado",
-        width: 140,
+        width: 160,
         renderCell: (p) => <StatusPill value={p.value} />,
       },
     ],
