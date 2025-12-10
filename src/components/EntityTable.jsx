@@ -62,7 +62,11 @@ export default function EntityTable({
 						fontWeight: 700,
 						color: "#111827",
 					},
-					"& .MuiDataGrid-cell": { py: 1.25, alignItems: "center", color: "#111827" },
+					"& .MuiDataGrid-cell": {
+						py: 0.75,
+						alignItems: "center",
+						color: "#111827",
+					},
 					"& .MuiDataGrid-cellContent": {
 						overflow: "visible",
 						whiteSpace: "normal",

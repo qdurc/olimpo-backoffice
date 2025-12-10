@@ -78,18 +78,19 @@ export default function TournamentsPage() {
 
 	const columns = useMemo(
 		() => [
-			{ field: "nombre", headerName: "Nombre", width: 185 },
-			{ field: "disciplina", headerName: "Disciplina", width: 130 },
-			{ field: "categoria", headerName: "Categoría", width: 130 },
-			{ field: "descripcion", headerName: "Descripción", width: 170 },
-			{ field: "normas", headerName: "Normas", width: 150 },
-			{ field: "fecha", headerName: "Fecha", width: 150 },
-			{ field: "instalacion", headerName: "Instalación", width: 150 },
-			{ field: "supervisor", headerName: "Encargado", width: 130 },
+			{ field: "nombre", headerName: "Nombre", flex: 1.1, minWidth: 150 },
+			{ field: "disciplina", headerName: "Disciplina", flex: 1, minWidth: 110 },
+			{ field: "categoria", headerName: "Categoría", flex: 0.9, minWidth: 110 },
+			{ field: "descripcion", headerName: "Descripción", flex: 1.1, minWidth: 140 },
+			{ field: "normas", headerName: "Normas", flex: 1, minWidth: 130 },
+			{ field: "fecha", headerName: "Fecha", flex: 1, minWidth: 140 },
+			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 130 },
+			{ field: "supervisor", headerName: "Encargado", flex: 1, minWidth: 120 },
 			{
 				field: "estado",
 				headerName: "Estado",
-				width: 100,
+				minWidth: 100,
+				flex: 0.8,
 				renderCell: (p) => <StatusPill value={p.value} />,
 			},
 		],
@@ -143,7 +144,7 @@ export default function TournamentsPage() {
 	};
 
 	return (
-		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
+		<Box sx={{ px: { xs: 2, md: 3 } }}>
 			<PageHeader
 				title="Torneos"
 				cta={
