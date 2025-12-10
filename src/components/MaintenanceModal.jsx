@@ -108,7 +108,7 @@ export default function MaintenanceModal({
 			setForm(emptyForm);
 			setErrors({});
 		}
-	}, [open, initialData, emptyForm, statuses]);
+	}, [open, initialData, statuses]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
