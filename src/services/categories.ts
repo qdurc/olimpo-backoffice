@@ -1,4 +1,4 @@
-import { isApiConfigured } from "./http";
+import { apiFetchJson, isApiConfigured } from "./http";
 
 export type Category = {
 	id: number | string;
@@ -9,35 +9,64 @@ export type CategoryPayload = {
 	descripcion: string;
 };
 
-function normalizeCategory(data: Partial<Category>): Category {
+type CategoryApi = {
+	id?: number;
+	descripcion?: string | null;
+};
+
+type CategoryResponse =
+	| CategoryApi[]
+	| CategoryApi
+	| {
+			data?: CategoryApi | CategoryApi[] | null;
+			errors?: unknown[];
+			success?: boolean;
+			message?: string;
+	  };
+
+function normalizeCategory(data: Partial<Category> | CategoryApi | null | undefined, fallback?: Category): Category {
 	return {
-		id: data.id ?? `categoria-${Math.random().toString(36).slice(2)}`,
-		descripcion: data.descripcion ?? "",
+		id:
+			(typeof data?.id === "number" && Number.isFinite(data.id)) || typeof data?.id === "string"
+				? data.id
+				: fallback?.id ?? `categoria-${Math.random().toString(36).slice(2)}`,
+		descripcion: (data as CategoryApi | undefined)?.descripcion ?? fallback?.descripcion ?? "",
 	};
 }
 
-/**
- * Placeholder de servicio para categorías.
- * Conecta tus endpoints reales cuando estén listos.
- */
 export async function getCategories(): Promise<Category[]> {
 	if (!isApiConfigured) {
-		return [];
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	// TODO: Reemplazar por llamada real al endpoint de categorías.
-	console.warn("getCategories: servicio pendiente de integrar, devolviendo arreglo vacío.");
-	return [];
+	const response = await apiFetchJson<CategoryResponse>("/api/Category/GetAllCategoriesFront");
+	const payload = Array.isArray(response)
+		? response
+		: Array.isArray(response?.data)
+			? response.data
+			: response?.data
+				? [response.data]
+				: [];
+
+	return payload.map((item) => normalizeCategory(item));
 }
 
 export async function createCategory(payload: CategoryPayload): Promise<Category> {
 	if (!isApiConfigured) {
-		return normalizeCategory(payload);
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	// TODO: Implementar POST real al endpoint de categorías.
-	console.warn("createCategory: servicio pendiente de integrar, devolviendo payload normalizado.");
-	return normalizeCategory(payload);
+	const body = { descripcion: payload.descripcion };
+	const response = await apiFetchJson<CategoryResponse>("/api/Category/CreateCategory", {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
+
+	const created =
+		(Array.isArray((response as any)?.data) ? (response as any).data?.[0] : (response as any)?.data) ??
+		(Array.isArray(response) ? response[0] : response);
+
+	return normalizeCategory(created, normalizeCategory(payload));
 }
 
 export async function updateCategory(
@@ -45,19 +74,34 @@ export async function updateCategory(
 	payload: CategoryPayload,
 ): Promise<Category> {
 	if (!isApiConfigured) {
-		return normalizeCategory({ ...payload, id });
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	// TODO: Implementar PUT/PATCH real al endpoint de categorías.
-	console.warn("updateCategory: servicio pendiente de integrar, devolviendo payload normalizado.");
-	return normalizeCategory({ ...payload, id });
+	const numericId = Number(id);
+	const requestId = Number.isFinite(numericId) ? numericId : id;
+
+	const body = { id: requestId, descripcion: payload.descripcion };
+	const response = await apiFetchJson<CategoryResponse>("/api/Category/UpdateCategory", {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
+
+	const updated =
+		(Array.isArray((response as any)?.data) ? (response as any).data?.[0] : (response as any)?.data) ??
+		(Array.isArray(response) ? response[0] : response);
+
+	return normalizeCategory(updated, normalizeCategory({ ...payload, id: requestId }));
 }
 
 export async function deleteCategory(id: number | string): Promise<void> {
 	if (!isApiConfigured) {
-		return;
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	// TODO: Implementar DELETE real al endpoint de categorías.
-	console.warn("deleteCategory: servicio pendiente de integrar, eliminación no ejecutada.");
+	const numericId = Number(id);
+	const requestId = Number.isFinite(numericId) ? numericId : id;
+
+	await apiFetchJson<void>(`/api/Category/DeleteCategory/${requestId}`, {
+		method: "DELETE",
+	});
 }
