@@ -13,13 +13,14 @@ export default function CategoriesPage() {
 	const [search, setSearch] = useState("");
 	const [categories, setCategories] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [submitting, setSubmitting] = useState(false);
 	const [openModal, setOpenModal] = useState(false);
 	const [editing, setEditing] = useState(null);
 
 	useEffect(() => {
 		let active = true;
 
-		(async () => {
+		const load = async () => {
 			setLoading(true);
 			try {
 				const data = await getCategories();
@@ -28,33 +29,45 @@ export default function CategoriesPage() {
 				}
 			} catch (error) {
 				console.error("Error cargando categorías", error);
-				if (active) {
-					setCategories([]);
-				}
+				if (active) setCategories([]);
 			} finally {
-				if (active) {
-					setLoading(false);
-				}
+				if (active) setLoading(false);
 			}
-		})();
+		};
 
+		load();
 		return () => {
 			active = false;
 		};
 	}, []);
 
+	const refresh = async () => {
+		setLoading(true);
+		try {
+			const data = await getCategories();
+			setCategories(data);
+		} catch (error) {
+			console.error("Error recargando categorías", error);
+			setCategories([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const handleSave = async (payload) => {
 		try {
+			setSubmitting(true);
 			if (payload.id) {
-				const updated = await updateCategory(payload.id, payload);
-				setCategories((prev) => prev.map((c) => (c.id === payload.id ? updated : c)));
+				await updateCategory(payload.id, payload);
 			} else {
-				const created = await createCategory(payload);
-				setCategories((prev) => [...prev, created]);
+				await createCategory(payload);
 			}
+			await refresh();
+			setOpenModal(false);
 		} catch (error) {
 			console.error("Error guardando categoría", error);
 		} finally {
+			setSubmitting(false);
 			setEditing(null);
 		}
 	};
@@ -62,7 +75,7 @@ export default function CategoriesPage() {
 	const handleDelete = async (id) => {
 		try {
 			await deleteCategory(id);
-			setCategories((prev) => prev.filter((c) => c.id !== id));
+			await refresh();
 		} catch (error) {
 			console.error("Error eliminando categoría", error);
 		}
@@ -166,6 +179,7 @@ export default function CategoriesPage() {
 					setEditing(null);
 				}}
 				onSave={handleSave}
+				loading={submitting}
 				initialData={editing}
 			/>
 		</Box>

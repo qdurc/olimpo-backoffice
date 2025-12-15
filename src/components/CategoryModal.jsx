@@ -8,7 +8,7 @@ import {
 	TextField,
 } from "@mui/material";
 
-export default function CategoryModal({ open, onClose, onSave, initialData = null }) {
+export default function CategoryModal({ open, onClose, onSave, initialData = null, loading = false }) {
 	const emptyForm = useMemo(
 		() => ({
 			descripcion: "",
@@ -46,7 +46,6 @@ export default function CategoryModal({ open, onClose, onSave, initialData = nul
 			id: initialData?.id,
 			descripcion: form.descripcion.trim(),
 		});
-		onClose?.();
 	};
 
 	return (
@@ -66,8 +65,10 @@ export default function CategoryModal({ open, onClose, onSave, initialData = nul
 				/>
 			</DialogContent>
 			<DialogActions sx={{ px: 3, pb: 2 }}>
-				<Button onClick={onClose}>Cancelar</Button>
-				<Button variant="contained" onClick={handleSubmit}>
+				<Button onClick={onClose} disabled={loading}>
+					Cancelar
+				</Button>
+				<Button variant="contained" onClick={handleSubmit} disabled={loading}>
 					Guardar
 				</Button>
 			</DialogActions>

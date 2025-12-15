@@ -1,3 +1,5 @@
+import { getSession } from "./session";
+
 const devApiUrl = import.meta.env.VITE_DEV_API_URL ?? "";
 const prodApiUrl = import.meta.env.VITE_API_URL ?? "";
 const useDevProxy = import.meta.env.DEV && !devApiUrl;
@@ -25,8 +27,15 @@ export async function apiFetchJson<T = Json>(
 			? { "Content-Type": "application/json", ...options.headers }
 			: { ...options.headers };
 
+	const session = getSession();
+	const authHeaders = session?.token
+		? {
+				Authorization: `Bearer ${session.token}`,
+		  }
+		: {};
+
 	const response = await fetch(`${apiBaseUrl}${path}`, {
-		headers,
+		headers: { ...authHeaders, ...headers },
 		...options,
 	});
 

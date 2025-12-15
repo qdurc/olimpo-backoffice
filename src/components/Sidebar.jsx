@@ -23,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/Miderec-logo-2020.png";
+import { logout } from "../services/auth";
 
 const menuItems = [
   { text: "Dashboard", icon: <Dashboard />, path: "/dashboard" },
@@ -39,6 +40,11 @@ const menuItems = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <Drawer
@@ -124,7 +130,7 @@ export default function Sidebar() {
           }}
         >
           <ListItemButton
-            onClick={() => navigate("/login")}
+            onClick={handleLogout}
             sx={{
               mx: 0.5,
               borderRadius: 1,

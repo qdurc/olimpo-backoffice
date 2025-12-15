@@ -1,0 +1,40 @@
+const TOKEN_KEY = "olimpo_token";
+const USER_ID_KEY = "olimpo_user_id";
+
+type Session = {
+	token: string;
+	userID?: number | string;
+};
+
+const hasStorage = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+
+export function getSession(): Session | null {
+	if (!hasStorage()) return null;
+
+	const token = window.localStorage.getItem(TOKEN_KEY);
+	const userID = window.localStorage.getItem(USER_ID_KEY) ?? undefined;
+
+	if (!token) return null;
+	return { token, userID };
+}
+
+export function setSession(session: Session): void {
+	if (!hasStorage()) return;
+	window.localStorage.setItem(TOKEN_KEY, session.token);
+
+	if (session.userID !== undefined) {
+		window.localStorage.setItem(USER_ID_KEY, String(session.userID));
+	} else {
+		window.localStorage.removeItem(USER_ID_KEY);
+	}
+}
+
+export function clearSession(): void {
+	if (!hasStorage()) return;
+	window.localStorage.removeItem(TOKEN_KEY);
+	window.localStorage.removeItem(USER_ID_KEY);
+}
+
+export function hasSession(): boolean {
+	return Boolean(getSession()?.token);
+}

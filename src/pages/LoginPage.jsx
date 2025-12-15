@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -13,7 +13,8 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import miderecLogo from "../assets/miderec-logo.png";
 import { login } from "../services/auth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { hasSession } from "../services/session";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/dashboard";
+
+  useEffect(() => {
+    if (hasSession()) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [navigate, redirectTo]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -30,9 +39,8 @@ export default function LoginPage() {
 
     login({ email, password })
       .then((res) => {
-        // TODO: almacenar token en el manejador de sesión.
         if (res?.token) {
-          navigate("/dashboard");
+          navigate(redirectTo, { replace: true });
         }
       })
       .catch((err) => {

@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
   useLocation,
+  Outlet,
 } from "react-router-dom";
 import { Box } from "@mui/material";
 import Sidebar from "./components/Sidebar";
@@ -17,6 +18,18 @@ import ManagersPage from "./pages/ManagersPage";
 import DisciplinesPage from "./pages/DisciplinesPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import LoginPage from "./pages/LoginPage";
+import { hasSession } from "./services/session";
+
+function RequireAuth() {
+  const location = useLocation();
+  const isAuthenticated = hasSession();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  return <Outlet />;
+}
 
 function AppLayout() {
   const location = useLocation();
@@ -34,17 +47,19 @@ function AppLayout() {
 
       <Box component="main" sx={{ flexGrow: 1, p: showSidebar ? 3 : 0 }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/instalaciones" element={<FacilitiesPage />} />
-          <Route path="/mantenimientos" element={<MaintenancePage />} />
-          <Route path="/usuario" element={<UsersPage />} />
-          <Route path="/encargado" element={<ManagersPage />} />
-          <Route path="/disciplina" element={<DisciplinesPage />} />
-          <Route path="/categoria" element={<CategoriesPage />} />
-          <Route path="/reservas" element={<ReservationsPage />} />
-          <Route path="/torneos" element={<TournamentsPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/instalaciones" element={<FacilitiesPage />} />
+            <Route path="/mantenimientos" element={<MaintenancePage />} />
+            <Route path="/usuario" element={<UsersPage />} />
+            <Route path="/encargado" element={<ManagersPage />} />
+            <Route path="/disciplina" element={<DisciplinesPage />} />
+            <Route path="/categoria" element={<CategoriesPage />} />
+            <Route path="/reservas" element={<ReservationsPage />} />
+            <Route path="/torneos" element={<TournamentsPage />} />
+          </Route>
         </Routes>
       </Box>
     </Box>

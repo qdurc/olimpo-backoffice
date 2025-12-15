@@ -13,13 +13,14 @@ export default function DisciplinesPage() {
 	const [search, setSearch] = useState("");
 	const [disciplines, setDisciplines] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [submitting, setSubmitting] = useState(false);
 	const [openModal, setOpenModal] = useState(false);
 	const [editing, setEditing] = useState(null);
 
 	useEffect(() => {
 		let active = true;
 
-		(async () => {
+		const load = async () => {
 			setLoading(true);
 			try {
 				const data = await getDisciplines();
@@ -36,25 +37,42 @@ export default function DisciplinesPage() {
 					setLoading(false);
 				}
 			}
-		})();
+		};
+
+		load();
 
 		return () => {
 			active = false;
 		};
 	}, []);
 
+	const refresh = async () => {
+		setLoading(true);
+		try {
+			const data = await getDisciplines();
+			setDisciplines(data);
+		} catch (error) {
+			console.error("Error recargando disciplinas", error);
+			setDisciplines([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const handleSave = async (payload) => {
 		try {
+			setSubmitting(true);
 			if (payload.id) {
-				const updated = await updateDiscipline(payload.id, payload);
-				setDisciplines((prev) => prev.map((d) => (d.id === payload.id ? updated : d)));
+				await updateDiscipline(payload.id, payload);
 			} else {
-				const created = await createDiscipline(payload);
-				setDisciplines((prev) => [...prev, created]);
+				await createDiscipline(payload);
 			}
+			await refresh();
+			setOpenModal(false);
 		} catch (error) {
 			console.error("Error guardando disciplina", error);
 		} finally {
+			setSubmitting(false);
 			setEditing(null);
 		}
 	};
@@ -62,7 +80,7 @@ export default function DisciplinesPage() {
 	const handleDelete = async (id) => {
 		try {
 			await deleteDiscipline(id);
-			setDisciplines((prev) => prev.filter((d) => d.id !== id));
+			await refresh();
 		} catch (error) {
 			console.error("Error eliminando disciplina", error);
 		}
@@ -166,6 +184,7 @@ export default function DisciplinesPage() {
 					setEditing(null);
 				}}
 				onSave={handleSave}
+				loading={submitting}
 				initialData={editing}
 			/>
 		</Box>
