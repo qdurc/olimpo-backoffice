@@ -69,7 +69,7 @@ export default function ReservationModal({
 			setErrors({});
 			setSubmitError("");
 		}
-	}, [open, initialData, emptyForm]);
+	}, [open, initialData, emptyForm, statuses]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;

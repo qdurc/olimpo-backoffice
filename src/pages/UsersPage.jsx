@@ -1,69 +1,44 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, TextField, InputAdornment } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
-
-const DATA = [
-	{
-		id: 1,
-		nombre: "María González",
-		rol: "Atleta",
-		documento: "001-2345678-9",
-		telefono: "(809) 555-1234",
-		email: "maria.gonzalez@email.com",
-		contrasena: "********",
-		disciplina: "Baloncesto",
-		foto: "https://i.pravatar.cc/36?img=11",
-	},
-	{
-		id: 2,
-		nombre: "Juan Pérez",
-		rol: "Entrenador",
-		documento: "402-9876543-2",
-		telefono: "(829) 222-5678",
-		email: "juan.perez@email.com",
-		contrasena: "********",
-		disciplina: "Fútbol",
-		foto: "https://i.pravatar.cc/36?img=12",
-	},
-	{
-		id: 3,
-		nombre: "Laura Jiménez",
-		rol: "Atleta",
-		documento: "003-1122334-5",
-		telefono: "(849) 123-4567",
-		email: "laura.jimenez@email.com",
-		contrasena: "********",
-		disciplina: "Natación",
-		foto: "https://i.pravatar.cc/36?img=13",
-	},
-	{
-		id: 4,
-		nombre: "Carlos Rodríguez",
-		rol: "Atleta",
-		documento: "001-8765432-1",
-		telefono: "(809) 444-8899",
-		email: "carlos.rdz@email.com",
-		contrasena: "********",
-		disciplina: "Atletismo",
-		foto: "https://i.pravatar.cc/36?img=14",
-	},
-];
+import { getUsers } from "../services/users";
 
 export default function UsersPage() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(7);
 	const [search, setSearch] = useState("");
+	const [users, setUsers] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+
+	useEffect(() => {
+		setLoading(true);
+		setError("");
+		getUsers()
+			.then((res) => setUsers(res))
+			.catch((err) => {
+				console.error("Error fetching users", err);
+				const message =
+					err instanceof Error
+						? err.message
+						: "No se pudieron cargar los usuarios. Intenta más tarde.";
+				setError(message);
+				setUsers([]);
+			})
+			.finally(() => setLoading(false));
+	}, []);
 
 	const filtered = useMemo(() => {
-		return DATA.filter((u) =>
-			`${u.nombre} ${u.documento} ${u.email} ${u.disciplina}`
+		return users.filter((u) =>
+			`${u.nombre} ${u.email || ""} ${u.rol || ""} ${u.estado || ""}`
 				.toLowerCase()
 				.includes(search.toLowerCase())
 		);
-	}, [search]);
+	}, [search, users]);
 
 	const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
 	const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -72,12 +47,12 @@ export default function UsersPage() {
 		{
 			field: "nombre",
 			headerName: "Nombre",
-			flex: 1,
+			flex: .5,
 			minWidth: 250,
 			renderCell: (p) => (
 				<Box display="flex" alignItems="center" gap={1.5}>
 					<img
-						src={p.row.foto}
+						src={p.row.avatar}
 						alt={p.row.nombre}
 						width={36}
 						height={36}
@@ -90,16 +65,13 @@ export default function UsersPage() {
 				</Box>
 			),
 		},
-		{ field: "documento", headerName: "Documento Identidad", flex: 1 },
-		{ field: "telefono", headerName: "Teléfono", width: 160 },
 		{ field: "email", headerName: "Correo electrónico", flex: 1 },
-		{ field: "contrasena", headerName: "Contraseña", width: 140 },
-		{ field: "disciplina", headerName: "Disciplina", width: 150 },
+		{ field: "estado", headerName: "Estado", width: 140 },
 	];
 
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
-			<PageHeader title="Usuario" />
+			<PageHeader title="Usuarios" />
 
 			<Box display="flex" justifyContent="flex-end" mb={2}>
 				<TextField
@@ -121,10 +93,16 @@ export default function UsersPage() {
 				/>
 			</Box>
 
+			{error ? (
+				<Alert severity="error" sx={{ mb: 2 }}>
+					{error}
+				</Alert>
+			) : null}
+
 			<EntityTable
 				rows={rows}
 				columns={columns}
-				loading={false}
+				loading={loading}
 				rowCount={filtered.length}
 				page={page}
 				pageSize={pageSize}

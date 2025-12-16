@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	Dialog,
 	DialogTitle,
@@ -55,17 +55,20 @@ export default function MaintenanceModal({
 		return Number.isNaN(date.getTime()) ? null : date;
 	};
 
-	const normalizeStatusId = (value) => {
-		if (value === null || value === undefined) return "";
-		const asString = String(value);
-		const byId = statuses.find((s) => String(s.id) === asString);
-		if (byId) return asString;
-		const normalizedLabel = asString.toLowerCase().trim();
-		const byLabel = statuses.find(
-			(s) => typeof s.label === "string" && s.label.toLowerCase().trim() === normalizedLabel,
-		);
-		return byLabel ? String(byLabel.id) : "";
-	};
+	const normalizeStatusId = useCallback(
+		(value) => {
+			if (value === null || value === undefined) return "";
+			const asString = String(value);
+			const byId = statuses.find((s) => String(s.id) === asString);
+			if (byId) return asString;
+			const normalizedLabel = asString.toLowerCase().trim();
+			const byLabel = statuses.find(
+				(s) => typeof s.label === "string" && s.label.toLowerCase().trim() === normalizedLabel,
+			);
+			return byLabel ? String(byLabel.id) : "";
+		},
+		[statuses],
+	);
 
 	useEffect(() => {
 		if (open && initialData) {
@@ -108,7 +111,7 @@ export default function MaintenanceModal({
 			setForm(emptyForm);
 			setErrors({});
 		}
-	}, [open, initialData, statuses]);
+	}, [open, initialData, statuses, emptyForm, normalizeStatusId]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
