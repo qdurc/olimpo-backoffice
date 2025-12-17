@@ -21,8 +21,12 @@ export default function ManagerModal({ open, onClose, onSave, initialData = null
 
 	const toDateInput = (value) => {
 		if (!value) return "";
+		if (typeof value === "string") {
+			const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+			if (match) return match[1];
+		}
 		const d = new Date(value);
-		return Number.isNaN(d.getTime()) ? value : d.toISOString().slice(0, 10);
+		return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
 	};
 
 	const [form, setForm] = useState(emptyForm);
