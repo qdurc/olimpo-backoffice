@@ -125,14 +125,7 @@ export default function UsersPage() {
 			flex: .2,
 			minWidth: 250,
 			renderCell: (p) => (
-				<Box display="flex" alignItems="center" gap={1.5}>
-					<img
-						src={p.row.avatar}
-						alt={p.row.nombre}
-						width={36}
-						height={36}
-						style={{ borderRadius: "50%", objectFit: "cover" }}
-					/>
+				<Box display="flex" alignItems="center">
 					<Box>
 						<Box sx={{ fontWeight: 600 }}>{p.row.nombre}</Box>
 						<Box sx={{ fontSize: 13, color: "text.secondary" }}>{p.row.rol}</Box>

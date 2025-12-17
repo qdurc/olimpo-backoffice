@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
 	Box,
+	CircularProgress,
 	Paper,
 	Table,
 	TableBody,
@@ -10,6 +11,7 @@ import {
 	TableRow,
 	Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
 	Cell,
 	Pie,
@@ -20,9 +22,6 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 import { getDashboardData } from "../services/dashboard";
-
-const cardBorder = "1px solid #e5e7eb";
-const neutralText = "#4b5563";
 
 const LegendDot = ({ color }) => (
 	<Box
@@ -37,28 +36,31 @@ const LegendDot = ({ color }) => (
 	/>
 );
 
-const StatCard = ({ title, value }) => (
-	<Paper
-		elevation={0}
-		sx={{
-			border: cardBorder,
-			bgcolor: "#FFFFFF",
-			p: 1.5,
-			borderRadius: 1.5,
-			display: "flex",
-			flexDirection: "column",
-			gap: 0.6,
-			height: "100%",
-		}}
-	>
-		<Typography variant="caption" sx={{ color: neutralText }}>
-			{title}
-		</Typography>
-		<Typography variant="h4" sx={{ fontWeight: 800, color: "#111827" }}>
-			{value}
-		</Typography>
-	</Paper>
-);
+const StatCard = ({ title, value }) => {
+	const theme = useTheme();
+
+	return (
+		<Paper
+			elevation={0}
+			sx={{
+				bgcolor: theme.palette.background.paper,
+				p: 1.5,
+				borderRadius: 1.5,
+				display: "flex",
+				flexDirection: "column",
+				gap: 0.6,
+				height: "100%",
+			}}
+		>
+			<Typography variant="caption" sx={{ color: theme.palette.common.primary }}>
+				{title}
+			</Typography>
+			<Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.common.secondary }}>
+				{value}
+			</Typography>
+		</Paper>
+	);
+};
 
 const DashboardPage = () => {
 	const [data, setData] = useState({
@@ -68,6 +70,7 @@ const DashboardPage = () => {
 		events: [],
 	});
 	const [loading, setLoading] = useState(true);
+	const theme = useTheme();
 
 	useEffect(() => {
 		let isMounted = true;
@@ -90,6 +93,41 @@ const DashboardPage = () => {
 	}, []);
 
 	const { stats, activity, classification, events } = data;
+	const activityColors = [
+		theme.palette.primary.main,
+		theme.palette.primary.light,
+		theme.palette.primary.dark,
+	];
+	const activityData = activity.map((item, index) => ({
+		...item,
+		color: activityColors[index % activityColors.length],
+	}));
+	const classificationColors = [
+		theme.palette.primary.main,
+		theme.palette.primary.light,
+		theme.palette.primary.dark,
+	];
+	const classificationData = classification.map((item, index) => ({
+		...item,
+		color: classificationColors[index % classificationColors.length],
+	}));
+
+	if (loading) {
+		return (
+			<Box
+				sx={{
+					flexGrow: 1,
+					minHeight: "100vh",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+				}}
+				aria-busy
+			>
+				<CircularProgress />
+			</Box>
+		);
+	}
 
 	return (
 		<Box
@@ -99,7 +137,10 @@ const DashboardPage = () => {
 				minHeight: "100vh",
 			}}
 		>
-			<Typography variant="h4" sx={{ fontWeight: 800, mb: 3, color: "#000000" }}>
+			<Typography
+				variant="h4"
+				sx={{ fontWeight: 800, mb: 3, color: theme.palette.common.black }}
+			>
 				Dashboard
 			</Typography>
 
@@ -116,8 +157,8 @@ const DashboardPage = () => {
 					mb: 3,
 				}}
 			>
-				{stats.map((item, i) => (
-					<StatCard key={i} {...item} />
+				{stats.map((item) => (
+					<StatCard key={item.title} {...item} />
 				))}
 			</Box>
 
@@ -137,15 +178,14 @@ const DashboardPage = () => {
 				<Paper
 					elevation={0}
 					sx={{
-						border: cardBorder,
-						bgcolor: "#FFFFFF",
+						bgcolor: theme.palette.background.paper,
 						p: 3,
 						borderRadius: 3,
 					}}
 				>
 					<Typography
 						variant="subtitle1"
-						sx={{ fontWeight: 800, mb: 2, color: "#000000" }}
+						sx={{ fontWeight: 800, mb: 2, color: theme.palette.text.primary }}
 					>
 						Actividad del sistema
 					</Typography>
@@ -160,9 +200,9 @@ const DashboardPage = () => {
 							gap: 3,
 						}}
 					>
-						{activity.map((item, index) => (
+						{activityData.map((item) => (
 							<Box
-								key={index}
+								key={item.name}
 								sx={{
 									position: "relative",
 									height: 220,
@@ -189,7 +229,7 @@ const DashboardPage = () => {
 										/>
 										<RadialBar
 											dataKey="value"
-											background={{ fill: "#E5E7EB" }}
+											background={{ fill: theme.palette.grey[200] }}
 											cornerRadius={12}
 										/>
 									</RadialBarChart>
@@ -206,13 +246,13 @@ const DashboardPage = () => {
 								>
 									<Typography
 										variant="h4"
-										sx={{ fontWeight: 800 }}
+										sx={{ fontWeight: 800, color: theme.palette.text.primary }}
 									>
 										{item.value}%
 									</Typography>
 									<Typography
 										variant="caption"
-										sx={{ color: neutralText }}
+										sx={{ color: theme.palette.text.secondary }}
 									>
 										{item.name}
 									</Typography>
@@ -226,13 +266,15 @@ const DashboardPage = () => {
 				<Paper
 					elevation={0}
 					sx={{
-						border: cardBorder,
-						bgcolor: "#FFFFFF",
+						bgcolor: theme.palette.background.paper,
 						p: 3,
 						borderRadius: 3,
 					}}
 				>
-					<Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#000000" }}>
+					<Typography
+						variant="subtitle1"
+						sx={{ fontWeight: 800, color: theme.palette.text.primary }}
+					>
 						Clasificación
 					</Typography>
 
@@ -240,7 +282,7 @@ const DashboardPage = () => {
 						<ResponsiveContainer>
 							<PieChart>
 								<Pie
-									data={classification}
+									data={classificationData}
 									dataKey="value"
 									cx="50%"
 									cy="50%"
@@ -248,9 +290,9 @@ const DashboardPage = () => {
 									outerRadius={82}
 									paddingAngle={4}
 								>
-									{classification.map((entry, index) => (
+									{classificationData.map((entry) => (
 										<Cell
-											key={index}
+											key={entry.name}
 											fill={entry.color}
 										/>
 									))}
@@ -260,15 +302,15 @@ const DashboardPage = () => {
 					</Box>
 
 					<Box sx={{ mt: 2 }}>
-						{classification.map((item, index) => (
+						{classificationData.map((item) => (
 							<Typography
-								key={index}
+								key={item.name}
 								variant="body2"
 								sx={{
 									display: "flex",
 									alignItems: "center",
 									gap: 1,
-									color: neutralText,
+									color: theme.palette.text.secondary,
 								}}
 							>
 								<LegendDot color={item.color} />
@@ -283,15 +325,14 @@ const DashboardPage = () => {
 			<Paper
 				elevation={0}
 				sx={{
-					border: cardBorder,
-					bgcolor: "#FFFFFF",
+					bgcolor: theme.palette.background.paper,
 					p: 3,
 					borderRadius: 3,
 				}}
 			>
 				<Typography
 					variant="subtitle1"
-					sx={{ fontWeight: 800, mb: 2, color: "#000000" }}
+					sx={{ fontWeight: 800, mb: 2, color: theme.palette.text.primary }}
 				>
 					Próximos eventos y torneos
 				</Typography>
@@ -300,13 +341,13 @@ const DashboardPage = () => {
 					<Table size="small">
 						<TableHead
 							sx={{
-								backgroundColor: "#F5F5F5",
+								backgroundColor: theme.palette.grey[100],
 							}}
 						>
 							<TableRow>
 								<TableCell
 									sx={{
-										color: "#111827",
+										color: theme.palette.common.black,
 										fontWeight: 700,
 									}}
 								>
@@ -315,7 +356,7 @@ const DashboardPage = () => {
 
 								<TableCell
 									sx={{
-										color: "#111827",
+										color: theme.palette.common.black,
 										fontWeight: 700,
 									}}
 								>
@@ -324,7 +365,7 @@ const DashboardPage = () => {
 
 								<TableCell
 									sx={{
-										color: "#111827",
+										color: theme.palette.common.black,
 										fontWeight: 700,
 									}}
 								>
@@ -333,7 +374,7 @@ const DashboardPage = () => {
 
 								<TableCell
 									sx={{
-										color: "#111827",
+										color: theme.palette.common.black,
 										fontWeight: 700,
 									}}
 								>
@@ -343,18 +384,18 @@ const DashboardPage = () => {
 						</TableHead>
 
 						<TableBody>
-							{events.map((e, i) => (
-								<TableRow key={i}>
-									<TableCell sx={{ color: "#000000" }}>
+							{events.map((e) => (
+								<TableRow key={`${e.evento}-${e.fecha}`}>
+									<TableCell sx={{ color: theme.palette.common.black }}>
 										{e.evento}
 									</TableCell>
-									<TableCell sx={{ color: "#000000" }}>
+									<TableCell sx={{ color: theme.palette.common.black }}>
 										{e.participacion}
 									</TableCell>
-									<TableCell sx={{ color: "#000000" }}>
+									<TableCell sx={{ color: theme.palette.common.black }}>
 										{e.inscritos}
 									</TableCell>
-									<TableCell sx={{ color: "#000000" }}>
+									<TableCell sx={{ color: theme.palette.common.black }}>
 										{e.fecha}
 									</TableCell>
 								</TableRow>
