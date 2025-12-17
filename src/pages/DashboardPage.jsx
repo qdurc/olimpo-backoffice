@@ -99,7 +99,7 @@ const DashboardPage = () => {
 				minHeight: "100vh",
 			}}
 		>
-			<Typography variant="h4" sx={{ fontWeight: 800, mb: 3 }}>
+			<Typography variant="h4" sx={{ fontWeight: 800, mb: 3, color: "#000000" }}>
 				Dashboard
 			</Typography>
 
@@ -145,7 +145,7 @@ const DashboardPage = () => {
 				>
 					<Typography
 						variant="subtitle1"
-						sx={{ fontWeight: 800, mb: 2 }}
+						sx={{ fontWeight: 800, mb: 2, color: "#000000" }}
 					>
 						Actividad del sistema
 					</Typography>
@@ -232,7 +232,7 @@ const DashboardPage = () => {
 						borderRadius: 3,
 					}}
 				>
-					<Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+					<Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#000000" }}>
 						Clasificación
 					</Typography>
 
@@ -291,28 +291,72 @@ const DashboardPage = () => {
 			>
 				<Typography
 					variant="subtitle1"
-					sx={{ fontWeight: 800, mb: 2 }}
+					sx={{ fontWeight: 800, mb: 2, color: "#000000" }}
 				>
 					Próximos eventos y torneos
 				</Typography>
 
 				<TableContainer>
 					<Table size="small">
-						<TableHead>
+						<TableHead
+							sx={{
+								backgroundColor: "#F5F5F5",
+							}}
+						>
 							<TableRow>
-								<TableCell>Evento</TableCell>
-								<TableCell>Participación</TableCell>
-								<TableCell>Inscritos</TableCell>
-								<TableCell>Fecha</TableCell>
+								<TableCell
+									sx={{
+										color: "#111827",
+										fontWeight: 700,
+									}}
+								>
+									Evento
+								</TableCell>
+
+								<TableCell
+									sx={{
+										color: "#111827",
+										fontWeight: 700,
+									}}
+								>
+									Participación
+								</TableCell>
+
+								<TableCell
+									sx={{
+										color: "#111827",
+										fontWeight: 700,
+									}}
+								>
+									Inscritos
+								</TableCell>
+
+								<TableCell
+									sx={{
+										color: "#111827",
+										fontWeight: 700,
+									}}
+								>
+									Fecha
+								</TableCell>
 							</TableRow>
 						</TableHead>
+
 						<TableBody>
 							{events.map((e, i) => (
 								<TableRow key={i}>
-									<TableCell>{e.evento}</TableCell>
-									<TableCell>{e.participacion}</TableCell>
-									<TableCell>{e.inscritos}</TableCell>
-									<TableCell>{e.fecha}</TableCell>
+									<TableCell sx={{ color: "#000000" }}>
+										{e.evento}
+									</TableCell>
+									<TableCell sx={{ color: "#000000" }}>
+										{e.participacion}
+									</TableCell>
+									<TableCell sx={{ color: "#000000" }}>
+										{e.inscritos}
+									</TableCell>
+									<TableCell sx={{ color: "#000000" }}>
+										{e.fecha}
+									</TableCell>
 								</TableRow>
 							))}
 						</TableBody>

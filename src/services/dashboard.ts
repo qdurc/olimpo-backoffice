@@ -53,18 +53,12 @@ export async function getDashboardData() {
 		const users = unwrapArray<User>(usersRes);
 		const tournaments = unwrapArray<Tournament>(tournamentsRes);
 
-		/* =========================
-			 1️⃣ RESERVAS ACTIVAS
-		========================= */
 		const totalReservations = reservations.length;
 		const activeReservations = reservations.filter(r => r.estatusID === 1).length;
 		const reservationsPct = totalReservations
 			? Math.round((activeReservations / totalReservations) * 100)
 			: 0;
 
-		/* =========================
-			 2️⃣ INSTALACIONES DISPONIBLES
-		========================= */
 		const totalFacilities = facilities.length;
 		const availableFacilities = facilities.filter(
 			f => f.status === "Activo"
@@ -73,9 +67,6 @@ export async function getDashboardData() {
 			? Math.round((availableFacilities / totalFacilities) * 100)
 			: 0;
 
-		/* =========================
-			 3️⃣ TORNEOS ACTIVOS
-		========================= */
 		const totalTournaments = tournaments.length;
 		const activeTournaments = tournaments.filter(
 			t => t.status === "Activo"
@@ -104,9 +95,6 @@ export async function getDashboardData() {
 				},
 			],
 
-			/* =========================
-				 ACTIVIDAD REAL
-			========================= */
 			activity: [
 				{
 					name: "Reservas activas",
