@@ -1,5 +1,4 @@
 import {
-	dashboardActivityData,
 	dashboardClassificationData,
 	upcomingEvents,
 } from "../mocks/dashboard";
@@ -18,7 +17,6 @@ function unwrapArray<T>(response: any): T[] {
 }
 
 const fallback = {
-	activity: dashboardActivityData,
 	classification: dashboardClassificationData,
 	events: upcomingEvents,
 };
@@ -32,6 +30,7 @@ export async function getDashboardData() {
 				{ title: "Usuarios registrados", value: 0 },
 				{ title: "Torneos en curso", value: 0 },
 			],
+			activity: [],
 			...fallback,
 		};
 	}
@@ -54,15 +53,46 @@ export async function getDashboardData() {
 		const users = unwrapArray<User>(usersRes);
 		const tournaments = unwrapArray<Tournament>(tournamentsRes);
 
+		/* =========================
+			 1️⃣ RESERVAS ACTIVAS
+		========================= */
+		const totalReservations = reservations.length;
+		const activeReservations = reservations.filter(r => r.estatusID === 1).length;
+		const reservationsPct = totalReservations
+			? Math.round((activeReservations / totalReservations) * 100)
+			: 0;
+
+		/* =========================
+			 2️⃣ INSTALACIONES DISPONIBLES
+		========================= */
+		const totalFacilities = facilities.length;
+		const availableFacilities = facilities.filter(
+			f => f.status === "Activo"
+		).length;
+		const facilitiesPct = totalFacilities
+			? Math.round((availableFacilities / totalFacilities) * 100)
+			: 0;
+
+		/* =========================
+			 3️⃣ TORNEOS ACTIVOS
+		========================= */
+		const totalTournaments = tournaments.length;
+		const activeTournaments = tournaments.filter(
+			t => t.status === "Activo"
+		).length;
+		const tournamentsPct = totalTournaments
+			? Math.round((activeTournaments / totalTournaments) * 100)
+			: 0;
+
 		return {
 			stats: [
 				{
 					title: "Instalaciones registradas",
-					value: facilities.length,
+					value: totalFacilities,
 				},
 				{
 					title: "Reservas activas",
-					value: reservations.filter(r => r.estatusID === 1).length,
+					value: activeReservations,
 				},
 				{
 					title: "Usuarios registrados",
@@ -70,9 +100,31 @@ export async function getDashboardData() {
 				},
 				{
 					title: "Torneos en curso",
-					value: tournaments.filter(t => t.status === "Activo").length,
+					value: activeTournaments,
 				},
 			],
+
+			/* =========================
+				 ACTIVIDAD REAL
+			========================= */
+			activity: [
+				{
+					name: "Reservas activas",
+					value: reservationsPct,
+					color: "#3366CC",
+				},
+				{
+					name: "Instalaciones disponibles",
+					value: facilitiesPct,
+					color: "#16A34A",
+				},
+				{
+					name: "Torneos activos",
+					value: tournamentsPct,
+					color: "#7C3AED",
+				},
+			],
+
 			...fallback,
 		};
 	} catch (error) {
@@ -84,6 +136,7 @@ export async function getDashboardData() {
 				{ title: "Usuarios registrados", value: 0 },
 				{ title: "Torneos en curso", value: 0 },
 			],
+			activity: [],
 			...fallback,
 		};
 	}
