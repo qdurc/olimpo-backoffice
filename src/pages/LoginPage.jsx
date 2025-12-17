@@ -9,6 +9,7 @@ import {
   Checkbox,
   IconButton,
   InputAdornment,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import miderecLogo from "../assets/miderec-logo.png";
@@ -22,6 +23,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || "/dashboard";
@@ -32,22 +34,71 @@ export default function LoginPage() {
     }
   }, [navigate, redirectTo]);
 
+  const normalizeErrorMessage = (err) => {
+    if (err instanceof Error) {
+      const raw = err.message?.trim?.() ?? "";
+      const lower = raw.toLowerCase();
+      if (!raw) {
+        return "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.";
+      }
+      if (raw.includes("Failed to fetch") || raw.includes("NetworkError")) {
+        return "No pudimos conectar con el servidor. Intenta nuevamente más tarde.";
+      }
+      if (lower.includes("status 401") || lower.includes("unauthorized") || lower.includes("no autorizado")) {
+        return "Credenciales inválidas. Verifica tu correo y contraseña.";
+      }
+      if (lower.includes("status 500")) {
+        return "El servidor tuvo un problema. Intenta nuevamente más tarde.";
+      }
+      if ((raw.startsWith("{") && raw.endsWith("}")) || (raw.startsWith("[") && raw.endsWith("]"))) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed?.message) return String(parsed.message);
+        } catch {
+          // ignore JSON parse errors
+        }
+      }
+      return raw;
+    }
+    return "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.";
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     setError("");
+    setFieldErrors({ email: "", password: "" });
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const nextErrors = { email: "", password: "" };
+
+    if (!trimmedEmail) {
+      nextErrors.email = "Correo requerido";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      nextErrors.email = "Correo inválido";
+    }
+
+    if (!trimmedPassword) {
+      nextErrors.password = "Contraseña requerida";
+    }
+
+    if (nextErrors.email || nextErrors.password) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
     setLoading(true);
 
-    login({ email, password })
+    login({ email: trimmedEmail, password: trimmedPassword })
       .then((res) => {
         if (res?.token) {
           navigate(redirectTo, { replace: true });
+          return;
         }
+        setError("No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.");
       })
       .catch((err) => {
-        setError(
-          err?.message ||
-            "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.",
-        );
+        setError(normalizeErrorMessage(err));
       })
       .finally(() => setLoading(false));
   };
@@ -88,9 +139,9 @@ export default function LoginPage() {
         </Typography>
 
         {error && (
-          <Typography color="error" align="center" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
             {error}
-          </Typography>
+          </Alert>
         )}
 
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -101,8 +152,16 @@ export default function LoginPage() {
             fullWidth
             size="small"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (fieldErrors.email) {
+                setFieldErrors((prev) => ({ ...prev, email: "" }));
+              }
+              if (error) setError("");
+            }}
             disabled={loading}
+            error={Boolean(fieldErrors.email)}
+            helperText={fieldErrors.email}
           />
 
           <TextField
@@ -112,8 +171,16 @@ export default function LoginPage() {
             fullWidth
             size="small"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (fieldErrors.password) {
+                setFieldErrors((prev) => ({ ...prev, password: "" }));
+              }
+              if (error) setError("");
+            }}
             disabled={loading}
+            error={Boolean(fieldErrors.password)}
+            helperText={fieldErrors.password}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
