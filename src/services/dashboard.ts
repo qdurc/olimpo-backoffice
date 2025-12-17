@@ -3,10 +3,18 @@ import {
 	upcomingEvents,
 } from "../mocks/dashboard";
 import { apiFetchJson, isApiConfigured } from "./http";
+import { getSession } from "./session";
 
 type Facility = { id: number; status: string };
 type Reservation = { id: number; estatusID: number };
-type User = { userId: number; status: string };
+type User = {
+	id?: number | string | null;
+	userId?: number | string | null;
+	userID?: number | string | null;
+	name?: string | null;
+	nombre?: string | null;
+	status?: string | null;
+};
 type Tournament = { id: number; status: string };
 
 function unwrapArray<T>(response: any): T[] {
@@ -21,6 +29,14 @@ const fallback = {
 	events: upcomingEvents,
 };
 
+function resolveUserId(user: User | null | undefined) {
+	return user?.id ?? user?.userId ?? user?.userID ?? null;
+}
+
+function resolveUserName(user: User | null | undefined) {
+	return user?.name ?? user?.nombre ?? "";
+}
+
 export async function getDashboardData() {
 	if (!isApiConfigured) {
 		return {
@@ -31,6 +47,7 @@ export async function getDashboardData() {
 				{ title: "Torneos en curso", value: 0 },
 			],
 			activity: [],
+			currentUserName: "",
 			...fallback,
 		};
 	}
@@ -52,6 +69,18 @@ export async function getDashboardData() {
 		const reservations = unwrapArray<Reservation>(reservationsRes);
 		const users = unwrapArray<User>(usersRes);
 		const tournaments = unwrapArray<Tournament>(tournamentsRes);
+		const session = getSession();
+		const sessionUserId = session?.userID ?? null;
+		const currentUserName =
+			sessionUserId !== null
+				? resolveUserName(
+						users.find(
+							(user) =>
+								String(resolveUserId(user) ?? "") ===
+								String(sessionUserId),
+						),
+				  )
+				: "";
 
 		const totalReservations = reservations.length;
 		const activeReservations = reservations.filter(r => r.estatusID === 1).length;
@@ -113,6 +142,7 @@ export async function getDashboardData() {
 				},
 			],
 
+			currentUserName,
 			...fallback,
 		};
 	} catch (error) {
@@ -125,6 +155,7 @@ export async function getDashboardData() {
 				{ title: "Torneos en curso", value: 0 },
 			],
 			activity: [],
+			currentUserName: "",
 			...fallback,
 		};
 	}

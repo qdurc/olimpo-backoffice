@@ -135,7 +135,12 @@ export default function Sidebar() {
               mx: 0.5,
               borderRadius: 1,
               bgcolor: "#f9fafb",
-              "&:hover": { bgcolor: "#f3f4f6" },
+              "&:hover": {
+                bgcolor: "#f3f4f6",
+                "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+                  color: "#d32f2f",
+                },
+              },
             }}
           >
             <ListItemIcon sx={{ color: "#6b7280" }}>

@@ -68,6 +68,7 @@ const DashboardPage = () => {
 		activity: [],
 		classification: [],
 		events: [],
+		currentUserName: "",
 	});
 	const [loading, setLoading] = useState(true);
 	const theme = useTheme();
@@ -92,7 +93,7 @@ const DashboardPage = () => {
 		};
 	}, []);
 
-	const { stats, activity, classification, events } = data;
+	const { stats, activity, classification, events, currentUserName } = data;
 	const activityColors = [
 		theme.palette.primary.main,
 		theme.palette.primary.light,
@@ -137,12 +138,20 @@ const DashboardPage = () => {
 				minHeight: "100vh",
 			}}
 		>
-			<Typography
-				variant="h4"
-				sx={{ fontWeight: 800, mb: 3, color: theme.palette.common.black }}
-			>
-				Dashboard
-			</Typography>
+			<Box sx={{ mb: 3 }}>
+				<Typography
+					variant="h4"
+					sx={{ fontWeight: 800, color: theme.palette.common.black }}
+				>
+					Dashboard
+				</Typography>
+				<Typography
+					variant="subtitle2"
+					sx={{ mt: 0.5, color: theme.palette.primary.main }}
+				>
+					Bienvenido, {currentUserName || "al panel principal"}
+				</Typography>
+			</Box>
 
 			{/* CARDS */}
 			<Box
