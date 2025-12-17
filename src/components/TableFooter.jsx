@@ -13,7 +13,11 @@ export default function TableFooter({
 						onChange={(e) => onPageSizeChange(Number(e.target.value))}
 						sx={{ minWidth: 72 }}
 					>
-						{[8, 10, 20, 50].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
+						{[8, 10, 20, 50].map((n) => (
+							<MenuItem key={n} value={n}>
+								{n}
+							</MenuItem>
+						))}
 					</Select>
 				</FormControl>
 			</Box>
