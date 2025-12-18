@@ -315,6 +315,7 @@ const DashboardPage = () => {
 							<Typography
 								key={item.name}
 								variant="body2"
+								component="div"
 								sx={{
 									display: "flex",
 									alignItems: "center",

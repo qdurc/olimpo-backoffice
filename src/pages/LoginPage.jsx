@@ -35,14 +35,16 @@ export default function LoginPage() {
   }, [navigate, redirectTo]);
 
   const normalizeErrorMessage = (err) => {
-    if (err instanceof Error) {
-      const raw = err.message?.trim?.() ?? "";
-      const lower = raw.toLowerCase();
-      if (!raw) {
-        return "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.";
+    const fallback =
+      "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.";
+
+    const resolveKnownMessage = (text) => {
+      const lower = text.toLowerCase();
+      if (lower.includes("invalid_login_credentials")) {
+        return "Credenciales inválidas. Verifica tu correo y contraseña.";
       }
-      if (raw.includes("Failed to fetch") || raw.includes("NetworkError")) {
-        return "No pudimos conectar con el servidor. Intenta nuevamente más tarde.";
+      if (lower.includes("user is not an admin")) {
+        return "Tu usuario no tiene permisos de administrador.";
       }
       if (lower.includes("status 401") || lower.includes("unauthorized") || lower.includes("no autorizado")) {
         return "Credenciales inválidas. Verifica tu correo y contraseña.";
@@ -50,17 +52,38 @@ export default function LoginPage() {
       if (lower.includes("status 500")) {
         return "El servidor tuvo un problema. Intenta nuevamente más tarde.";
       }
-      if ((raw.startsWith("{") && raw.endsWith("}")) || (raw.startsWith("[") && raw.endsWith("]"))) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed?.message) return String(parsed.message);
-        } catch {
-          // ignore JSON parse errors
-        }
+      if (text.includes("Failed to fetch") || text.includes("NetworkError")) {
+        return "No pudimos conectar con el servidor. Intenta nuevamente más tarde.";
       }
-      return raw;
+      return "";
+    };
+
+    if (!(err instanceof Error)) return fallback;
+
+    const raw = err.message?.trim?.() ?? "";
+    if (!raw) return fallback;
+
+    const known = resolveKnownMessage(raw);
+    if (known) return known;
+
+    if ((raw.startsWith("{") && raw.endsWith("}")) || (raw.startsWith("[") && raw.endsWith("]"))) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed?.errors)) {
+          const joined = parsed.errors.join(" ");
+          const knownFromErrors = resolveKnownMessage(joined);
+          if (knownFromErrors) return knownFromErrors;
+        }
+        if (parsed?.message) {
+          const knownFromMessage = resolveKnownMessage(String(parsed.message));
+          return knownFromMessage || String(parsed.message);
+        }
+      } catch {
+        // ignore JSON parse errors
+      }
     }
-    return "No pudimos iniciar sesión. Verifica tus credenciales e inténtalo de nuevo.";
+
+    return raw;
   };
 
   const handleSubmit = (event) => {
@@ -80,6 +103,8 @@ export default function LoginPage() {
 
     if (!trimmedPassword) {
       nextErrors.password = "Contraseña requerida";
+    } else if (trimmedPassword.length < 6) {
+      nextErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
 
     if (nextErrors.email || nextErrors.password) {
@@ -181,6 +206,7 @@ export default function LoginPage() {
             disabled={loading}
             error={Boolean(fieldErrors.password)}
             helperText={fieldErrors.password}
+            inputProps={{ minLength: 6 }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
