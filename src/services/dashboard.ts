@@ -5,7 +5,12 @@ import {
 import { apiFetchJson, isApiConfigured } from "./http";
 import { getSession } from "./session";
 
-type Facility = { id: number; status: string };
+type Facility = {
+	id: number;
+	status?: string | number | null;
+	status_ID?: number | null;
+	estatusID?: number | null;
+};
 type Reservation = { id: number; estatusID: number };
 type User = {
 	id?: number | string | null;
@@ -89,9 +94,19 @@ export async function getDashboardData() {
 			: 0;
 
 		const totalFacilities = facilities.length;
-		const availableFacilities = facilities.filter(
-			f => f.status === "Activo"
-		).length;
+		const availableFacilities = facilities.filter((facility) => {
+			const raw = facility.status;
+			if (typeof raw === "string") {
+				const normalized = raw.trim().toLowerCase();
+				if (normalized === "activo") return true;
+				const asNumber = Number(normalized);
+				if (!Number.isNaN(asNumber)) return asNumber === 1;
+			}
+			if (typeof raw === "number") return raw === 1;
+			if (typeof facility.status_ID === "number") return facility.status_ID === 1;
+			if (typeof facility.estatusID === "number") return facility.estatusID === 1;
+			return false;
+		}).length;
 		const facilitiesPct = totalFacilities
 			? Math.round((availableFacilities / totalFacilities) * 100)
 			: 0;

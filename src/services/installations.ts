@@ -81,15 +81,9 @@ function normalizeFacility(data?: FacilityApi | null, fallback?: Installation): 
 				: numFromStatus;
 
 	const statusTextFromNumber =
-		statusNumeric === 1
-			? "Activo"
-			: statusNumeric === 2
-				? "Inactivo"
-				: statusNumeric === 3
-					? "En Mantenimiento"
-					: statusNumeric === 4
-						? "Reservado"
-						: null;
+		typeof statusNumeric === "number"
+			? installationStatuses.find((status) => status.id === statusNumeric)?.label ?? null
+			: null;
 
 	const statusId =
 		statusNumeric ??
@@ -103,6 +97,10 @@ function normalizeFacility(data?: FacilityApi | null, fallback?: Installation): 
 		fallback?.id ??
 		`facility-${Math.random().toString(36).slice(2)}`;
 
+	const statusString = typeof data.status === "string" ? data.status.trim() : "";
+	const statusStringIsNumeric =
+		statusString !== "" && !Number.isNaN(Number(statusString));
+
 	return {
 		id: fallbackId,
 		nombre: data.name ?? fallback?.nombre ?? "",
@@ -111,7 +109,9 @@ function normalizeFacility(data?: FacilityApi | null, fallback?: Installation): 
 		direccion: data.address ?? fallback?.direccion ?? "",
 		estado:
 			typeof data.status === "string"
-				? data.status
+				? statusStringIsNumeric
+					? statusTextFromNumber ?? statusString
+					: statusString
 				: statusTextFromNumber ??
 					(typeof data.status === "number"
 						? String(data.status)
@@ -127,6 +127,11 @@ function parseStatusId(statusId?: number | string | null) {
 	if (typeof statusId === "number" && !Number.isNaN(statusId)) return statusId;
 	const parsed = Number(statusId);
 	return Number.isNaN(parsed) ? null : parsed;
+}
+
+function statusLabelFromId(statusId?: number | null) {
+	if (typeof statusId !== "number") return null;
+	return installationStatuses.find((status) => status.id === statusId)?.label ?? null;
 }
 
 export async function getInstallations(): Promise<Installation[]> {
@@ -196,6 +201,7 @@ export async function createInstallation(
 		type: payload.tipo,
 		capacity: payload.capacidad,
 		address: payload.direccion,
+		status: statusId ?? null,
 		status_ID: statusId,
 	};
 
@@ -214,9 +220,9 @@ export async function createInstallation(
 		capacidad: payload.capacidad,
 		direccion: payload.direccion,
 		estado:
-			typeof payload.estadoId === "number" || typeof payload.estadoId === "string"
-				? String(payload.estadoId)
-				: payload.estado ?? "Sin estado",
+			statusLabelFromId(statusId) ??
+			payload.estado ??
+			(statusId !== null ? String(statusId) : "Sin estado"),
 		statusId,
 	});
 
@@ -269,6 +275,7 @@ export async function updateInstallation(
 		type: payload.tipo,
 		capacity: payload.capacidad,
 		address: payload.direccion,
+		status: statusId ?? null,
 		status_ID: statusId,
 	};
 
@@ -291,9 +298,9 @@ export async function updateInstallation(
 		capacidad: payload.capacidad,
 		direccion: payload.direccion,
 		estado:
-			typeof payload.estadoId === "number" || typeof payload.estadoId === "string"
-				? String(payload.estadoId)
-				: payload.estado ?? "Sin estado",
+			statusLabelFromId(statusId) ??
+			payload.estado ??
+			(statusId !== null ? String(statusId) : "Sin estado"),
 		statusId: parseStatusId(payload.estadoId),
 	};
 
