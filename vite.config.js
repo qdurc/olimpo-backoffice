@@ -1,35 +1,38 @@
 /* eslint-env node */
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-
-// // https://vite.dev/config/
-// export default defineConfig({
-//   plugins: [react()],
-// })
-
 import fs from "node:fs";
+import path from "node:path";
 
-export default defineConfig(({ mode }) => {
-	const env = loadEnv(mode, process.cwd(), "");
-	const apiTarget = env.VITE_API_URL;
+export default defineConfig(({ mode, command }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const apiTarget = env.VITE_API_URL;
 
-	return {
-		plugins: [react()],
-		server: {
-			host: true,
-			port: 5173,
-			https: {
-				key: fs.readFileSync("localhost-key.pem"),
-				cert: fs.readFileSync("localhost.pem"),
-			},
-			proxy: apiTarget
-				? {
-						"/api": {
-							target: apiTarget,
-							changeOrigin: true,
-						},
-				  }
-				: undefined,
-		},
-	};
+  const isDev = command === "serve";
+
+  const serverConfig = {
+    host: true,
+    port: 5173,
+    proxy: apiTarget
+      ? {
+          "/api": {
+            target: apiTarget,
+            changeOrigin: true,
+          },
+        }
+      : undefined,
+  };
+
+  // Solo en local/dev: usa HTTPS con tus certificados
+  if (isDev) {
+    serverConfig.https = {
+      key: fs.readFileSync(path.resolve(process.cwd(), "localhost-key.pem")),
+      cert: fs.readFileSync(path.resolve(process.cwd(), "localhost.pem")),
+    };
+  }
+
+  return {
+    plugins: [react()],
+    server: serverConfig,
+  };
 });
