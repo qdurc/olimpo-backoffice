@@ -16,7 +16,6 @@ export default function UserModal({
 	onSave,
 	initialData = null,
 	roles = [],
-	statuses = [],
 	loading = false,
 }) {
 	const emptyForm = useMemo(
@@ -25,6 +24,7 @@ export default function UserModal({
 			email: "",
 			rolId: "",
 			estadoId: "",
+			password: "",
 		}),
 		[],
 	);
@@ -34,24 +34,26 @@ export default function UserModal({
 
 	useEffect(() => {
 		if (open) {
+			const defaultRol = !initialData && roles.length
+				? String(roles[0].id)
+				: "";
+
 			setForm({
 				nombre: initialData?.nombre ?? "",
 				email: initialData?.email ?? "",
 				rolId:
 					initialData?.rolId !== undefined && initialData?.rolId !== null
 						? String(initialData.rolId)
-						: "",
-				estadoId:
-					initialData?.estadoId !== undefined && initialData?.estadoId !== null
-						? String(initialData.estadoId)
-						: "",
+						: defaultRol,
+				estadoId: "1",
+				password: "",
 			});
 			setErrors({});
 		} else {
 			setForm(emptyForm);
 			setErrors({});
 		}
-	}, [open, initialData, emptyForm]);
+	}, [open, initialData, emptyForm, roles]);
 
 	const handleChange = (event) => {
 		const { name, value } = event.target;
@@ -67,11 +69,15 @@ export default function UserModal({
 		if (!form.email.trim()) {
 			nextErrors.email = "Correo requerido";
 		}
+		if (!initialData) {
+			if (!form.password.trim()) {
+				nextErrors.password = "Contraseña requerida";
+			} else if (form.password.trim().length < 6) {
+				nextErrors.password = "Mínimo 6 caracteres";
+			}
+		}
 		if (roles.length && !form.rolId) {
 			nextErrors.rolId = "Selecciona un rol";
-		}
-		if (statuses.length && !form.estadoId) {
-			nextErrors.estadoId = "Selecciona un estado";
 		}
 
 		setErrors(nextErrors);
@@ -83,6 +89,7 @@ export default function UserModal({
 			email: form.email.trim(),
 			rolId: form.rolId === "" ? null : form.rolId,
 			estadoId: form.estadoId === "" ? null : form.estadoId,
+			password: form.password.trim(),
 		});
 		onClose?.();
 	};
@@ -115,6 +122,20 @@ export default function UserModal({
 						error={Boolean(errors.email)}
 						helperText={errors.email}
 					/>
+					{!initialData && (
+						<TextField
+							label="Contraseña"
+							name="password"
+							type="password"
+							fullWidth
+							required
+							value={form.password}
+							onChange={handleChange}
+							error={Boolean(errors.password)}
+							helperText={errors.password}
+							inputProps={{ minLength: 6 }}
+						/>
+					)}
 					<TextField
 						select
 						label="Rol"
@@ -134,23 +155,19 @@ export default function UserModal({
 						))}
 					</TextField>
 					<TextField
-						select
 						label="Estado"
 						name="estadoId"
 						fullWidth
-						required={Boolean(statuses.length)}
-						value={form.estadoId}
-						onChange={handleChange}
-						error={Boolean(errors.estadoId)}
-						helperText={errors.estadoId}
-					>
-						<MenuItem value="">Selecciona</MenuItem>
-						{statuses.map((status) => (
-							<MenuItem key={status.id} value={String(status.id)}>
-								{status.label}
-							</MenuItem>
-						))}
-					</TextField>
+						value={
+							form.estadoId === "1"
+								? "Activo"
+								: form.estadoId === "2"
+									? "Inactivo"
+									: form.estadoId
+						}
+						disabled
+						helperText="Estado asignado automáticamente"
+					/>
 				</Box>
 			</DialogContent>
 			<DialogActions sx={{ px: 3, pb: 2 }}>

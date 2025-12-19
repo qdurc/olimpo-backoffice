@@ -116,7 +116,7 @@ export default function DisciplinesPage() {
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
 			<PageHeader
-				title="Disciplina"
+				title="Disciplinas"
 				cta={
 					<Button
 						variant="contained"

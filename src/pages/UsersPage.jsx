@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, TextField, InputAdornment } from "@mui/material";
+import { Box, TextField, InputAdornment, Button } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
@@ -7,7 +7,7 @@ import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
 import UserModal from "../components/UserModal";
-import { getUserEdit, getUsers, updateUser } from "../services/users";
+import { getUserEdit, getUsers, updateUser, createUser } from "../services/users";
 
 export default function UsersPage() {
 	const [page, setPage] = useState(1);
@@ -18,9 +18,23 @@ export default function UsersPage() {
 	const [error, setError] = useState("");
 	const [openModal, setOpenModal] = useState(false);
 	const [editing, setEditing] = useState(null);
-	const [editOptions, setEditOptions] = useState({ roles: [], statuses: [] });
-	const [submitting, setSubmitting] = useState(false);
-	const [loadingEdit, setLoadingEdit] = useState(false);
+const [editOptions, setEditOptions] = useState({ roles: [], statuses: [] });
+const [submitting, setSubmitting] = useState(false);
+const [loadingEdit, setLoadingEdit] = useState(false);
+const statusOptions = useMemo(
+	() => [
+		{ id: 1, label: "Activo" },
+		{ id: 2, label: "Inactivo" },
+	],
+	[],
+);
+const roleOptions = useMemo(
+	() => [
+		{ id: 1, label: "Admin" },
+		{ id: 2, label: "Usuario" },
+	],
+		[],
+	);
 
 	useEffect(() => {
 		setLoading(true);
@@ -88,29 +102,42 @@ export default function UsersPage() {
 	const handleSave = async (payload) => {
 		try {
 			setSubmitting(true);
-			const updated = await updateUser(payload.id, payload);
-			const roleLabel =
-				editOptions.roles.find((r) => String(r.id) === String(payload.rolId))
-					?.label ?? updated.rol;
-			const statusLabel =
-				editOptions.statuses.find((s) => String(s.id) === String(payload.estadoId))
-					?.label ?? updated.estado;
+			setError("");
+			if (payload.id) {
+				const updated = await updateUser(payload.id, payload);
+				const roleLabel =
+					editOptions.roles.find((r) => String(r.id) === String(payload.rolId))
+						?.label ?? updated.rol;
+				const statusLabel =
+					editOptions.statuses.find((s) => String(s.id) === String(payload.estadoId))
+						?.label ??
+					statusOptions.find((s) => String(s.id) === String(payload.estadoId))?.label ??
+					updated.estado;
 
-			const merged = {
-				...updated,
-				rol: roleLabel ?? updated.rol,
-				estado: statusLabel ?? updated.estado,
-				rolId: payload.rolId ?? updated.rolId ?? null,
-				estadoId: payload.estadoId ?? updated.estadoId ?? null,
-			};
+				const merged = {
+					...updated,
+					rol: roleLabel ?? updated.rol,
+					estado: statusLabel ?? updated.estado,
+					rolId: payload.rolId ?? updated.rolId ?? null,
+					estadoId: payload.estadoId ?? updated.estadoId ?? null,
+				};
 
-			setUsers((prev) =>
-				prev.map((u) =>
-					String(u.id) === String(payload.id) ? { ...u, ...merged } : u,
-				),
-			);
+				setUsers((prev) =>
+					prev.map((u) =>
+						String(u.id) === String(payload.id) ? { ...u, ...merged } : u,
+					),
+				);
+			} else {
+				const created = await createUser({
+					...payload,
+					rolId: payload.rolId ?? 2,
+					estadoId: payload.estadoId ?? 1,
+				});
+				setUsers((prev) => [...prev, created]);
+			}
 		} catch (err) {
 			console.error("Error guardando usuario", err);
+			setError("No se pudo guardar el usuario.");
 		} finally {
 			setSubmitting(false);
 			setEditing(null);
@@ -144,11 +171,25 @@ export default function UsersPage() {
 
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
-			<PageHeader title="Usuarios" />
+			<PageHeader
+				title="Usuarios"
+				cta={
+					<Button
+						variant="contained"
+						onClick={() => {
+							setEditing(null);
+							setOpenModal(true);
+						}}
+					>
+						Nuevo Usuario
+					</Button>
+				}
+			/>
 
 			<Box display="flex" justifyContent="flex-end" mb={2}>
 				<TextField
 					placeholder="Buscar"
+					type="text"
 					size="small"
 					value={search}
 					onChange={(e) => {
@@ -182,6 +223,7 @@ export default function UsersPage() {
 				onPageChange={setPage}
 				onPageSizeChange={setPageSize}
 				onEdit={handleEdit}
+				// onDelete={handleDelete}
 			/>
 
 			<TableFooter
@@ -204,8 +246,8 @@ export default function UsersPage() {
 				}}
 				onSave={handleSave}
 				initialData={editing}
-				roles={editOptions.roles}
-				statuses={editOptions.statuses}
+				roles={editOptions.roles.length ? editOptions.roles : roleOptions}
+				statuses={editOptions.statuses.length ? editOptions.statuses : statusOptions}
 				loading={submitting}
 			/>
 		</Box>

@@ -111,7 +111,7 @@ export default function CategoriesPage() {
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
 			<PageHeader
-				title="Categoría"
+				title="Categorías"
 				cta={
 					<Button
 						variant="contained"

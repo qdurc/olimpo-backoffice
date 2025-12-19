@@ -91,6 +91,10 @@ export type UserUpdatePayload = {
 	estadoId?: number | string | null;
 };
 
+export type UserCreatePayload = UserUpdatePayload & {
+	password: string;
+};
+
 function buildAvatar(seed: string): string {
 	const safeSeed = encodeURIComponent(seed || Math.random().toString(36).slice(2));
 	return `https://i.pravatar.cc/96?u=${safeSeed}`;
@@ -292,6 +296,53 @@ export async function updateUser(
 	};
 
 	const normalized = normalizeUser(updated, fallbackUser);
+	normalized.rolId = payload.rolId ?? normalized.rolId ?? null;
+	normalized.estadoId = payload.estadoId ?? normalized.estadoId ?? null;
+
+	return normalized;
+}
+
+export async function createUser(payload: UserCreatePayload): Promise<User> {
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
+
+	const body = {
+		name: payload.nombre,
+		email: payload.email,
+		password: payload.password,
+		roleId: parseNum(payload.rolId),
+		estatusID: parseNum(payload.estadoId),
+	};
+
+	const response = await apiFetchJson<UserUpdateResponse>("/api/Auth/Register", {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
+
+	const created =
+		response && typeof response === "object" && "data" in response
+			? response.data
+			: (response as UserApi | null | undefined);
+
+	const fallbackUser: User = {
+		id: created?.id ?? created?.userId ?? created?.userID ?? `user-${Math.random().toString(36).slice(2)}`,
+		nombre: payload.nombre,
+		email: payload.email,
+		rol:
+			payload.rolId !== undefined && payload.rolId !== null
+				? String(payload.rolId)
+				: "Usuario",
+		estado:
+			payload.estadoId !== undefined && payload.estadoId !== null
+				? String(payload.estadoId)
+				: "Activo",
+		avatar: buildAvatar(String(payload.email || payload.nombre)),
+		rolId: payload.rolId ?? null,
+		estadoId: payload.estadoId ?? null,
+	};
+
+	const normalized = normalizeUser(created, fallbackUser);
 	normalized.rolId = payload.rolId ?? normalized.rolId ?? null;
 	normalized.estadoId = payload.estadoId ?? normalized.estadoId ?? null;
 

@@ -86,7 +86,23 @@ function resolveBornDate(data: Partial<Manager> | SupervisorApi | null | undefin
 	);
 }
 
+function normalizeDateString(value?: string | null) {
+	if (!value) return "";
+	const date = new Date(value);
+	if (!Number.isNaN(date.getTime())) {
+		return date.toISOString().slice(0, 10); // YYYY-MM-DD
+	}
+	// Si no parsea como Date, intenta extraer YYYY-MM-DD al inicio del string.
+	if (typeof value === "string") {
+		const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+		if (match) return match[1];
+	}
+	return value;
+}
+
 function normalizeManager(data: Partial<Manager> | SupervisorApi | null | undefined): Manager {
+	const rawFecha = resolveBornDate(data);
+	const fechaIso = normalizeDateString(rawFecha);
 	return {
 		id:
 			(data as SupervisorApi | undefined)?.id ??
@@ -94,7 +110,7 @@ function normalizeManager(data: Partial<Manager> | SupervisorApi | null | undefi
 			`manager-${Math.random().toString(36).slice(2)}`,
 		nombreCompleto:
 			(data as SupervisorApi | undefined)?.fullName ?? data?.nombreCompleto ?? "",
-		fechaNacimiento: resolveBornDate(data),
+		fechaNacimiento: fechaIso,
 		cedula: (data as SupervisorApi | undefined)?.cedula ?? data?.cedula ?? "",
 		status: (data as SupervisorApi | undefined)?.status ?? data?.status ?? null,
 	};
@@ -114,6 +130,7 @@ export async function getManagers(): Promise<Manager[]> {
 	);
 
 	const payload = extractSupervisorArray(response);
+	console.log("Managers payload", payload);
 
 	return payload.map((item) => normalizeManager(item));
 }

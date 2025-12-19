@@ -99,8 +99,17 @@ export default function ManagersPage() {
 				width: 180,
 				valueFormatter: (p) => {
 					if (!p.value) return "";
+					if (typeof p.value === "string") {
+						const isoMatch = p.value.match(/^(\d{4}-\d{2}-\d{2})/);
+						if (isoMatch) {
+							return isoMatch[1];
+						}
+					}
 					const date = new Date(p.value);
-					return Number.isNaN(date.getTime()) ? p.value : date.toLocaleDateString();
+					if (Number.isNaN(date.getTime())) {
+						return typeof p.value === "string" ? p.value : "";
+					}
+					return date.toLocaleDateString();
 				},
 			},
 			{ field: "cedula", headerName: "Cédula", width: 180 },
@@ -111,7 +120,7 @@ export default function ManagersPage() {
 	return (
 		<Box sx={{ px: { xs: 2, md: 3 }, pr: { md: 4 } }}>
 			<PageHeader
-				title="Encargado"
+				title="Encargados"
 				cta={
 					<Button
 						variant="contained"
