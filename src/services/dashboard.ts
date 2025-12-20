@@ -1,6 +1,4 @@
-import {
-	upcomingEvents,
-} from "../mocks/dashboard";
+import { getMaintenances } from "./maintenances";
 import { apiFetchJson, isApiConfigured } from "./http";
 import { getSession } from "./session";
 
@@ -28,10 +26,6 @@ function unwrapArray<T>(response: any): T[] {
 	return [];
 }
 
-const fallback = {
-	events: upcomingEvents,
-};
-
 function resolveUserId(user: User | null | undefined) {
 	return user?.id ?? user?.userId ?? user?.userID ?? null;
 }
@@ -51,8 +45,8 @@ export async function getDashboardData() {
 			],
 			activity: [],
 			classification: [],
+			maintenances: [],
 			currentUserName: "",
-			...fallback,
 		};
 	}
 
@@ -62,11 +56,13 @@ export async function getDashboardData() {
 			reservationsRes,
 			usersRes,
 			tournamentsRes,
+			maintenances,
 		] = await Promise.all([
 			apiFetchJson("/api/Facility/GetAllFacilitiesAsyncFront"),
 			apiFetchJson("/api/Reservation/GetAllReservationsFront"),
 			apiFetchJson("/api/User/GetAllUsersIndex"),
 			apiFetchJson("/api/Tournaments/GetAllTournamentsFront"),
+			getMaintenances(),
 		]);
 
 		const facilities = unwrapArray<Facility>(facilitiesRes);
@@ -146,6 +142,17 @@ export async function getDashboardData() {
 			}
 		});
 
+		const dashboardMaintenances = maintenances
+			.filter(
+				(m) => m.estadoId === 1 || m.estadoId === 3
+			)
+			.sort(
+				(a, b) =>
+					new Date(a.inicio).getTime() -
+					new Date(b.inicio).getTime()
+			)
+			.slice(0, 5);
+
 		return {
 			stats: [
 				{
@@ -193,9 +200,8 @@ export async function getDashboardData() {
 				},
 				{ name: "Reservado", value: facilityStatusCount.Reservado },
 			].filter(item => item.value > 0),
-
+			maintenances: dashboardMaintenances,
 			currentUserName,
-			...fallback,
 		};
 	} catch (error) {
 		console.error("Error loading dashboard data, using fallback", error);
@@ -208,8 +214,8 @@ export async function getDashboardData() {
 			],
 			activity: [],
 			classification: [],
+			maintenances: [],
 			currentUserName: "",
-			...fallback,
 		};
 	}
 }

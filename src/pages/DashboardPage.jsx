@@ -67,7 +67,7 @@ const DashboardPage = () => {
 		stats: [],
 		activity: [],
 		classification: [],
-		events: [],
+		maintenances: [],
 		currentUserName: "",
 	});
 	const [loading, setLoading] = useState(true);
@@ -93,7 +93,7 @@ const DashboardPage = () => {
 		};
 	}, []);
 
-	const { stats, activity, classification, events, currentUserName } = data;
+	const { stats, activity, classification, maintenances, currentUserName } = data;
 	const activityColors = [
 		theme.palette.primary.main,
 		theme.palette.primary.light,
@@ -348,7 +348,7 @@ const DashboardPage = () => {
 				</Paper>
 			</Box>
 
-			{/* EVENTOS */}
+			{/* Mantenimientos */}
 			<Paper
 				elevation={0}
 				sx={{
@@ -361,7 +361,7 @@ const DashboardPage = () => {
 					variant="subtitle1"
 					sx={{ fontWeight: 800, mb: 2, color: theme.palette.text.primary }}
 				>
-					Próximos eventos y torneos
+					Próximos mantenimientos
 				</Typography>
 
 				<TableContainer>
@@ -378,7 +378,7 @@ const DashboardPage = () => {
 										fontWeight: 700,
 									}}
 								>
-									Evento
+									Instalación
 								</TableCell>
 
 								<TableCell
@@ -387,7 +387,7 @@ const DashboardPage = () => {
 										fontWeight: 700,
 									}}
 								>
-									Participación
+									Inicio
 								</TableCell>
 
 								<TableCell
@@ -396,7 +396,7 @@ const DashboardPage = () => {
 										fontWeight: 700,
 									}}
 								>
-									Inscritos
+									Fin
 								</TableCell>
 
 								<TableCell
@@ -405,26 +405,22 @@ const DashboardPage = () => {
 										fontWeight: 700,
 									}}
 								>
-									Fecha
+									Estado
 								</TableCell>
 							</TableRow>
 						</TableHead>
 
 						<TableBody>
-							{events.map((e) => (
-								<TableRow key={`${e.evento}-${e.fecha}`}>
-									<TableCell sx={{ color: theme.palette.common.black }}>
-										{e.evento}
+							{maintenances.map((m) => (
+								<TableRow key={m.id}>
+									<TableCell>{m.nombre}</TableCell>
+									<TableCell>
+										{m.inicio ? new Date(m.inicio).toLocaleString() : ""}
 									</TableCell>
-									<TableCell sx={{ color: theme.palette.common.black }}>
-										{e.participacion}
+									<TableCell>
+										{m.fin ? new Date(m.fin).toLocaleString() : ""}
 									</TableCell>
-									<TableCell sx={{ color: theme.palette.common.black }}>
-										{e.inscritos}
-									</TableCell>
-									<TableCell sx={{ color: theme.palette.common.black }}>
-										{e.fecha}
-									</TableCell>
+									<TableCell>{m.estado}</TableCell>
 								</TableRow>
 							))}
 						</TableBody>
