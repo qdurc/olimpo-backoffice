@@ -18,11 +18,11 @@ type DisciplineResponse =
 	| DisciplineApi[]
 	| DisciplineApi
 	| {
-			data?: DisciplineApi | DisciplineApi[] | null;
-			errors?: unknown[];
-			success?: boolean;
-			message?: string;
-	  };
+		data?: DisciplineApi | DisciplineApi[] | null;
+		errors?: unknown[];
+		success?: boolean;
+		message?: string;
+	};
 
 function normalizeDiscipline(
 	data: Partial<Discipline> | DisciplineApi | null | undefined,
@@ -59,7 +59,7 @@ export async function createDiscipline(payload: DisciplinePayload): Promise<Disc
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	const body = { descripcion: payload.descripcion };
+	const body = { descripcion: payload.descripcion, status: 1 };
 	const response = await apiFetchJson<DisciplineResponse>("/api/Discipline/CreateDiscipline", {
 		method: "POST",
 		body: JSON.stringify(body),
@@ -83,7 +83,7 @@ export async function updateDiscipline(
 	const numericId = Number(id);
 	const requestId = Number.isFinite(numericId) ? numericId : id;
 
-	const body = { id: requestId, descripcion: payload.descripcion };
+	const body = { id: requestId, descripcion: payload.descripcion, status: 1 };
 	const response = await apiFetchJson<DisciplineResponse>("/api/Discipline/UpdateDiscipline", {
 		method: "POST",
 		body: JSON.stringify(body),
