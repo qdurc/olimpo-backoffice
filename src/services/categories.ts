@@ -18,11 +18,11 @@ type CategoryResponse =
 	| CategoryApi[]
 	| CategoryApi
 	| {
-			data?: CategoryApi | CategoryApi[] | null;
-			errors?: unknown[];
-			success?: boolean;
-			message?: string;
-	  };
+		data?: CategoryApi | CategoryApi[] | null;
+		errors?: unknown[];
+		success?: boolean;
+		message?: string;
+	};
 
 function normalizeCategory(data: Partial<Category> | CategoryApi | null | undefined, fallback?: Category): Category {
 	return {
@@ -56,7 +56,7 @@ export async function createCategory(payload: CategoryPayload): Promise<Category
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	const body = { descripcion: payload.descripcion };
+	const body = { descripcion: payload.descripcion, status: 1 };
 	const response = await apiFetchJson<CategoryResponse>("/api/Category/CreateCategory", {
 		method: "POST",
 		body: JSON.stringify(body),
@@ -80,7 +80,7 @@ export async function updateCategory(
 	const numericId = Number(id);
 	const requestId = Number.isFinite(numericId) ? numericId : id;
 
-	const body = { id: requestId, descripcion: payload.descripcion };
+	const body = { id: requestId, descripcion: payload.descripcion, status: 1 };
 	const response = await apiFetchJson<CategoryResponse>("/api/Category/UpdateCategory", {
 		method: "POST",
 		body: JSON.stringify(body),
