@@ -1,4 +1,3 @@
-// src/services/tournaments.ts
 import { apiFetchJson, isApiConfigured } from "./http";
 import { getInstallations, type Installation } from "./installations";
 import { getTournamentViewModel } from "./tournamentViewModel";
@@ -125,7 +124,6 @@ async function getViewMaps(): Promise<{
 
 	const statusMap = new Map<number, string>();
 	(vm.estatus ?? []).forEach((s: any) => {
-		// en el view model estatus tiene estatusID y descripcion
 		if (s?.estatusID !== undefined) statusMap.set(Number(s.estatusID), s.descripcion ?? String(s.estatusID));
 	});
 
@@ -153,13 +151,32 @@ function normalizeTournament(
 		facilityMapSimple?: Map<number, string>;
 	},
 ): Tournament {
-	const facilityId = item.facilityID ?? null;
-	const categoryId = item.categoryID ?? null;
-	const disciplineId = item.disciplineID ?? null;
-	const estadoId = item.estatusID ?? null;
-	const supervisorId = item.supervisorID ?? null;
 
-	// preferir nombre directo de la respuesta; si no, buscar en viewmodel maps; si no, usar ID string
+	const categoryId =
+		item.categoryID ??
+		findIdByName(helpers?.catMap, item.category) ??
+		null;
+
+	const disciplineId =
+		item.disciplineID ??
+		findIdByName(helpers?.discMap, item.discipline) ??
+		null;
+
+	const estadoId =
+		item.estatusID ??
+		findIdByName(helpers?.statusMap, item.status) ??
+		null;
+
+	const supervisorId =
+		item.supervisorID ??
+		findIdByName(helpers?.encMap, item.supervisor) ??
+		null;
+
+	const facilityId =
+		item.facilityID ??
+		findIdByName(helpers?.facilityMapSimple, item.facility) ??
+		null;
+
 	const categoria =
 		item.category ??
 		(helpers?.catMap?.get(Number(categoryId ?? -1)) ?? (categoryId !== null ? String(categoryId) : "Sin categoría"));
@@ -201,7 +218,6 @@ function normalizeTournament(
 	};
 }
 
-/** GET all tournaments */
 export async function getTournaments(facilities?: Installation[]): Promise<Tournament[]> {
 	if (!isApiConfigured) {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
@@ -219,7 +235,6 @@ export async function getTournaments(facilities?: Installation[]): Promise<Tourn
 	return tournamentsList.map((t) => normalizeTournament(t, facilityMap, viewMaps));
 }
 
-/** CREATE tournament */
 export async function createTournament(payload: TournamentPayload): Promise<Tournament> {
 	if (!isApiConfigured) {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
@@ -230,9 +245,9 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 
 	const categoryID = parseNum(payload.categoriaId);
 	const disciplineID = parseNum(payload.disciplinaId);
-	const estatusID = parseNum(payload.estadoId) ?? 0; // enviar siempre estatusID según tu requerimiento
+	const estatusID = parseNum(payload.estadoId) ?? 0;
 	const facilityID = parseNum(payload.facilityId);
-	const supervisorID = parseNum(payload.supervisorId) ?? 0; // enviar siempre supervisorID según tu requerimiento
+	const supervisorID = parseNum(payload.supervisorId) ?? 0;
 
 	const body: TournamentApi = {
 		name: payload.nombre,
@@ -258,7 +273,6 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 	return normalizeTournament({ ...body, ...data }, facilityMap, viewMaps);
 }
 
-/** UPDATE tournament */
 export async function updateTournament(id: number | string, payload: TournamentPayload): Promise<Tournament> {
 	if (!isApiConfigured) {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
@@ -301,7 +315,6 @@ export async function updateTournament(id: number | string, payload: TournamentP
 	return normalizeTournament({ ...body, ...data }, facilityMap, viewMaps);
 }
 
-/** DELETE tournament */
 export async function deleteTournament(id: number | string): Promise<void> {
 	if (!isApiConfigured) {
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
@@ -314,4 +327,17 @@ export async function deleteTournament(id: number | string): Promise<void> {
 	await apiFetchJson(`/api/Tournaments/DeleteTournament?${params.toString()}`, {
 		method: "DELETE",
 	});
+}
+
+function findIdByName(
+	map: Map<number, string> | undefined,
+	name?: string | null,
+) {
+	if (!map || !name) return null;
+	for (const [id, label] of map.entries()) {
+		if (label?.toLowerCase() === name.toLowerCase()) {
+			return id;
+		}
+	}
+	return null;
 }
