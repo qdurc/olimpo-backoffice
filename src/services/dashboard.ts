@@ -1,5 +1,4 @@
 import {
-	dashboardClassificationData,
 	upcomingEvents,
 } from "../mocks/dashboard";
 import { apiFetchJson, isApiConfigured } from "./http";
@@ -30,7 +29,6 @@ function unwrapArray<T>(response: any): T[] {
 }
 
 const fallback = {
-	classification: dashboardClassificationData,
 	events: upcomingEvents,
 };
 
@@ -52,6 +50,7 @@ export async function getDashboardData() {
 				{ title: "Torneos en curso", value: 0 },
 			],
 			activity: [],
+			classification: [],
 			currentUserName: "",
 			...fallback,
 		};
@@ -79,12 +78,12 @@ export async function getDashboardData() {
 		const currentUserName =
 			sessionUserId !== null
 				? resolveUserName(
-						users.find(
-							(user) =>
-								String(resolveUserId(user) ?? "") ===
-								String(sessionUserId),
-						),
-				  )
+					users.find(
+						(user) =>
+							String(resolveUserId(user) ?? "") ===
+							String(sessionUserId),
+					),
+				)
 				: "";
 
 		const totalReservations = reservations.length;
@@ -118,6 +117,34 @@ export async function getDashboardData() {
 		const tournamentsPct = totalTournaments
 			? Math.round((activeTournaments / totalTournaments) * 100)
 			: 0;
+
+		const facilityStatusCount = {
+			Activo: 0,
+			Inactivo: 0,
+			"En Mantenimiento": 0,
+			Reservado: 0,
+		};
+
+		facilities.forEach((facility) => {
+			const status = Number(facility.status ?? facility.status_ID ?? facility.estatusID);
+
+			switch (status) {
+				case 1:
+					facilityStatusCount.Activo++;
+					break;
+				case 2:
+					facilityStatusCount.Inactivo++;
+					break;
+				case 3:
+					facilityStatusCount["En Mantenimiento"]++;
+					break;
+				case 4:
+					facilityStatusCount.Reservado++;
+					break;
+				default:
+					break;
+			}
+		});
 
 		return {
 			stats: [
@@ -157,6 +184,16 @@ export async function getDashboardData() {
 				},
 			],
 
+			classification: [
+				{ name: "Activo", value: facilityStatusCount.Activo },
+				{ name: "Inactivo", value: facilityStatusCount.Inactivo },
+				{
+					name: "En Mantenimiento",
+					value: facilityStatusCount["En Mantenimiento"],
+				},
+				{ name: "Reservado", value: facilityStatusCount.Reservado },
+			].filter(item => item.value > 0),
+
 			currentUserName,
 			...fallback,
 		};
@@ -170,6 +207,7 @@ export async function getDashboardData() {
 				{ title: "Torneos en curso", value: 0 },
 			],
 			activity: [],
+			classification: [],
 			currentUserName: "",
 			...fallback,
 		};

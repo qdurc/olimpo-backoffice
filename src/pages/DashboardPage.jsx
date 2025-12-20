@@ -103,15 +103,32 @@ const DashboardPage = () => {
 		...item,
 		color: activityColors[index % activityColors.length],
 	}));
-	const classificationColors = [
-		theme.palette.primary.main,
-		theme.palette.primary.light,
-		theme.palette.primary.dark,
-	];
-	const classificationData = classification.map((item, index) => ({
-		...item,
-		color: classificationColors[index % classificationColors.length],
-	}));
+
+	const classificationData = classification.map((item) => {
+		let color = theme.palette.grey[300];
+
+		switch (item.name) {
+			case "Activo":
+				color = theme.palette.success.main;
+				break;
+			case "Inactivo":
+				color = theme.palette.grey[400];
+				break;
+			case "En Mantenimiento":
+				color = theme.palette.warning.main;
+				break;
+			case "Reservado":
+				color = theme.palette.primary.light;
+				break;
+			default:
+				break;
+		}
+
+		return {
+			...item,
+			color,
+		};
+	});
 
 	if (loading) {
 		return (
@@ -284,7 +301,7 @@ const DashboardPage = () => {
 						variant="subtitle1"
 						sx={{ fontWeight: 800, color: theme.palette.text.primary }}
 					>
-						Clasificación
+						Clasificación de instalaciones por estado
 					</Typography>
 
 					<Box sx={{ height: 260 }}>
