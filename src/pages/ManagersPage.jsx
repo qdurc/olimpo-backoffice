@@ -97,19 +97,17 @@ export default function ManagersPage() {
 				field: "fechaNacimiento",
 				headerName: "Fecha de Nacimiento",
 				width: 180,
-				valueFormatter: (p) => {
+
+				renderCell: (p) => {
 					if (!p.value) return "";
-					if (typeof p.value === "string") {
-						const isoMatch = p.value.match(/^(\d{4}-\d{2}-\d{2})/);
-						if (isoMatch) {
-							return isoMatch[1];
-						}
-					}
+
 					const date = new Date(p.value);
-					if (Number.isNaN(date.getTime())) {
-						return typeof p.value === "string" ? p.value : "";
-					}
-					return date.toLocaleDateString();
+
+					if (Number.isNaN(date.getTime())) return p.value;
+
+					return date.toLocaleDateString("en-US", {
+						timeZone: "UTC",
+					});
 				},
 			},
 			{ field: "cedula", headerName: "Cédula", width: 180 },
