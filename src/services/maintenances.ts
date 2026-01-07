@@ -11,6 +11,11 @@ type MaintenanceApi = {
 	estatusID?: number | null;
 };
 
+type UserApi = {
+	userId?: number | null;
+	name?: string | null;
+}
+
 export const maintenanceStatuses = [
 	{ id: 1, label: "Activo" },
 	{ id: 2, label: "Inactivo" },
@@ -26,6 +31,7 @@ export type Maintenance = {
 	inicio: string;
 	fin: string;
 	usuarioId: number | null;
+	usuarioNombre: string;
 	estadoId: number | null;
 	estado: string;
 };
@@ -41,6 +47,40 @@ export type MaintenancePayload = {
 
 let maintenancesCache: Maintenance[] | null = null;
 let maintenancesPromise: Promise<Maintenance[]> | null = null;
+let usersMapCache: Map<number, string> | null = null;
+let usersMapPromise: Promise<Map<number, string>> | null = null;
+
+async function getUsersMap(): Promise<Map<number, string>> {
+	if (usersMapCache) return usersMapCache;
+	if (usersMapPromise) return usersMapPromise;
+
+	usersMapPromise = (async () => {
+		const usersResponse = await apiFetchJson<UserApi[] | { data?: UserApi[] | null }>(
+			"/api/User/GetAllUsersIndex",
+		);
+
+		const usersList = Array.isArray(usersResponse)
+			? usersResponse
+			: Array.isArray(usersResponse?.data)
+				? usersResponse.data
+				: [];
+
+		const map = new Map<number, string>();
+		usersList.forEach((u) => {
+			const id = typeof u.userId === "number" ? u.userId : Number(u.userId);
+			if (Number.isFinite(id)) map.set(id, u.name ?? "");
+		});
+
+		usersMapCache = map;
+		return map;
+	})();
+
+	try {
+		return await usersMapPromise;
+	} finally {
+		usersMapPromise = null;
+	}
+}
 
 type MaintenanceApiResponse = {
 	data?: MaintenanceApi[] | MaintenanceApi | null;
@@ -86,6 +126,7 @@ function toIsoString(value?: string | null) {
 function normalizeMaintenance(
 	item: MaintenanceApi,
 	facilityMap: Map<number, Installation>,
+	userMap?: Map<number, string>,
 ): Maintenance {
 	const facilityId = item.facilityId ?? null;
 	const statusId = normalizeStatusId(item.estatusID) ?? null;
@@ -97,6 +138,9 @@ function normalizeMaintenance(
 		(facilityId !== null && facilityMap.get(facilityId)?.nombre) ||
 		(facilityId !== null ? `Instalación ${facilityId}` : "Sin instalación");
 
+	const usuarioId = item.userId ?? null;
+	const usuarioNombre = usuarioId !== null ? userMap?.get(Number(usuarioId)) ?? "" : "";
+
 	return {
 		id: item.id ?? `maintenance-${Math.random().toString(36).slice(2)}`,
 		facilityId,
@@ -104,7 +148,8 @@ function normalizeMaintenance(
 		descripcion: item.description ?? "",
 		inicio: item.startDate ?? "",
 		fin: item.endDate ?? "",
-		usuarioId: item.userId ?? null,
+		usuarioId,
+		usuarioNombre,
 		estadoId: statusId,
 		estado: statusText,
 	};
@@ -147,9 +192,27 @@ export async function getMaintenances(
 
 	const request = (async () => {
 		const facilityMap = await buildFacilityMap(facilities);
-		const maintenancesResponse = await apiFetchJson<MaintenanceApiResponse | MaintenanceApi[]>(
-			"/api/Maintenance/GetAllMaintenancesFront",
-		);
+
+		const [maintenancesResponse, usersResponse] = await Promise.all([
+			apiFetchJson<MaintenanceApiResponse | MaintenanceApi[]>(
+				"/api/Maintenance/GetAllMaintenancesFront",
+			),
+			apiFetchJson<UserApi[] | { data?: UserApi[] | null }>(
+				"/api/User/GetAllUsersIndex",
+			),
+		]);
+
+		const usersList = Array.isArray(usersResponse)
+			? usersResponse
+			: Array.isArray(usersResponse?.data)
+				? usersResponse.data
+				: [];
+
+		const userMap = new Map<number, string>();
+		usersList.forEach((u) => {
+			const id = typeof u.userId === "number" ? u.userId : Number(u.userId);
+			if (Number.isFinite(id)) userMap.set(id, u.name ?? "");
+		});
 
 		const maintenances = Array.isArray(maintenancesResponse)
 			? maintenancesResponse
@@ -157,7 +220,7 @@ export async function getMaintenances(
 				? maintenancesResponse.data
 				: [];
 
-		const normalized = maintenances.map((m) => normalizeMaintenance(m, facilityMap));
+		const normalized = maintenances.map((m) => normalizeMaintenance(m, facilityMap, userMap));
 
 		maintenancesCache = normalized;
 		return normalized;
@@ -175,6 +238,8 @@ export async function getMaintenances(
 export function clearMaintenancesCache() {
 	maintenancesCache = null;
 	maintenancesPromise = null;
+	usersMapCache = null;
+	usersMapPromise = null;
 }
 
 export async function createMaintenance(payload: MaintenancePayload): Promise<Maintenance> {
@@ -202,7 +267,7 @@ export async function createMaintenance(payload: MaintenancePayload): Promise<Ma
 		},
 	);
 
-	const facilityMap = await buildFacilityMap();
+	const [facilityMap, userMap] = await Promise.all([buildFacilityMap(), getUsersMap()]);
 
 	const normalized = normalizeMaintenance(
 		{
@@ -215,6 +280,7 @@ export async function createMaintenance(payload: MaintenancePayload): Promise<Ma
 			estatusID: body.estatusID ?? created?.estatusID,
 		},
 		facilityMap,
+		userMap,
 	);
 
 	if (maintenancesCache) {
@@ -264,10 +330,12 @@ export async function updateMaintenance(
 
 	const maintenanceData = response ? response.data : updated;
 
-	const facilityMap = await buildFacilityMap();
+	const [facilityMap, userMap] = await Promise.all([buildFacilityMap(), getUsersMap()]);
+
 	const normalized = normalizeMaintenance(
 		{ ...body, ...(maintenanceData || {}) },
 		facilityMap,
+		userMap,
 	);
 
 	if (maintenancesCache) {
