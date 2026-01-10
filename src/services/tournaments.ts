@@ -25,6 +25,7 @@ type TournamentApi = {
 	rules?: string | null;
 
 	date?: string | null;
+	endDate?: string | null;
 };
 
 export type Tournament = {
@@ -44,6 +45,8 @@ export type Tournament = {
 	supervisor: string;
 	fecha: string;
 	fechaIso: string;
+	endFecha: string;
+	endFechaIso: string;
 };
 
 export type TournamentPayload = {
@@ -55,6 +58,7 @@ export type TournamentPayload = {
 	estadoId?: number | string | null;
 	facilityId: number | string | null;
 	fechaIso: string;
+	endFechaIso: string;
 	supervisorId?: number | string | null;
 };
 
@@ -215,6 +219,8 @@ function normalizeTournament(
 		supervisor,
 		fechaIso: item.date ?? "",
 		fecha: formatDateTime(item.date),
+		endFechaIso: item.endDate ?? "",
+		endFecha: formatDateTime(item.endDate),
 	};
 }
 
@@ -243,6 +249,10 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 	const startDate = parseDate(payload.fechaIso);
 	if (!startDate) throw new Error("Fecha inválida");
 
+	const endDate = parseDate(payload.endFechaIso);
+	if (!endDate) throw new Error("Fecha fin inválida");
+	if (endDate.getTime() <= startDate.getTime()) throw new Error("La fecha fin debe ser mayor que la fecha inicio");
+
 	const categoryID = parseNum(payload.categoriaId);
 	const disciplineID = parseNum(payload.disciplinaId);
 	const estatusID = parseNum(payload.estadoId) ?? 0;
@@ -259,6 +269,7 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 		facilityID,
 		supervisorID,
 		date: startDate.toISOString(),
+		endDate: endDate.toISOString(),
 	};
 
 	const created = await apiFetchJson<any>("/api/Tournaments/CreateTournament", {
@@ -284,6 +295,10 @@ export async function updateTournament(id: number | string, payload: TournamentP
 	const startDate = parseDate(payload.fechaIso);
 	if (!startDate) throw new Error("Fecha inválida");
 
+	const endDate = parseDate(payload.endFechaIso);
+	if (!endDate) throw new Error("Fecha fin inválida");
+	if (endDate.getTime() <= startDate.getTime()) throw new Error("La fecha fin debe ser mayor que la fecha inicio");
+
 	const categoryID = parseNum(payload.categoriaId);
 	const disciplineID = parseNum(payload.disciplinaId);
 	const estatusID = parseNum(payload.estadoId) ?? 0;
@@ -301,6 +316,7 @@ export async function updateTournament(id: number | string, payload: TournamentP
 		facilityID,
 		supervisorID,
 		date: startDate.toISOString(),
+		endDate: endDate.toISOString(),
 	};
 
 	const updated = await apiFetchJson<any>("/api/Tournaments/UpdateTournament", {

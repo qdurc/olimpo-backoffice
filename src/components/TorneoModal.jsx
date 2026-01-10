@@ -34,6 +34,7 @@ export default function TorneoModal({
 			facilityId: "",
 			supervisorId: "",
 			fechaIso: "",
+			endFechaIso: "",
 		}),
 		[]
 	);
@@ -53,6 +54,7 @@ export default function TorneoModal({
 				facilityId: initialData.facilityId ? String(initialData.facilityId) : "",
 				supervisorId: initialData.supervisorId ? String(initialData.supervisorId) : "",
 				fechaIso: formatDateTimeLocal(initialData.fechaIso),
+				endFechaIso: formatDateTimeLocal(initialData.endFechaIso),
 			});
 			setErrors({});
 		} else if (open) {
@@ -69,6 +71,7 @@ export default function TorneoModal({
 	const handleSubmit = () => {
 		const nextErrors = {};
 		const date = form.fechaIso ? new Date(form.fechaIso) : null;
+		const endDate = form.endFechaIso ? new Date(form.endFechaIso) : null;
 
 		const categoriaNum = form.categoriaId === "" ? NaN : Number(form.categoriaId);
 		const disciplinaNum = form.disciplinaId === "" ? NaN : Number(form.disciplinaId);
@@ -92,7 +95,6 @@ export default function TorneoModal({
 			nextErrors.disciplinaId = "Selecciona una disciplina válida";
 		}
 		if (!Number.isFinite(estadoNum) || (estadoNum !== 1 && estadoNum !== 2 && estadoNum <= 0)) {
-			// tu API exigía 1 o 2 pero si en futuro aceptan más, puedes relajar
 			nextErrors.estadoId = "Selecciona un estado válido (1 o 2)";
 		}
 		if (!Number.isFinite(facilityNum) || facilityNum <= 0) {
@@ -104,11 +106,15 @@ export default function TorneoModal({
 		if (!date || Number.isNaN(date.getTime())) {
 			nextErrors.fechaIso = "Ingresa una fecha válida";
 		} else {
-			// opcional: evitar fechas en el pasado
 			const now = new Date();
 			if (date.getTime() < now.getTime()) {
 				nextErrors.fechaIso = "La fecha no puede estar en el pasado";
 			}
+		}
+		if (!endDate || Number.isNaN(endDate.getTime())) {
+			nextErrors.endFechaIso = "Ingresa una fecha fin válida";
+		} else if (date && !Number.isNaN(date.getTime()) && endDate.getTime() <= date.getTime()) {
+			nextErrors.endFechaIso = "La fecha fin debe ser mayor que la fecha inicio";
 		}
 
 		setErrors(nextErrors);
@@ -125,6 +131,7 @@ export default function TorneoModal({
 			facilityId: Number(form.facilityId),
 			supervisorId: Number(form.supervisorId),
 			fechaIso: date.toISOString(),
+			endFechaIso: endDate.toISOString(),
 		});
 
 		onClose?.();
@@ -284,6 +291,19 @@ export default function TorneoModal({
 					InputLabelProps={{ shrink: true }}
 					error={Boolean(errors.fechaIso)}
 					helperText={errors.fechaIso}
+				/>
+
+				<TextField
+					label="Fecha fin"
+					name="endFechaIso"
+					type="datetime-local"
+					fullWidth
+					required
+					value={form.endFechaIso}
+					onChange={handleChange}
+					InputLabelProps={{ shrink: true }}
+					error={Boolean(errors.endFechaIso)}
+					helperText={errors.endFechaIso}
 				/>
 			</DialogContent>
 

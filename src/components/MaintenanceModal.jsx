@@ -122,6 +122,7 @@ export default function MaintenanceModal({
 		const nextErrors = {};
 		const startDate = parseDate(form.inicio);
 		const endDate = parseDate(form.fin);
+		const estadoIdNum = form.estadoId === "" ? NaN : Number(form.estadoId);
 
 		if (!form.facilityId) {
 			nextErrors.facilityId = "Selecciona la instalación";
@@ -133,6 +134,9 @@ export default function MaintenanceModal({
 			nextErrors.fin = "Ingresa una fecha y hora de fin válida";
 		} else if (startDate && endDate < startDate) {
 			nextErrors.fin = "La fecha fin debe ser posterior al inicio";
+		}
+		if (!Number.isFinite(estadoIdNum) || estadoIdNum <= 0) {
+			nextErrors.estadoId = "Selecciona un estado válido";
 		}
 
 		setErrors(nextErrors);
@@ -223,12 +227,12 @@ export default function MaintenanceModal({
 
 				<TextField
 					label="Usuario ID"
-				name="usuarioId"
-				type="number"
-				fullWidth
-				value={form.usuarioId}
-				onChange={handleChange}
-			/>
+					name="usuarioId"
+					type="number"
+					fullWidth
+					value={form.usuarioId}
+					onChange={handleChange}
+				/>
 
 				<TextField
 					select

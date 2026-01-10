@@ -84,6 +84,7 @@ export default function TournamentsPage() {
 			{ field: "descripcion", headerName: "Descripción", flex: 1.1, minWidth: 140 },
 			{ field: "normas", headerName: "Normas", flex: 1, minWidth: 130 },
 			{ field: "fecha", headerName: "Fecha", flex: 1, minWidth: 140 },
+			{ field: "endFecha", headerName: "Fin", flex: 1, minWidth: 140 },
 			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 130 },
 			{ field: "supervisor", headerName: "Encargado", flex: 1, minWidth: 120 },
 			{

@@ -31,6 +31,7 @@ export default function ReservationModal({
 			facilityId: "",
 			usuarioId: "",
 			fechaIso: "",
+			endFechaIso: "",
 			estadoId: "",
 		}),
 		[],
@@ -49,6 +50,7 @@ export default function ReservationModal({
 						? ""
 						: String(initialData.usuarioId),
 				fechaIso: formatDateTimeLocal(initialData.fechaIso),
+				endFechaIso: formatDateTimeLocal(initialData.endFechaIso),
 				estadoId:
 					initialData.estadoId === null || initialData.estadoId === undefined
 						? ""
@@ -79,6 +81,7 @@ export default function ReservationModal({
 	const handleSubmit = async () => {
 		const nextErrors = {};
 		const date = form.fechaIso ? new Date(form.fechaIso) : null;
+		const endDate = form.endFechaIso ? new Date(form.endFechaIso) : null;
 		const facilityIdNum = form.facilityId === "" ? NaN : Number(form.facilityId);
 		const userIdNum = form.usuarioId === "" ? NaN : Number(form.usuarioId);
 		const estadoIdNum = form.estadoId === "" ? NaN : Number(form.estadoId);
@@ -95,6 +98,15 @@ export default function ReservationModal({
 		if (!Number.isFinite(estadoIdNum) || estadoIdNum <= 0) {
 			nextErrors.estadoId = "Ingresa un estado (estatusID) válido";
 		}
+		if (!form.endFechaIso || !endDate || Number.isNaN(endDate.getTime())) {
+			nextErrors.endFechaIso = "Ingresa una fecha y hora de fin válida";
+		}
+
+		if (date && endDate && !Number.isNaN(date.getTime()) && !Number.isNaN(endDate.getTime())) {
+			if (endDate.getTime() <= date.getTime()) {
+				nextErrors.endFechaIso = "La fecha/hora de fin debe ser mayor que la de inicio";
+			}
+		}
 
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
@@ -105,6 +117,7 @@ export default function ReservationModal({
 			await onSave?.({
 				...form,
 				fechaIso: date.toISOString(),
+				endFechaIso: endDate.toISOString(),
 				id: initialData?.id,
 				facilityId: facilityIdNum,
 				usuarioId: userIdNum,
@@ -174,13 +187,13 @@ export default function ReservationModal({
 					required
 					error={Boolean(errors.estadoId)}
 					helperText={errors.estadoId}
-					>
-						{statuses.map((status) => (
-							<MenuItem key={status.id} value={status.id}>
-								{status.label}
-							</MenuItem>
-						))}
-					</TextField>
+				>
+					{statuses.map((status) => (
+						<MenuItem key={status.id} value={status.id}>
+							{status.label}
+						</MenuItem>
+					))}
+				</TextField>
 
 				<TextField
 					label="Fecha y hora"
@@ -193,6 +206,19 @@ export default function ReservationModal({
 					InputLabelProps={{ shrink: true }}
 					error={Boolean(errors.fechaIso)}
 					helperText={errors.fechaIso}
+				/>
+
+				<TextField
+					label="Fecha y hora fin"
+					name="endFechaIso"
+					type="datetime-local"
+					fullWidth
+					value={form.endFechaIso}
+					onChange={handleChange}
+					required
+					InputLabelProps={{ shrink: true }}
+					error={Boolean(errors.endFechaIso)}
+					helperText={errors.endFechaIso}
 				/>
 
 				{submitError ? (

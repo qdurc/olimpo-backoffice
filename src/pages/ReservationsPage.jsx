@@ -74,6 +74,8 @@ export default function ReservationsPage() {
 			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 200 },
 			{ field: "fecha", headerName: "Fecha", width: 130 },
 			{ field: "hora", headerName: "Hora", width: 120 },
+			{ field: "endFecha", headerName: "Fin Fecha", width: 130 },
+			{ field: "endHora", headerName: "Fin Hora", width: 120 },
 			{ field: "estado", headerName: "Estado", width: 150, renderCell: (p) => <StatusPill value={p.value} /> },
 		],
 		[],

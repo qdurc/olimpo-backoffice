@@ -11,6 +11,7 @@ type ReservationApi = {
 	userId?: number;
 	facilityId?: number;
 	reservedDates?: string;
+	endReservedDate?: string;
 	estatusID?: number | null;
 };
 
@@ -21,15 +22,19 @@ export type Reservation = {
 	instalacion: string;
 	fecha: string;
 	hora: string;
+	endFecha: string;
+	endHora: string;
 	estado: string;
 	estadoId: number | null;
 	fechaIso: string;
+	endFechaIso: string;
 };
 
 export type ReservationPayload = {
 	facilityId: number | string | null;
 	usuarioId: number | string | null;
 	fechaIso: string;
+	endFechaIso: string;
 	estadoId?: number | string | null;
 };
 
@@ -92,6 +97,7 @@ function buildReservationBody(payload: ReservationPayload, id?: number): Reserva
 	const userId = parseNum(payload.usuarioId);
 	const estadoId = parseNum(payload.estadoId ?? null);
 	const reservedDates = toDotNetDateTime(payload.fechaIso);
+	const endReservedDate = toDotNetDateTime(payload.endFechaIso);
 
 	if (!facilityId || facilityId <= 0) {
 		throw new Error("Selecciona una instalación válida antes de guardar.");
@@ -105,11 +111,20 @@ function buildReservationBody(payload: ReservationPayload, id?: number): Reserva
 		throw new Error("La fecha/hora de la reserva no es válida.");
 	}
 
+	if (!endReservedDate) {
+		throw new Error("La fecha/hora de fin no es válida.");
+	}
+
+	if (new Date(payload.endFechaIso).getTime() <= new Date(payload.fechaIso).getTime()) {
+		throw new Error("La fecha/hora de fin debe ser mayor que la fecha/hora de inicio.");
+	}
+
 	return {
 		...(typeof id === "number" ? { id } : {}),
 		facilityId,
 		userId,
 		reservedDates,
+		endReservedDate,
 		estatusID: estadoId ?? undefined,
 	};
 }
@@ -144,12 +159,14 @@ function normalizeReservation(
 	facilityMap: Map<number, Installation>,
 ): Reservation {
 	const { fecha, hora } = formatDate(item.reservedDates);
+	const { fecha: endFecha, hora: endHora } = formatDate(item.endReservedDate);
 	const facilityName =
 		(item.facilityId !== undefined && facilityMap.get(item.facilityId)?.nombre) ||
 		(item.facilityId !== undefined ? `Instalación ${item.facilityId}` : "Sin instalación");
 
 	const estadoId = item.estatusID ?? null;
 	const fechaIso = toIsoString(item.reservedDates) ?? "";
+	const endFechaIso = toIsoString(item.endReservedDate) ?? "";
 	const statusText =
 		estadoId !== null
 			? reservationStatuses.find((s) => s.id === estadoId)?.label ?? String(estadoId)
@@ -162,9 +179,12 @@ function normalizeReservation(
 		instalacion: facilityName,
 		fecha,
 		hora,
+		endFecha,
+		endHora,
 		estado: statusText,
 		estadoId,
 		fechaIso,
+		endFechaIso,
 	};
 }
 
@@ -232,6 +252,7 @@ export async function createReservation(payload: ReservationPayload) {
 		facilityId: body.facilityId ?? reservationData?.facilityId,
 		userId: body.userId ?? reservationData?.userId,
 		reservedDates: body.reservedDates ?? reservationData?.reservedDates,
+		endReservedDate: body.endReservedDate ?? reservationData?.endReservedDate,
 		estatusID: body.estatusID ?? reservationData?.estatusID,
 	};
 
@@ -284,6 +305,7 @@ export async function updateReservation(
 		facilityId: body.facilityId ?? reservationData?.facilityId,
 		userId: body.userId ?? reservationData?.userId,
 		reservedDates: body.reservedDates ?? reservationData?.reservedDates,
+		endReservedDate: body.endReservedDate ?? reservationData?.endReservedDate,
 		estatusID: body.estatusID ?? reservationData?.estatusID,
 	};
 
