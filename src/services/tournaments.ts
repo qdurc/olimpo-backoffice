@@ -62,6 +62,24 @@ export type TournamentPayload = {
 	supervisorId?: number | string | null;
 };
 
+export type UserTournamentHistoryItem = {
+	name: string;
+	discipline: string;
+	category: string;
+	estatus: string;
+	facility: string;
+	supervisor: string;
+};
+
+type UserHistoryResponse =
+	| UserTournamentHistoryItem[]
+	| {
+		data?: UserTournamentHistoryItem[] | null;
+		errors?: unknown[];
+		success?: boolean;
+		message?: string;
+	};
+
 type ViewModel = {
 	facilities: Array<{ id: number; name: string }>;
 	estatus: Array<{ estatusID: number; descripcion: string }>;
@@ -97,6 +115,29 @@ function buildFacilityMap(facilities?: Installation[]) {
 		});
 	}
 	return map;
+}
+
+export async function getUserHistoryTournamentByUser(
+	userId: number | string,
+): Promise<UserTournamentHistoryItem[]> {
+	if (!isApiConfigured) {
+		throw new Error("API base URL is not configured (VITE_API_URL missing)");
+	}
+
+	const numericId = typeof userId === "number" ? userId : Number(userId);
+	const requestId = Number.isFinite(numericId) ? numericId : userId;
+
+	const response = await apiFetchJson<UserHistoryResponse>(
+		`/api/Tournaments/GetUserHistoryTournamentByUser/${requestId}`,
+	);
+
+	const payload = Array.isArray(response)
+		? response
+		: Array.isArray((response as any)?.data)
+			? (response as any).data
+			: [];
+
+	return payload ?? [];
 }
 
 async function resolveFacilityMap(facilities?: Installation[]) {

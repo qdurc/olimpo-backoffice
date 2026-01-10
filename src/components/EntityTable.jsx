@@ -9,6 +9,7 @@ export default function EntityTable({
 	loading,
 	onEdit,
 	onDelete,
+	onHistory,
 }) {
 
 	const actionCol = {
@@ -22,6 +23,7 @@ export default function EntityTable({
 			<RowActionsMenu
 				onEdit={onEdit ? () => onEdit(params.id) : undefined}
 				onDelete={onDelete ? () => onDelete(params.id) : undefined}
+				onHistory={onHistory ? () => onHistory(params.id) : undefined}
 			/>
 		),
 	};

@@ -7,6 +7,8 @@ import EntityTable from "../components/EntityTable";
 import TableFooter from "../components/TableFooter";
 import StatusPill from "../components/StatusPill";
 import UserModal from "../components/UserModal";
+import UserHistoryModal from "../components/UserHistoryModal";
+import { getUserHistoryTournamentByUser } from "../services/tournaments";
 import { getUserEdit, getUsers, updateUser, createUser } from "../services/users";
 
 export default function UsersPage() {
@@ -21,6 +23,11 @@ export default function UsersPage() {
 	const [editOptions, setEditOptions] = useState({ roles: [], statuses: [] });
 	const [submitting, setSubmitting] = useState(false);
 	const [loadingEdit, setLoadingEdit] = useState(false);
+	const [openHistory, setOpenHistory] = useState(false);
+	const [historyUser, setHistoryUser] = useState(null);
+	const [historyItems, setHistoryItems] = useState([]);
+	const [historyLoading, setHistoryLoading] = useState(false);
+	const [historyError, setHistoryError] = useState("");
 	const statusOptions = useMemo(
 		() => [
 			{ id: 1, label: "Activo" },
@@ -103,6 +110,27 @@ export default function UsersPage() {
 			console.error("Error cargando datos de edición del usuario", err);
 		} finally {
 			setLoadingEdit(false);
+		}
+	};
+
+	const handleHistory = async (id) => {
+		const found = users.find((u) => String(u.id) === String(id));
+		setHistoryUser(found ?? { id, nombre: "" });
+		setOpenHistory(true);
+		setHistoryLoading(true);
+		setHistoryError("");
+		setHistoryItems([]);
+
+		try {
+			const items = await getUserHistoryTournamentByUser(id);
+			setHistoryItems(items);
+		} catch (err) {
+			console.error("Error cargando historial", err);
+			const msg =
+				err instanceof Error ? err.message : "No se pudo cargar el historial.";
+			setHistoryError(msg);
+		} finally {
+			setHistoryLoading(false);
 		}
 	};
 
@@ -262,6 +290,7 @@ export default function UsersPage() {
 				onPageChange={setPage}
 				onPageSizeChange={setPageSize}
 				onEdit={handleEdit}
+				onHistory={handleHistory}
 			// onDelete={handleDelete}
 			/>
 
@@ -288,6 +317,15 @@ export default function UsersPage() {
 				roles={editOptions.roles.length ? editOptions.roles : roleOptions}
 				statuses={editOptions.statuses.length ? editOptions.statuses : statusOptions}
 				loading={submitting}
+			/>
+
+			<UserHistoryModal
+				open={openHistory}
+				onClose={() => setOpenHistory(false)}
+				user={historyUser}
+				loading={historyLoading}
+				error={historyError}
+				items={historyItems}
 			/>
 		</Box>
 	);
