@@ -7,6 +7,7 @@ import {
 	TextField,
 	Button,
 	MenuItem,
+	Alert,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -41,6 +42,7 @@ export default function TorneoModal({
 
 	const [form, setForm] = useState(emptyForm);
 	const [errors, setErrors] = useState({});
+	const [submitError, setSubmitError] = useState("");
 
 	useEffect(() => {
 		if (open && initialData) {
@@ -57,9 +59,11 @@ export default function TorneoModal({
 				endFechaIso: formatDateTimeLocal(initialData.endFechaIso),
 			});
 			setErrors({});
+			setSubmitError("");
 		} else if (open) {
 			setForm(emptyForm);
 			setErrors({});
+			setSubmitError("");
 		}
 	}, [open, initialData, emptyForm]);
 
@@ -68,7 +72,7 @@ export default function TorneoModal({
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const nextErrors = {};
 		const date = form.fechaIso ? new Date(form.fechaIso) : null;
 		const endDate = form.endFechaIso ? new Date(form.endFechaIso) : null;
@@ -79,37 +83,17 @@ export default function TorneoModal({
 		const facilityNum = form.facilityId === "" ? NaN : Number(form.facilityId);
 		const supervisorNum = form.supervisorId === "" ? NaN : Number(form.supervisorId);
 
-		if (!form.nombre.trim()) {
-			nextErrors.nombre = "Ingresa un nombre";
-		}
-		if (!form.descripcion?.trim()) {
-			nextErrors.descripcion = "Ingresa una descripción";
-		}
-		if (!form.normas?.trim()) {
-			nextErrors.normas = "Ingresa las normas";
-		}
-		if (!Number.isFinite(categoriaNum) || categoriaNum <= 0) {
-			nextErrors.categoriaId = "Selecciona una categoría válida";
-		}
-		if (!Number.isFinite(disciplinaNum) || disciplinaNum <= 0) {
-			nextErrors.disciplinaId = "Selecciona una disciplina válida";
-		}
-		if (!Number.isFinite(estadoNum) || (estadoNum !== 1 && estadoNum !== 2 && estadoNum <= 0)) {
-			nextErrors.estadoId = "Selecciona un estado válido (1 o 2)";
-		}
-		if (!Number.isFinite(facilityNum) || facilityNum <= 0) {
-			nextErrors.facilityId = "Selecciona una instalación válida";
-		}
-		if (!Number.isFinite(supervisorNum) || supervisorNum <= 0) {
-			nextErrors.supervisorId = "Selecciona un encargado válido";
-		}
+		if (!form.nombre.trim()) nextErrors.nombre = "Ingresa un nombre";
+		if (!form.descripcion?.trim()) nextErrors.descripcion = "Ingresa una descripción";
+		if (!form.normas?.trim()) nextErrors.normas = "Ingresa las normas";
+		if (!Number.isFinite(categoriaNum) || categoriaNum <= 0) nextErrors.categoriaId = "Selecciona una categoría válida";
+		if (!Number.isFinite(disciplinaNum) || disciplinaNum <= 0) nextErrors.disciplinaId = "Selecciona una disciplina válida";
+		if (!Number.isFinite(estadoNum) || estadoNum <= 0) nextErrors.estadoId = "Selecciona un estado válido";
+		if (!Number.isFinite(facilityNum) || facilityNum <= 0) nextErrors.facilityId = "Selecciona una instalación válida";
+		if (!Number.isFinite(supervisorNum) || supervisorNum <= 0) nextErrors.supervisorId = "Selecciona un encargado válido";
+
 		if (!date || Number.isNaN(date.getTime())) {
 			nextErrors.fechaIso = "Ingresa una fecha válida";
-		} else {
-			const now = new Date();
-			if (date.getTime() < now.getTime()) {
-				nextErrors.fechaIso = "La fecha no puede estar en el pasado";
-			}
 		}
 		if (!endDate || Number.isNaN(endDate.getTime())) {
 			nextErrors.endFechaIso = "Ingresa una fecha fin válida";
@@ -120,21 +104,32 @@ export default function TorneoModal({
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
 
-		onSave?.({
-			id: initialData?.id,
-			nombre: form.nombre.trim(),
-			descripcion: form.descripcion.trim(),
-			normas: form.normas.trim(),
-			categoriaId: Number(form.categoriaId),
-			disciplinaId: Number(form.disciplinaId),
-			estadoId: Number(form.estadoId),
-			facilityId: Number(form.facilityId),
-			supervisorId: Number(form.supervisorId),
-			fechaIso: date.toISOString(),
-			endFechaIso: endDate.toISOString(),
-		});
+		setSubmitError("");
 
-		onClose?.();
+		try {
+			await onSave?.({
+				id: initialData?.id,
+				nombre: form.nombre.trim(),
+				descripcion: form.descripcion.trim(),
+				normas: form.normas.trim(),
+				categoriaId: Number(form.categoriaId),
+				disciplinaId: Number(form.disciplinaId),
+				estadoId: Number(form.estadoId),
+				facilityId: Number(form.facilityId),
+				supervisorId: Number(form.supervisorId),
+				fechaIso: date.toISOString(),
+				endFechaIso: endDate.toISOString(),
+			});
+
+			onClose?.();
+		} catch (error) {
+			console.error("Error saving tournament", error);
+			const message =
+				error instanceof Error
+					? error.message
+					: "No se pudo guardar el torneo. Intenta de nuevo.";
+			setSubmitError(message);
+		}
 	};
 
 	return (
@@ -305,6 +300,11 @@ export default function TorneoModal({
 					error={Boolean(errors.endFechaIso)}
 					helperText={errors.endFechaIso}
 				/>
+				{submitError ? (
+					<Alert severity="error" sx={{ mt: 2 }}>
+						{submitError}
+					</Alert>
+				) : null}
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
