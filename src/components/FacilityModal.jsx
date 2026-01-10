@@ -29,6 +29,7 @@ export default function FacilityModal({
 
 	const isEditing = Boolean(initialData);
 	const [form, setForm] = useState(initialForm);
+	const [errors, setErrors] = useState({});
 
 	const normalizeStatusId = (value) => {
 		if (value === null || value === undefined) return "";
@@ -54,41 +55,62 @@ export default function FacilityModal({
 						? normalizeStatusId(initialData.estado)
 						: normalizeStatusId(initialData.statusId),
 			});
+			setErrors({});
 		} else if (open && !initialData) {
 			const defaultStatus =
 				installationStatuses.find((s) => s.id === 1)?.id?.toString?.() ||
 				installationStatuses[0]?.id?.toString?.() ||
 				"";
 			setForm({ ...initialForm, estadoId: defaultStatus });
+			setErrors({});
 		} else if (!open) {
 			setForm(initialForm);
+			setErrors({});
 		}
 	}, [open, initialData, initialForm]);
+
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setForm((prev) => ({ ...prev, [name]: value }));
+		setErrors((prev) => ({ ...prev, [name]: undefined }));
 	};
 
-	const handleSubmit = () => {
-		if (!form.nombre.trim()) return;
 
-		const estadoId = form.estadoId === "" ? null : Number(form.estadoId);
+	const handleSubmit = async () => {
+		const nextErrors = {};
+
+		const estadoIdNum = form.estadoId === "" ? NaN : Number(form.estadoId);
+		const capacidadNum = form.capacidad === "" ? NaN : Number(form.capacidad);
+
+		if (!form.nombre?.trim()) nextErrors.nombre = "Ingresa el nombre";
+		if (!form.tipo?.trim()) nextErrors.tipo = "Ingresa el tipo";
+		if (!form.direccion?.trim()) nextErrors.direccion = "Ingresa la dirección";
+
+		if (!Number.isFinite(capacidadNum) || capacidadNum <= 0) {
+			nextErrors.capacidad = "Ingresa una capacidad válida (mayor que 0)";
+		}
+
+		if (!Number.isFinite(estadoIdNum) || estadoIdNum <= 0) {
+			nextErrors.estadoId = "Selecciona un estado válido";
+		}
+
+		setErrors(nextErrors);
+		if (Object.keys(nextErrors).length) return;
+
 		const estadoTexto =
-			estadoId !== null
-				? installationStatuses.find((s) => s.id === estadoId)?.label ?? String(estadoId)
-				: "";
+			installationStatuses.find((s) => s.id === estadoIdNum)?.label ?? String(estadoIdNum);
 
-		onSave?.({
+		await onSave?.({
 			...form,
 			id: initialData?.id,
-			capacidad: Number(form.capacidad) || 0,
-			estadoId,
+			capacidad: capacidadNum,
+			estadoId: estadoIdNum,
 			estado: estadoTexto,
 		});
 
 		setForm(initialForm);
-		onClose();
+		onClose?.();
 	};
 
 	return (
@@ -107,38 +129,56 @@ export default function FacilityModal({
 					gap: 2,
 				}}
 			>
+
 				<TextField
 					label="Nombre"
 					name="nombre"
 					fullWidth
+					required
 					value={form.nombre}
 					onChange={handleChange}
+					error={Boolean(errors.nombre)}
+					helperText={errors.nombre}
 				/>
+
 
 				<TextField
 					label="Tipo"
 					name="tipo"
 					fullWidth
+					required
 					value={form.tipo}
 					onChange={handleChange}
+					error={Boolean(errors.tipo)}
+					helperText={errors.tipo}
 				/>
+
 
 				<TextField
 					label="Capacidad"
 					name="capacidad"
 					type="number"
 					fullWidth
+					required
+					inputProps={{ min: 1 }}
 					value={form.capacidad}
 					onChange={handleChange}
+					error={Boolean(errors.capacidad)}
+					helperText={errors.capacidad}
 				/>
+
 
 				<TextField
 					label="Dirección"
 					name="direccion"
 					fullWidth
+					required
 					value={form.direccion}
 					onChange={handleChange}
+					error={Boolean(errors.direccion)}
+					helperText={errors.direccion}
 				/>
+
 
 				<TextField
 					select
@@ -148,6 +188,8 @@ export default function FacilityModal({
 					value={form.estadoId}
 					onChange={handleChange}
 					required
+					error={Boolean(errors.estadoId)}
+					helperText={errors.estadoId}
 				>
 					<MenuItem value="">Selecciona</MenuItem>
 					{installationStatuses.map((status) => (
