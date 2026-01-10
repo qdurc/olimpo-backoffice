@@ -16,6 +16,7 @@ export default function UserModal({
 	onSave,
 	initialData = null,
 	roles = [],
+	statuses = [],
 	loading = false,
 }) {
 	const emptyForm = useMemo(
@@ -24,6 +25,7 @@ export default function UserModal({
 			email: "",
 			rolId: "",
 			estadoId: "",
+			personTypeId: "",
 			password: "",
 		}),
 		[],
@@ -34,18 +36,21 @@ export default function UserModal({
 
 	useEffect(() => {
 		if (open) {
-			const defaultRol = !initialData && roles.length
-				? String(roles[0].id)
-				: "";
-
 			setForm({
 				nombre: initialData?.nombre ?? "",
 				email: initialData?.email ?? "",
 				rolId:
 					initialData?.rolId !== undefined && initialData?.rolId !== null
 						? String(initialData.rolId)
-						: defaultRol,
-				estadoId: "1",
+						: "",
+				estadoId:
+					initialData?.estadoId !== undefined && initialData?.estadoId !== null
+						? String(initialData.estadoId)
+						: "",
+				personTypeId:
+					initialData?.personTypeId !== undefined && initialData?.personTypeId !== null
+						? String(initialData.personTypeId)
+						: "",
 				password: "",
 			});
 			setErrors({});
@@ -53,7 +58,7 @@ export default function UserModal({
 			setForm(emptyForm);
 			setErrors({});
 		}
-	}, [open, initialData, emptyForm, roles]);
+	}, [open, initialData, emptyForm, roles, statuses]);
 
 	const handleChange = (event) => {
 		const { name, value } = event.target;
@@ -79,6 +84,14 @@ export default function UserModal({
 		if (roles.length && !form.rolId) {
 			nextErrors.rolId = "Selecciona un rol";
 		}
+		if (statuses.length && !form.estadoId) {
+			nextErrors.estadoId = "Selecciona un estado";
+		}
+
+		const personTypeNum = Number(form.personTypeId);
+		if (![1, 2].includes(personTypeNum)) {
+			nextErrors.personTypeId = "Selecciona Atleta o Entrenador";
+		}
 
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
@@ -89,6 +102,7 @@ export default function UserModal({
 			email: form.email.trim(),
 			rolId: form.rolId === "" ? null : form.rolId,
 			estadoId: form.estadoId === "" ? null : form.estadoId,
+			personTypeId: Number(form.personTypeId),
 			password: form.password.trim(),
 		});
 		onClose?.();
@@ -155,19 +169,38 @@ export default function UserModal({
 						))}
 					</TextField>
 					<TextField
+						select
+						label="Tipo de persona"
+						name="personTypeId"
+						fullWidth
+						required
+						value={form.personTypeId}
+						onChange={handleChange}
+						error={Boolean(errors.personTypeId)}
+						helperText={errors.personTypeId}
+					>
+						<MenuItem value="">Selecciona</MenuItem>
+						<MenuItem value="1">Atleta</MenuItem>
+						<MenuItem value="2">Entrenador</MenuItem>
+					</TextField>
+					<TextField
+						select
 						label="Estado"
 						name="estadoId"
 						fullWidth
-						value={
-							form.estadoId === "1"
-								? "Activo"
-								: form.estadoId === "2"
-									? "Inactivo"
-									: form.estadoId
-						}
-						disabled
-						helperText="Estado asignado automáticamente"
-					/>
+						required={Boolean(statuses.length)}
+						value={form.estadoId}
+						onChange={handleChange}
+						error={Boolean(errors.estadoId)}
+						helperText={errors.estadoId}
+					>
+						<MenuItem value="">Selecciona</MenuItem>
+						{statuses.map((s) => (
+							<MenuItem key={s.id} value={String(s.id)}>
+								{s.label}
+							</MenuItem>
+						))}
+					</TextField>
 				</Box>
 			</DialogContent>
 			<DialogActions sx={{ px: 3, pb: 2 }}>

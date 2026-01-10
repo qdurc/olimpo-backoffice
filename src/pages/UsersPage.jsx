@@ -18,21 +18,21 @@ export default function UsersPage() {
 	const [error, setError] = useState("");
 	const [openModal, setOpenModal] = useState(false);
 	const [editing, setEditing] = useState(null);
-const [editOptions, setEditOptions] = useState({ roles: [], statuses: [] });
-const [submitting, setSubmitting] = useState(false);
-const [loadingEdit, setLoadingEdit] = useState(false);
-const statusOptions = useMemo(
-	() => [
-		{ id: 1, label: "Activo" },
-		{ id: 2, label: "Inactivo" },
-	],
-	[],
-);
-const roleOptions = useMemo(
-	() => [
-		{ id: 1, label: "Admin" },
-		{ id: 2, label: "Usuario" },
-	],
+	const [editOptions, setEditOptions] = useState({ roles: [], statuses: [] });
+	const [submitting, setSubmitting] = useState(false);
+	const [loadingEdit, setLoadingEdit] = useState(false);
+	const statusOptions = useMemo(
+		() => [
+			{ id: 1, label: "Activo" },
+			{ id: 2, label: "Inactivo" },
+		],
+		[],
+	);
+	const roleOptions = useMemo(
+		() => [
+			{ id: 1, label: "Admin" },
+			{ id: 2, label: "Usuario" },
+		],
 		[],
 	);
 
@@ -146,6 +146,7 @@ const roleOptions = useMemo(
 	};
 
 	const columns = [
+		{ field: "id", headerName: "ID", width: 90 },
 		{
 			field: "nombre",
 			headerName: "Nombre",
@@ -161,6 +162,7 @@ const roleOptions = useMemo(
 			),
 		},
 		{ field: "email", headerName: "Correo electrónico", flex: 1 },
+		{ field: "personType", headerName: "Tipo", width: 140 },
 		{
 			field: "estado",
 			headerName: "Estado",
@@ -223,7 +225,7 @@ const roleOptions = useMemo(
 				onPageChange={setPage}
 				onPageSizeChange={setPageSize}
 				onEdit={handleEdit}
-				// onDelete={handleDelete}
+			// onDelete={handleDelete}
 			/>
 
 			<TableFooter

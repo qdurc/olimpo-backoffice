@@ -6,6 +6,8 @@ export type User = {
 	email: string;
 	rol: string;
 	estado: string;
+	personType: string;
+	personTypeId?: number | string | null;
 	avatar: string;
 	rolId?: number | string | null;
 	estadoId?: number | string | null;
@@ -18,6 +20,8 @@ type UserApi = {
 	email?: string | null;
 	rol?: string | null;
 	status?: string | null;
+	personType?: string | null;
+	personTypeID?: number | string | null;
 	foto?: string | null;
 	avatar?: string | null;
 	rolId?: number | string | null;
@@ -31,11 +35,11 @@ type UsersResponse =
 	| UserApi[]
 	| UserApi
 	| {
-			data?: UserApi | UserApi[] | null;
-			errors?: unknown[];
-			success?: boolean;
-			message?: string;
-	  };
+		data?: UserApi | UserApi[] | null;
+		errors?: unknown[];
+		success?: boolean;
+		message?: string;
+	};
 
 type RoleApi = {
 	id?: number | string | null;
@@ -60,11 +64,11 @@ type UserEditApi = {
 type UserEditResponse =
 	| UserEditApi
 	| {
-			data?: UserEditApi | null;
-			errors?: unknown[];
-			success?: boolean;
-			message?: string;
-	  };
+		data?: UserEditApi | null;
+		errors?: unknown[];
+		success?: boolean;
+		message?: string;
+	};
 
 export type UserRoleOption = {
 	id: number | string;
@@ -89,10 +93,12 @@ export type UserUpdatePayload = {
 	email: string;
 	rolId?: number | string | null;
 	estadoId?: number | string | null;
+	personTypeId?: number | string | null;
 };
 
 export type UserCreatePayload = UserUpdatePayload & {
 	password: string;
+	personTypeId: number | string;
 };
 
 function buildAvatar(seed: string): string {
@@ -110,7 +116,7 @@ function parseNum(value: number | string | null | undefined) {
 function normalizeUser(user: UserApi | null | undefined, fallback?: User): User {
 	const id =
 		(typeof user?.id === "number" && Number.isFinite(user.id)) ||
-		typeof user?.id === "string"
+			typeof user?.id === "string"
 			? user.id
 			: typeof user?.userId === "number" && Number.isFinite(user.userId)
 				? user.userId
@@ -130,12 +136,25 @@ function normalizeUser(user: UserApi | null | undefined, fallback?: User): User 
 	const avatar =
 		user?.foto ?? user?.avatar ?? fallback?.avatar ?? buildAvatar(String(email || nombre || id));
 
+	const personType = user?.personType ?? fallback?.personType ?? "";
+	const personTypeId =
+		user?.personTypeID ??
+		(user?.personType?.toLowerCase?.().trim() === "atleta"
+			? 1
+			: user?.personType?.toLowerCase?.().trim() === "entrenador"
+				? 2
+				: null) ??
+		(fallback as any)?.personTypeId ??
+		null;
+
 	return {
 		id,
 		nombre,
 		email,
 		rol,
 		estado,
+		personType,
+		personTypeId,
 		avatar,
 		rolId,
 		estadoId,
@@ -229,7 +248,13 @@ export async function getUserEdit(
 	}
 
 	const user = normalizeUser(
-		{ userId: payload.userId, name: payload.name, email: payload.email },
+		{
+			userId: payload.userId,
+			name: payload.name,
+			email: payload.email,
+			personType: fallback?.personType ?? null,
+			personTypeID: (fallback as any)?.personTypeId ?? null,
+		},
 		fallback,
 	);
 
@@ -243,11 +268,11 @@ export async function getUserEdit(
 type UserUpdateResponse =
 	| UserApi
 	| {
-			data?: UserApi | null;
-			errors?: unknown[];
-			success?: boolean;
-			message?: string;
-	  };
+		data?: UserApi | null;
+		errors?: unknown[];
+		success?: boolean;
+		message?: string;
+	};
 
 export async function updateUser(
 	id: number | string,
@@ -313,6 +338,7 @@ export async function createUser(payload: UserCreatePayload): Promise<User> {
 		password: payload.password,
 		roleId: parseNum(payload.rolId),
 		estatusID: parseNum(payload.estadoId),
+		personTypeID: parseNum(payload.personTypeId),
 	};
 
 	const response = await apiFetchJson<UserUpdateResponse>("/api/Auth/Register", {
