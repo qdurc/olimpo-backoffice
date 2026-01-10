@@ -30,6 +30,7 @@ export default function MaintenanceModal({
 			descripcion: "",
 			inicio: "",
 			fin: "",
+			usuarioId: "",
 			estadoId: "",
 		}),
 		[],
@@ -86,6 +87,10 @@ export default function MaintenanceModal({
 				descripcion: initialData.descripcion ?? "",
 				inicio: formatDateTimeLocal(initialData.inicio),
 				fin: formatDateTimeLocal(initialData.fin),
+				usuarioId:
+					initialData.usuarioId === null || initialData.usuarioId === undefined
+						? ""
+						: String(initialData.usuarioId),
 				estadoId: normalizedStatus,
 			});
 			setErrors({});
@@ -140,6 +145,7 @@ export default function MaintenanceModal({
 		onSave?.({
 			...form,
 			id: initialData?.id,
+			usuarioId: form.usuarioId === "" ? null : form.usuarioId,
 			estadoId: form.estadoId === "" ? null : Number(form.estadoId),
 			inicio: startDate.toISOString(),
 			fin: endDate.toISOString(),
@@ -217,6 +223,15 @@ export default function MaintenanceModal({
 					InputLabelProps={{ shrink: true }}
 					error={Boolean(errors.fin)}
 					helperText={errors.fin}
+				/>
+
+				<TextField
+					label="Usuario ID"
+					name="usuarioId"
+					type="number"
+					fullWidth
+					value={form.usuarioId}
+					onChange={handleChange}
 				/>
 
 				<TextField
