@@ -255,7 +255,7 @@ export async function createMaintenance(payload: MaintenancePayload): Promise<Ma
 		description: payload.descripcion,
 		startDate,
 		endDate,
-		userId: parseNum(payload.usuarioId),
+		userId: 0,
 		estatusID: parseNum(payload.estadoId),
 	};
 
@@ -311,7 +311,7 @@ export async function updateMaintenance(
 		description: payload.descripcion,
 		startDate,
 		endDate,
-		userId: parseNum(payload.usuarioId),
+		userId: 0,
 		estatusID: parseNum(payload.estadoId),
 	};
 
