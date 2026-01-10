@@ -106,16 +106,20 @@ export default function MaintenancePage() {
 				setMantenimientos((prev) =>
 					prev.map((item) => (item.id === updated.id ? updated : item))
 				);
+				return updated;
 			} else {
 				const created = await createMaintenance(data);
 				setMantenimientos((prev) => [...prev, created]);
+				return created;
 			}
 		} catch (error) {
 			console.error("Error saving maintenance", error);
+			throw error;
 		} finally {
 			setEditing(null);
 		}
 	};
+
 
 	const handleDelete = async (id) => {
 		const numericId = typeof id === "number" ? id : Number(id);

@@ -1,5 +1,6 @@
 import { apiFetchJson, isApiConfigured } from "./http";
 import { getInstallations, type Installation } from "./installations";
+import { extractBackendError } from "../utils/apiError";
 
 export const reservationStatuses = [
 	{ id: 1, label: "Activo" },
@@ -129,19 +130,6 @@ function buildReservationBody(payload: ReservationPayload, id?: number): Reserva
 	};
 }
 
-function mapReservationError(error: unknown) {
-	if (error instanceof Error) {
-		if (error.message?.includes("status 500")) {
-			return new Error(
-				"No se pudo guardar la reserva (500). Verifica que el Usuario ID exista, la instalación sea válida y que la fecha/hora esté completa.",
-			);
-		}
-		return error;
-	}
-
-	return new Error("No se pudo guardar la reserva.");
-}
-
 function buildFacilityMap(facilities?: Installation[]) {
 	const facilityMap = new Map<number, Installation>();
 	if (facilities?.length) {
@@ -222,6 +210,7 @@ export async function createReservation(payload: ReservationPayload) {
 	const body = buildReservationBody(payload);
 
 	let created: ReservationApi | ReservationSingleResponse;
+
 	try {
 		created = await apiFetchJson<ReservationApi | ReservationSingleResponse>(
 			"/api/Reservation/AddReservation",
@@ -231,7 +220,15 @@ export async function createReservation(payload: ReservationPayload) {
 			},
 		);
 	} catch (error) {
-		throw mapReservationError(error);
+		throw extractBackendError(error);
+	}
+
+	// 👇 si el backend respondió pero con success:false, lánzalo igual
+	if (typeof created === "object" && created !== null && "success" in created) {
+		const maybe = created as ReservationSingleResponse;
+		if (maybe.success === false) {
+			throw extractBackendError(maybe);
+		}
 	}
 
 	const response =
@@ -275,6 +272,7 @@ export async function updateReservation(
 	const body = buildReservationBody(payload, numericId);
 
 	let updated: ReservationApi | ReservationSingleResponse;
+
 	try {
 		updated = await apiFetchJson<ReservationApi | ReservationSingleResponse>(
 			"/api/Reservation/UpdateReservation",
@@ -284,7 +282,14 @@ export async function updateReservation(
 			},
 		);
 	} catch (error) {
-		throw mapReservationError(error);
+		throw extractBackendError(error);
+	}
+
+	if (typeof updated === "object" && updated !== null && "success" in updated) {
+		const maybe = updated as ReservationSingleResponse;
+		if (maybe.success === false) {
+			throw extractBackendError(maybe);
+		}
 	}
 
 	const response =
@@ -326,16 +331,8 @@ export async function deleteReservation(id: number | string): Promise<void> {
 	await apiFetchJson(`/api/Reservation/DeleteReservation?${params.toString()}`, {
 		method: "DELETE",
 	}).then((res: DeleteReservationResponse | unknown) => {
-		if (
-			res &&
-			typeof res === "object" &&
-			"success" in res &&
-			(res as DeleteReservationResponse).success === false
-		) {
-			const message =
-				(res as DeleteReservationResponse).message ??
-				"No se pudo eliminar la reserva";
-			throw new Error(message);
+		if (res && typeof res === "object" && "success" in res && (res as DeleteReservationResponse).success === false) {
+			throw extractBackendError(res);
 		}
 	});
 }

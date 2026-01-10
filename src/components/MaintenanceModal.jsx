@@ -7,6 +7,7 @@ import {
 	TextField,
 	Button,
 	MenuItem,
+	Alert,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -38,6 +39,7 @@ export default function MaintenanceModal({
 
 	const [form, setForm] = useState(emptyForm);
 	const [errors, setErrors] = useState({});
+	const [submitError, setSubmitError] = useState("");
 
 	const getDefaultRange = () => {
 		const start = new Date();
@@ -94,6 +96,7 @@ export default function MaintenanceModal({
 				estadoId: normalizedStatus,
 			});
 			setErrors({});
+			setSubmitError("");
 		} else if (open && !initialData) {
 			const defaults = getDefaultRange();
 			const defaultStatus =
@@ -118,7 +121,7 @@ export default function MaintenanceModal({
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		const nextErrors = {};
 		const startDate = parseDate(form.inicio);
 		const endDate = parseDate(form.fin);
@@ -142,17 +145,28 @@ export default function MaintenanceModal({
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
 
-		onSave?.({
-			...form,
-			id: initialData?.id,
-			usuarioId: form.usuarioId === "" ? null : form.usuarioId,
-			estadoId: form.estadoId === "" ? null : Number(form.estadoId),
-			inicio: startDate.toISOString(),
-			fin: endDate.toISOString(),
-		});
+		setSubmitError("");
 
-		setForm(emptyForm);
-		onClose?.();
+		try {
+			await onSave?.({
+				...form,
+				id: initialData?.id,
+				usuarioId: form.usuarioId === "" ? null : Number(form.usuarioId),
+				estadoId: form.estadoId === "" ? null : Number(form.estadoId),
+				inicio: startDate.toISOString(),
+				fin: endDate.toISOString(),
+			});
+
+			setForm(emptyForm);
+			onClose?.();
+		} catch (error) {
+			console.error("Error saving maintenance", error);
+			const message =
+				error instanceof Error
+					? error.message
+					: "No se pudo guardar el mantenimiento. Intenta de nuevo.";
+			setSubmitError(message);
+		}
 	};
 
 	return (
@@ -252,6 +266,11 @@ export default function MaintenanceModal({
 						</MenuItem>
 					))}
 				</TextField>
+				{submitError ? (
+					<Alert severity="error" sx={{ mt: 2 }}>
+						{submitError}
+					</Alert>
+				) : null}
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>

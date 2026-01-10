@@ -30,8 +30,8 @@ export async function apiFetchJson<T = Json>(
 	const session = getSession();
 	const authHeaders = session?.token
 		? {
-				Authorization: `Bearer ${session.token}`,
-		  }
+			Authorization: `Bearer ${session.token}`,
+		}
 		: {};
 
 	const response = await fetch(`${apiBaseUrl}${path}`, {
@@ -40,10 +40,44 @@ export async function apiFetchJson<T = Json>(
 	});
 
 	if (!response.ok) {
-		const message = await response.text();
-		throw new Error(
-			message || `Request failed with status ${response.status}`,
-		);
+		const contentType = response.headers.get("content-type") || "";
+
+		let errorBody: unknown = null;
+
+		if (contentType.includes("application/json")) {
+			try {
+				errorBody = await response.json();
+			} catch {
+				errorBody = await response.text();
+			}
+		} else {
+			const text = await response.text();
+			if (text) {
+				try {
+					errorBody = JSON.parse(text);
+				} catch {
+					errorBody = text;
+				}
+			}
+		}
+
+		let message = `Request failed with status ${response.status}`;
+
+		if (errorBody && typeof errorBody === "object") {
+			const err = errorBody as { errors?: unknown; message?: unknown };
+
+			if (Array.isArray(err.errors) && err.errors.length) {
+				message = err.errors
+					.map((e) => (typeof e === "string" ? e : JSON.stringify(e)))
+					.join("\n");
+			} else if (typeof err.message === "string" && err.message.trim()) {
+				message = err.message;
+			}
+		} else if (typeof errorBody === "string" && errorBody.trim()) {
+			message = errorBody;
+		}
+
+		throw new Error(message);
 	}
 
 	if (response.status === 204) {
