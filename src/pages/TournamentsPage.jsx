@@ -110,17 +110,16 @@ export default function TournamentsPage() {
 				setTorneos((prev) =>
 					prev.map((t) => (Number(t.id) === Number(updated.id) ? updated : t))
 				);
-				return updated;
 			} else {
 				const created = await createTournament(torneoForm);
 				setTorneos((prev) => [...prev, created]);
-				return created;
 			}
+
+			setEditingTorneo(null);
+			setOpenModal(false);
 		} catch (error) {
 			console.error("Error saving tournament", error);
 			throw error;
-		} finally {
-			setEditingTorneo(null);
 		}
 	};
 

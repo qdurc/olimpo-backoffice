@@ -60,7 +60,12 @@ export default function TorneoModal({
 			});
 			setErrors({});
 			setSubmitError("");
-		} else if (open) {
+		} else if (open && !initialData) {
+			// ✅ igual que ReservationModal: si abres NUEVO, resetea
+			setForm(emptyForm);
+			setErrors({});
+			setSubmitError("");
+		} else if (!open) {
 			setForm(emptyForm);
 			setErrors({});
 			setSubmitError("");

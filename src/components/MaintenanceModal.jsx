@@ -110,9 +110,11 @@ export default function MaintenanceModal({
 				estadoId: defaultStatus,
 			}));
 			setErrors({});
+			setSubmitError("");
 		} else if (!open) {
 			setForm(emptyForm);
 			setErrors({});
+			setSubmitError("");
 		}
 	}, [open, initialData, statuses, emptyForm, normalizeStatusId]);
 
