@@ -35,6 +35,13 @@ export default function UsersPage() {
 		],
 		[],
 	);
+	const personTypeOptions = useMemo(
+		() => [
+			{ id: 1, label: "Atleta" },
+			{ id: 2, label: "Entrenador" },
+		],
+		[],
+	);
 
 	useEffect(() => {
 		setLoading(true);
@@ -120,6 +127,8 @@ export default function UsersPage() {
 					estado: statusLabel ?? updated.estado,
 					rolId: payload.rolId ?? updated.rolId ?? null,
 					estadoId: payload.estadoId ?? updated.estadoId ?? null,
+					personType: updated.personType ?? payload.personType ?? "",
+					personTypeId: payload.personTypeId ?? updated.personTypeId ?? null,
 				};
 
 				setUsers((prev) =>
@@ -128,12 +137,40 @@ export default function UsersPage() {
 					),
 				);
 			} else {
-				const created = await createUser({
+				const createPayload = {
 					...payload,
 					rolId: payload.rolId ?? 2,
 					estadoId: payload.estadoId ?? 1,
-				});
-				setUsers((prev) => [...prev, created]);
+				};
+
+				const created = await createUser(createPayload);
+
+				const rolesSource = editOptions.roles.length ? editOptions.roles : roleOptions;
+				const statusesSource = editOptions.statuses.length ? editOptions.statuses : statusOptions;
+
+				const roleLabel =
+					rolesSource.find((r) => String(r.id) === String(createPayload.rolId))?.label ?? created.rol;
+
+				const statusLabel =
+					statusesSource.find((s) => String(s.id) === String(createPayload.estadoId))?.label ??
+					created.estado;
+
+				const personTypeLabel =
+					personTypeOptions.find(
+						(p) => String(p.id) === String(createPayload.personTypeId ?? created.personTypeId),
+					)?.label ?? created.personType ?? "";
+
+				const merged = {
+					...created,
+					rol: roleLabel,
+					estado: statusLabel,
+					personType: personTypeLabel,
+					personTypeId: createPayload.personTypeId ?? created.personTypeId ?? null,
+					rolId: createPayload.rolId ?? created.rolId ?? null,
+					estadoId: createPayload.estadoId ?? created.estadoId ?? null,
+				};
+
+				setUsers((prev) => [...prev, merged]);
 			}
 		} catch (err) {
 			console.error("Error guardando usuario", err);
