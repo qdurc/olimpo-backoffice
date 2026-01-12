@@ -123,6 +123,17 @@ function toIsoString(value?: string | null) {
 	return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
+function toDotNetDateTime(value?: string | null) {
+	if (!value) return undefined;
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return undefined;
+
+	const pad = (n: number, size = 2) => n.toString().padStart(size, "0");
+	const ms = date.getMilliseconds();
+
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(ms, 3)}`;
+}
+
 function normalizeMaintenance(
 	item: MaintenanceApi,
 	facilityMap: Map<number, Installation>,
@@ -247,8 +258,8 @@ export async function createMaintenance(payload: MaintenancePayload): Promise<Ma
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	const startDate = toIsoString(payload.inicio);
-	const endDate = toIsoString(payload.fin);
+	const startDate = toDotNetDateTime(payload.inicio);
+	const endDate = toDotNetDateTime(payload.fin);
 
 	const body: MaintenanceApi = {
 		facilityId: parseNum(payload.facilityId),
@@ -302,8 +313,8 @@ export async function updateMaintenance(
 		throw new Error("Update requiere un id numérico válido");
 	}
 
-	const startDate = toIsoString(payload.inicio);
-	const endDate = toIsoString(payload.fin);
+	const startDate = toDotNetDateTime(payload.inicio);
+	const endDate = toDotNetDateTime(payload.fin);
 
 	const body: MaintenanceApi = {
 		id: numericId,
