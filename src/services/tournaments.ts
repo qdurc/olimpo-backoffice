@@ -107,6 +107,17 @@ function formatDateTime(value?: string | null) {
 	return Number.isNaN(d.getTime()) ? "" : d.toLocaleString();
 }
 
+function toDotNetDateTime(value?: string | null) {
+	if (!value) return undefined;
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return undefined;
+
+	const pad = (n: number, size = 2) => n.toString().padStart(size, "0");
+	const ms = date.getMilliseconds();
+
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(ms, 3)}`;
+}
+
 function buildFacilityMap(facilities?: Installation[]) {
 	const map = new Map<number, Installation>();
 	if (facilities?.length) {
@@ -287,12 +298,20 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 		throw new Error("API base URL is not configured (VITE_API_URL missing)");
 	}
 
-	const startDate = parseDate(payload.fechaIso);
-	if (!startDate) throw new Error("Fecha inválida");
+	const start = parseDate(payload.fechaIso);
+	if (!start) throw new Error("Fecha inválida");
 
-	const endDate = parseDate(payload.endFechaIso);
+	const end = parseDate(payload.endFechaIso);
+	if (!end) throw new Error("Fecha fin inválida");
+	if (end.getTime() <= start.getTime()) {
+		throw new Error("La fecha fin debe ser mayor que la fecha inicio");
+	}
+
+	const date = toDotNetDateTime(payload.fechaIso);
+	const endDate = toDotNetDateTime(payload.endFechaIso);
+
+	if (!date) throw new Error("Fecha inválida");
 	if (!endDate) throw new Error("Fecha fin inválida");
-	if (endDate.getTime() <= startDate.getTime()) throw new Error("La fecha fin debe ser mayor que la fecha inicio");
 
 	const categoryID = parseNum(payload.categoriaId);
 	const disciplineID = parseNum(payload.disciplinaId);
@@ -309,8 +328,8 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 		estatusID,
 		facilityID,
 		supervisorID,
-		date: startDate.toISOString(),
-		endDate: endDate.toISOString(),
+		date,
+		endDate,
 	};
 
 	const created = await apiFetchJson<any>("/api/Tournaments/CreateTournament", {
@@ -333,12 +352,20 @@ export async function updateTournament(id: number | string, payload: TournamentP
 	const numericId = typeof id === "number" ? id : Number(id);
 	if (!Number.isFinite(numericId)) throw new Error("Update requiere un id numérico válido");
 
-	const startDate = parseDate(payload.fechaIso);
-	if (!startDate) throw new Error("Fecha inválida");
+	const start = parseDate(payload.fechaIso);
+	if (!start) throw new Error("Fecha inválida");
 
-	const endDate = parseDate(payload.endFechaIso);
+	const end = parseDate(payload.endFechaIso);
+	if (!end) throw new Error("Fecha fin inválida");
+	if (end.getTime() <= start.getTime()) {
+		throw new Error("La fecha fin debe ser mayor que la fecha inicio");
+	}
+
+	const date = toDotNetDateTime(payload.fechaIso);
+	const endDate = toDotNetDateTime(payload.endFechaIso);
+
+	if (!date) throw new Error("Fecha inválida");
 	if (!endDate) throw new Error("Fecha fin inválida");
-	if (endDate.getTime() <= startDate.getTime()) throw new Error("La fecha fin debe ser mayor que la fecha inicio");
 
 	const categoryID = parseNum(payload.categoriaId);
 	const disciplineID = parseNum(payload.disciplinaId);
@@ -356,8 +383,8 @@ export async function updateTournament(id: number | string, payload: TournamentP
 		estatusID,
 		facilityID,
 		supervisorID,
-		date: startDate.toISOString(),
-		endDate: endDate.toISOString(),
+		date,
+		endDate,
 	};
 
 	const updated = await apiFetchJson<any>("/api/Tournaments/UpdateTournament", {
