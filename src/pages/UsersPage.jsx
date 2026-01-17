@@ -138,36 +138,10 @@ export default function UsersPage() {
 		try {
 			setSubmitting(true);
 			setError("");
+
 			if (payload.id) {
 				const existing = users.find((u) => String(u.id) === String(payload.id));
-				const updated = await updateUser(payload.id, payload, existing);
-
-				const roleLabel = existing?.rol ?? updated.rol;
-
-				const statusLabel =
-					editOptions.statuses.find((s) => String(s.id) === String(payload.estadoId))?.label ??
-					statusOptions.find((s) => String(s.id) === String(payload.estadoId))?.label ??
-					updated.estado;
-
-				const merged = {
-					...existing,
-					...updated,
-					rol: roleLabel ?? updated.rol,
-					estado: statusLabel ?? updated.estado,
-
-					rolId: existing?.rolId ?? updated.rolId ?? null,
-
-					estadoId: payload.estadoId ?? updated.estadoId ?? existing?.estadoId ?? null,
-
-					personType: updated.personType ?? existing?.personType ?? "",
-					personTypeId: payload.personTypeId ?? updated.personTypeId ?? existing?.personTypeId ?? null,
-
-					identification: updated.identification ?? existing?.identification ?? null,
-				};
-
-				setUsers((prev) =>
-					prev.map((u) => (String(u.id) === String(payload.id) ? { ...u, ...merged } : u)),
-				);
+				await updateUser(payload.id, payload, existing);
 			} else {
 				const createPayload = {
 					...payload,
@@ -175,38 +149,11 @@ export default function UsersPage() {
 					estadoId: payload.estadoId ?? 1,
 				};
 
-				const created = await createUser(createPayload);
-
-				const rolesSource = editOptions.roles.length ? editOptions.roles : roleOptions;
-				const statusesSource = editOptions.statuses.length ? editOptions.statuses : statusOptions;
-
-				const roleLabel =
-					rolesSource.find((r) => String(r.id) === String(createPayload.rolId))?.label ?? created.rol;
-
-				const statusLabel =
-					statusesSource.find((s) => String(s.id) === String(createPayload.estadoId))?.label ??
-					created.estado;
-
-				const personTypeLabel =
-					personTypeOptions.find(
-						(p) => String(p.id) === String(createPayload.personTypeId ?? created.personTypeId),
-					)?.label ?? created.personType ?? "";
-
-				const merged = {
-					...created,
-					rol: roleLabel,
-					estado: statusLabel,
-					personType: personTypeLabel,
-					personTypeId: createPayload.personTypeId ?? created.personTypeId ?? null,
-					rolId: createPayload.rolId ?? created.rolId ?? null,
-					estadoId: createPayload.estadoId ?? created.estadoId ?? null,
-					identification: createPayload.identification ?? created.identification ?? null,
-					bornDateIso: createPayload.bornDateIso ?? created.bornDateIso ?? null,
-					gender: createPayload.gender ?? created.gender ?? null,
-				};
-
-				setUsers((prev) => [...prev, merged]);
+				await createUser(createPayload);
 			}
+
+			const fresh = await getUsers();
+			setUsers(fresh);
 		} catch (err) {
 			console.error("Error guardando usuario", err);
 			const msg =
