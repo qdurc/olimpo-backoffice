@@ -193,7 +193,7 @@ export default function FacilityModal({
 				>
 					<MenuItem value="">Selecciona</MenuItem>
 					{installationStatuses.map((status) => (
-						<MenuItem key={status.id} value={status.id}>
+						<MenuItem key={status.id} value={status.id} disabled={isEditing && String(status.id) === "2"}>
 							{status.label}
 						</MenuItem>
 					))}
