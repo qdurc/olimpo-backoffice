@@ -12,6 +12,7 @@ import {
 	getMaintenances,
 	updateMaintenance,
 	maintenanceStatuses,
+	clearMaintenancesCache,
 } from "../services/maintenances";
 import { getInstallations } from "../services/installations";
 
@@ -101,25 +102,26 @@ export default function MaintenancePage() {
 
 	const handleSave = async (data) => {
 		try {
+			setLoading(true);
+
 			if (data.id) {
-				const updated = await updateMaintenance(data.id, data);
-				setMantenimientos((prev) =>
-					prev.map((item) => (item.id === updated.id ? updated : item))
-				);
-				return updated;
+				await updateMaintenance(data.id, data);
 			} else {
-				const created = await createMaintenance(data);
-				setMantenimientos((prev) => [...prev, created]);
-				return created;
+				await createMaintenance(data);
 			}
+
+			clearMaintenancesCache();
+			const fresh = await getMaintenances(instalaciones);
+			setMantenimientos(fresh);
 		} catch (error) {
 			console.error("Error saving maintenance", error);
 			throw error;
 		} finally {
+			setLoading(false);
 			setEditing(null);
+			setOpenModal(false);
 		}
 	};
-
 
 	const handleDelete = async (id) => {
 		const numericId = typeof id === "number" ? id : Number(id);
@@ -129,12 +131,17 @@ export default function MaintenancePage() {
 		}
 
 		try {
+			setLoading(true);
+
 			await deleteMaintenance(numericId);
-			setMantenimientos((prev) =>
-				prev.filter((item) => Number(item.id) !== numericId)
-			);
+
+			clearMaintenancesCache();
+			const fresh = await getMaintenances(instalaciones);
+			setMantenimientos(fresh);
 		} catch (error) {
 			console.error("Error deleting maintenance", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
