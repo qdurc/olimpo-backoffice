@@ -83,19 +83,24 @@ export default function ReservationsPage() {
 
 	const handleSave = async (data) => {
 		try {
+			setLoading(true);
+
 			if (data.id) {
-				const updated = await updateReservation(data.id, data);
-				setReservations((prev) =>
-					prev.map((item) => (item.id === updated.id ? updated : item)),
-				);
+				await updateReservation(data.id, data);
 			} else {
-				const created = await createReservation(data);
-				setReservations((prev) => [...prev, created]);
+				await createReservation(data);
 			}
+
+			const fresh = await getReservations(installations);
+			setReservations(fresh);
+
 			setEditing(null);
+			setOpenModal(false);
 		} catch (error) {
 			console.error("Error saving reservation", error);
 			throw error;
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -107,10 +112,16 @@ export default function ReservationsPage() {
 		}
 
 		try {
+			setLoading(true);
+
 			await deleteReservation(numericId);
-			setReservations((prev) => prev.filter((item) => Number(item.id) !== numericId));
+
+			const fresh = await getReservations(installations);
+			setReservations(fresh);
 		} catch (error) {
 			console.error("Error deleting reservation", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
