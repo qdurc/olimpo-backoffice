@@ -69,7 +69,7 @@ export default function UsersPage() {
 
 	const filtered = useMemo(() => {
 		return users.filter((u) =>
-			`${u.nombre} ${u.email || ""} ${u.rol || ""} ${u.estado || ""}`
+			`${u.nombre} ${u.email || ""} ${u.rol || ""} ${u.estado || ""} ${u.identification || ""} ${u.gender || ""} ${u.bornDateIso || ""}`
 				.toLowerCase()
 				.includes(search.toLowerCase())
 		);
@@ -139,30 +139,34 @@ export default function UsersPage() {
 			setSubmitting(true);
 			setError("");
 			if (payload.id) {
-				const updated = await updateUser(payload.id, payload);
-				const roleLabel =
-					editOptions.roles.find((r) => String(r.id) === String(payload.rolId))
-						?.label ?? updated.rol;
+				const existing = users.find((u) => String(u.id) === String(payload.id));
+				const updated = await updateUser(payload.id, payload, existing);
+
+				const roleLabel = existing?.rol ?? updated.rol;
+
 				const statusLabel =
-					editOptions.statuses.find((s) => String(s.id) === String(payload.estadoId))
-						?.label ??
+					editOptions.statuses.find((s) => String(s.id) === String(payload.estadoId))?.label ??
 					statusOptions.find((s) => String(s.id) === String(payload.estadoId))?.label ??
 					updated.estado;
 
 				const merged = {
+					...existing,
 					...updated,
 					rol: roleLabel ?? updated.rol,
 					estado: statusLabel ?? updated.estado,
-					rolId: payload.rolId ?? updated.rolId ?? null,
-					estadoId: payload.estadoId ?? updated.estadoId ?? null,
-					personType: updated.personType ?? payload.personType ?? "",
-					personTypeId: payload.personTypeId ?? updated.personTypeId ?? null,
+
+					rolId: existing?.rolId ?? updated.rolId ?? null,
+
+					estadoId: payload.estadoId ?? updated.estadoId ?? existing?.estadoId ?? null,
+
+					personType: updated.personType ?? existing?.personType ?? "",
+					personTypeId: payload.personTypeId ?? updated.personTypeId ?? existing?.personTypeId ?? null,
+
+					identification: updated.identification ?? existing?.identification ?? null,
 				};
 
 				setUsers((prev) =>
-					prev.map((u) =>
-						String(u.id) === String(payload.id) ? { ...u, ...merged } : u,
-					),
+					prev.map((u) => (String(u.id) === String(payload.id) ? { ...u, ...merged } : u)),
 				);
 			} else {
 				const createPayload = {
@@ -196,13 +200,20 @@ export default function UsersPage() {
 					personTypeId: createPayload.personTypeId ?? created.personTypeId ?? null,
 					rolId: createPayload.rolId ?? created.rolId ?? null,
 					estadoId: createPayload.estadoId ?? created.estadoId ?? null,
+					identification: createPayload.identification ?? created.identification ?? null,
+					bornDateIso: createPayload.bornDateIso ?? created.bornDateIso ?? null,
+					gender: createPayload.gender ?? created.gender ?? null,
 				};
 
 				setUsers((prev) => [...prev, merged]);
 			}
 		} catch (err) {
 			console.error("Error guardando usuario", err);
-			setError("No se pudo guardar el usuario.");
+			const msg =
+				err instanceof Error
+					? err.message
+					: "No se pudo guardar el usuario (error desconocido).";
+			setError(msg);
 		} finally {
 			setSubmitting(false);
 			setEditing(null);
@@ -228,6 +239,15 @@ export default function UsersPage() {
 		},
 		{ field: "email", headerName: "Correo electrónico", flex: 1 },
 		{ field: "personType", headerName: "Tipo", width: 140 },
+		{ field: "identification", headerName: "Cédula", width: 160 },
+		{
+			field: "bornDateIso",
+			headerName: "Fecha de Nacimiento",
+			width: 180,
+			renderCell: (p) =>
+				p.value ? new Date(p.value).toLocaleDateString() : "",
+		},
+		{ field: "gender", headerName: "Género", width: 110 },
 		{
 			field: "estado",
 			headerName: "Estado",

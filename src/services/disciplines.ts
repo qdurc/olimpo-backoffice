@@ -43,13 +43,22 @@ export async function getDisciplines(): Promise<Discipline[]> {
 	}
 
 	const response = await apiFetchJson<DisciplineResponse>("/api/Discipline/GetAllDisciplinesFront");
-	const payload = Array.isArray(response)
-		? response
-		: Array.isArray(response?.data)
-			? response.data
-			: response?.data
-				? [response.data]
-				: [];
+	let payload: DisciplineApi[] = [];
+
+	if (Array.isArray(response)) {
+		payload = response;
+	} else if (response && typeof response === "object" && "data" in response) {
+		const data = (response as { data?: DisciplineApi | DisciplineApi[] | null }).data;
+		if (Array.isArray(data)) {
+			payload = data;
+		} else if (data) {
+			payload = [data];
+		} else {
+			payload = [];
+		}
+	} else if (response) {
+		payload = [response as DisciplineApi];
+	}
 
 	return payload.map((item) => normalizeDiscipline(item));
 }

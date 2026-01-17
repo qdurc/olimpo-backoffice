@@ -27,12 +27,22 @@ export default function UserModal({
 			estadoId: "",
 			personTypeId: "",
 			password: "",
+			bornDateIso: "",
+			gender: "",
+			identification: "",
 		}),
 		[],
 	);
 
 	const [form, setForm] = useState(emptyForm);
 	const [errors, setErrors] = useState({});
+
+	const toDateInputValue = (value) => {
+		if (!value) return "";
+		const d = new Date(value);
+		if (Number.isNaN(d.getTime())) return "";
+		return d.toISOString().slice(0, 10);
+	};
 
 	useEffect(() => {
 		if (open) {
@@ -52,6 +62,14 @@ export default function UserModal({
 						? String(initialData.personTypeId)
 						: "",
 				password: "",
+				bornDateIso: toDateInputValue(
+					initialData?.bornDateIso ?? initialData?.bornDate ?? null,
+				),
+				gender: initialData?.gender ?? "",
+				identification:
+					initialData?.identification ??
+					initialData?.cedula ??
+					"",
 			});
 			setErrors({});
 		} else {
@@ -68,43 +86,61 @@ export default function UserModal({
 	const handleSubmit = () => {
 		const nextErrors = {};
 
-		if (!form.nombre.trim()) {
-			nextErrors.nombre = "Nombre requerido";
-		}
-		if (!form.email.trim()) {
-			nextErrors.email = "Correo requerido";
-		}
+		if (!form.nombre.trim()) nextErrors.nombre = "Nombre requerido";
+
+		if (!initialData && !form.email.trim()) nextErrors.email = "Correo requerido";
+
 		if (!initialData) {
-			if (!form.password.trim()) {
-				nextErrors.password = "Contraseña requerida";
-			} else if (form.password.trim().length < 6) {
-				nextErrors.password = "Mínimo 6 caracteres";
-			}
-		}
-		if (roles.length && !form.rolId) {
-			nextErrors.rolId = "Selecciona un rol";
-		}
-		if (statuses.length && !form.estadoId) {
-			nextErrors.estadoId = "Selecciona un estado";
+			if (!form.password.trim()) nextErrors.password = "Contraseña requerida";
+			else if (form.password.trim().length < 6) nextErrors.password = "Mínimo 6 caracteres";
 		}
 
+		if (!initialData && roles.length && !form.rolId) nextErrors.rolId = "Selecciona un rol";
+
+		if (statuses.length && !form.estadoId) nextErrors.estadoId = "Selecciona un estado";
+
 		const personTypeNum = Number(form.personTypeId);
-		if (![1, 2].includes(personTypeNum)) {
-			nextErrors.personTypeId = "Selecciona Atleta o Entrenador";
+		if (![1, 2].includes(personTypeNum)) nextErrors.personTypeId = "Selecciona Atleta o Entrenador";
+
+		if (!form.bornDateIso) {
+			nextErrors.bornDateIso = "Fecha de nacimiento requerida";
+		} else {
+			const d = new Date(form.bornDateIso);
+			if (Number.isNaN(d.getTime())) nextErrors.bornDateIso = "Fecha de nacimiento inválida";
 		}
+
+		const gender = form.gender?.trim();
+		if (!gender) nextErrors.gender = "Género requerido";
+		else if (!["M", "F"].includes(gender)) nextErrors.gender = "Selecciona M o F";
+
+		if (!initialData && !form.identification.trim()) nextErrors.identification = "Identificación requerida";
 
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
 
-		onSave?.({
+		const basePayload = {
 			id: initialData?.id,
 			nombre: form.nombre.trim(),
-			email: form.email.trim(),
-			rolId: form.rolId === "" ? null : form.rolId,
-			estadoId: form.estadoId === "" ? null : form.estadoId,
 			personTypeId: Number(form.personTypeId),
-			password: form.password.trim(),
-		});
+			estadoId: form.estadoId === "" ? null : form.estadoId,
+			bornDateIso: form.bornDateIso || null,
+			gender: gender || null,
+		};
+
+		if (initialData) {
+			onSave?.({
+				...basePayload,
+			});
+		} else {
+			onSave?.({
+				...basePayload,
+				email: form.email.trim(),
+				rolId: form.rolId === "" ? null : form.rolId,
+				password: form.password.trim(),
+				identification: form.identification.trim() || null,
+			});
+		}
+
 		onClose?.();
 	};
 
@@ -130,11 +166,12 @@ export default function UserModal({
 						name="email"
 						type="email"
 						fullWidth
-						required
+						required={!initialData}
 						value={form.email}
 						onChange={handleChange}
 						error={Boolean(errors.email)}
 						helperText={errors.email}
+						disabled={Boolean(initialData)}
 					/>
 					{!initialData && (
 						<TextField
@@ -155,11 +192,12 @@ export default function UserModal({
 						label="Rol"
 						name="rolId"
 						fullWidth
-						required={Boolean(roles.length)}
+						required={!initialData && Boolean(roles.length)}
 						value={form.rolId}
 						onChange={handleChange}
 						error={Boolean(errors.rolId)}
 						helperText={errors.rolId}
+						disabled={Boolean(initialData)}
 					>
 						<MenuItem value="">Selecciona</MenuItem>
 						{roles.map((role) => (
@@ -183,6 +221,44 @@ export default function UserModal({
 						<MenuItem value="1">Atleta</MenuItem>
 						<MenuItem value="2">Entrenador</MenuItem>
 					</TextField>
+					<TextField
+						label="Fecha de nacimiento"
+						name="bornDateIso"
+						type="date"
+						fullWidth
+						required
+						value={form.bornDateIso}
+						onChange={handleChange}
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.bornDateIso)}
+						helperText={errors.bornDateIso}
+					/>
+					<TextField
+						select
+						label="Género"
+						name="gender"
+						fullWidth
+						required
+						value={form.gender}
+						onChange={handleChange}
+						error={Boolean(errors.gender)}
+						helperText={errors.gender}
+					>
+						<MenuItem value="">Selecciona</MenuItem>
+						<MenuItem value="M">Masculino</MenuItem>
+						<MenuItem value="F">Femenino</MenuItem>
+					</TextField>
+					<TextField
+						label="Cédula"
+						name="identification"
+						fullWidth
+						required={!initialData}
+						value={form.identification}
+						onChange={handleChange}
+						error={Boolean(errors.identification)}
+						helperText={errors.identification}
+						disabled={Boolean(initialData)}
+					/>
 					<TextField
 						select
 						label="Estado"
