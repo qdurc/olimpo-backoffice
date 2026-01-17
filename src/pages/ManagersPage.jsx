@@ -45,26 +45,38 @@ export default function ManagersPage() {
 
 	const handleSave = async (payload) => {
 		try {
+			setLoading(true);
+
 			if (payload.id) {
-				const updated = await updateManager(payload.id, payload);
-				setManagers((prev) => prev.map((m) => (m.id === payload.id ? updated : m)));
+				await updateManager(payload.id, payload);
 			} else {
-				const created = await createManager(payload);
-				setManagers((prev) => [...prev, created]);
+				await createManager(payload);
 			}
+
+			const fresh = await getManagers();
+			setManagers(fresh);
+
+			setEditing(null);
+			setOpenModal(false);
 		} catch (error) {
 			console.error("Error guardando encargado", error);
 		} finally {
-			setEditing(null);
+			setLoading(false);
 		}
 	};
 
 	const handleDelete = async (id) => {
 		try {
+			setLoading(true);
+
 			await deleteManager(id);
-			setManagers((prev) => prev.filter((m) => m.id !== id));
+
+			const fresh = await getManagers();
+			setManagers(fresh);
 		} catch (error) {
 			console.error("Error eliminando encargado", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 

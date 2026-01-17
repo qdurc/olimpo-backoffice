@@ -59,6 +59,19 @@ export default function TournamentsPage() {
 		};
 	}, []);
 
+	const refreshTorneos = async () => {
+		setLoading(true);
+		try {
+			const fresh = await getTournaments(viewModel.facilities);
+			setTorneos(fresh);
+		} catch (error) {
+			console.error("Error recargando torneos", error);
+			setTorneos([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const rows = useMemo(() => {
 		const term = search.toLowerCase();
 		return torneos.filter(
@@ -105,21 +118,24 @@ export default function TournamentsPage() {
 
 	const handleSaveTorneo = async (torneoForm) => {
 		try {
+			setLoading(true);
+
 			if (editingTorneo?.id) {
-				const updated = await updateTournament(editingTorneo.id, torneoForm);
-				setTorneos((prev) =>
-					prev.map((t) => (Number(t.id) === Number(updated.id) ? updated : t))
-				);
+				await updateTournament(editingTorneo.id, torneoForm);
 			} else {
-				const created = await createTournament(torneoForm);
-				setTorneos((prev) => [...prev, created]);
+				await createTournament(torneoForm);
 			}
+
+			const fresh = await getTournaments(viewModel.facilities);
+			setTorneos(fresh);
 
 			setEditingTorneo(null);
 			setOpenModal(false);
 		} catch (error) {
 			console.error("Error saving tournament", error);
 			throw error;
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -131,10 +147,16 @@ export default function TournamentsPage() {
 		}
 
 		try {
+			setLoading(true);
+
 			await deleteTournament(numericId);
-			setTorneos((prev) => prev.filter((t) => Number(t.id) !== numericId));
+
+			const fresh = await getTournaments(viewModel.facilities);
+			setTorneos(fresh);
 		} catch (error) {
 			console.error("Error deleting tournament", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 

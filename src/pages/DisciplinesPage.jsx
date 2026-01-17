@@ -79,10 +79,13 @@ export default function DisciplinesPage() {
 
 	const handleDelete = async (id) => {
 		try {
+			setLoading(true);
 			await deleteDiscipline(id);
 			await refresh();
 		} catch (error) {
 			console.error("Error eliminando disciplina", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 

@@ -74,10 +74,13 @@ export default function CategoriesPage() {
 
 	const handleDelete = async (id) => {
 		try {
+			setLoading(true);
 			await deleteCategory(id);
 			await refresh();
 		} catch (error) {
 			console.error("Error eliminando categoría", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
