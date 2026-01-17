@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
@@ -22,6 +23,17 @@ export default function FacilitiesPage() {
 	const [openModal, setOpenModal] = useState(false);
 	const [editingInst, setEditingInst] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
+
+	React.useEffect(() => {
+		if (!error) return;
+
+		const timer = setTimeout(() => {
+			setError("");
+		}, 8000);
+
+		return () => clearTimeout(timer);
+	}, [error]);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -34,6 +46,13 @@ export default function FacilitiesPage() {
 				setInstalaciones(instData);
 			} catch (error) {
 				console.error("Error loading installations data", error);
+				const message =
+					error instanceof Error
+						? error.message
+						: "No se pudieron cargar las instalaciones.";
+				if (isMounted) {
+					setError(message);
+				}
 			} finally {
 				if (isMounted) {
 					setLoading(false);
@@ -50,6 +69,7 @@ export default function FacilitiesPage() {
 	const handleSaveInst = async (inst) => {
 		try {
 			setLoading(true);
+			setError("");
 
 			if (inst.id) {
 				await updateInstallation(inst.id, inst);
@@ -62,6 +82,11 @@ export default function FacilitiesPage() {
 			setInstalaciones(fresh);
 		} catch (error) {
 			console.error("Error saving installation", error);
+			const message =
+				error instanceof Error
+					? error.message
+					: "No se pudo guardar la instalación.";
+			setError(message);
 		} finally {
 			setLoading(false);
 			setEditingInst(null);
@@ -72,6 +97,7 @@ export default function FacilitiesPage() {
 	const handleDeleteInst = async (id) => {
 		try {
 			setLoading(true);
+			setError("");
 
 			await deleteInstallation(id);
 
@@ -81,6 +107,11 @@ export default function FacilitiesPage() {
 
 		} catch (error) {
 			console.error("Error deleting installation", error);
+			const message =
+				error instanceof Error
+					? error.message
+					: "No se pudo eliminar la instalación.";
+			setError(message);
 		} finally {
 			setLoading(false);
 		}
@@ -157,6 +188,12 @@ export default function FacilitiesPage() {
 					}}
 				/>
 			</Box>
+
+			{error ? (
+				<Alert severity="error" sx={{ mb: 2 }}>
+					{error}
+				</Alert>
+			) : null}
 
 			<EntityTable
 				rows={paged}
