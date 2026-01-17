@@ -113,11 +113,11 @@ function normalizeFacility(data?: FacilityApi | null, fallback?: Installation): 
 					? statusTextFromNumber ?? statusString
 					: statusString
 				: statusTextFromNumber ??
-					(typeof data.status === "number"
-						? String(data.status)
-						: typeof data.status_ID === "number"
-							? String(data.status_ID)
-							: fallback?.estado ?? "Sin estado"),
+				(typeof data.status === "number"
+					? String(data.status)
+					: typeof data.status_ID === "number"
+						? String(data.status_ID)
+						: fallback?.estado ?? "Sin estado"),
 		statusId,
 	};
 }
@@ -344,7 +344,5 @@ export async function deleteInstallation(id: number | string): Promise<void> {
 		}
 	});
 
-	if (installationsCache) {
-		installationsCache = installationsCache.filter((item) => item.id !== id);
-	}
+	clearInstallationsCache();
 }
