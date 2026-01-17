@@ -191,8 +191,23 @@ export default function UsersPage() {
 			field: "bornDateIso",
 			headerName: "Fecha de Nacimiento",
 			width: 180,
-			renderCell: (p) =>
-				p.value ? new Date(p.value).toLocaleDateString() : "",
+			renderCell: (p) => {
+				if (!p.value) return "";
+
+				const s = String(p.value);
+				const dateOnly = s.slice(0, 10);
+
+				if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+					const [y, m, d] = dateOnly.split("-").map(Number);
+					const dt = new Date(Date.UTC(y, m - 1, d));
+					return dt.toLocaleDateString("en-US", { timeZone: "UTC" });
+				}
+
+				const dt = new Date(s);
+				if (Number.isNaN(dt.getTime())) return "";
+
+				return dt.toLocaleDateString("en-US", { timeZone: "UTC" });
+			},
 		},
 		{ field: "gender", headerName: "Género", width: 110 },
 		{

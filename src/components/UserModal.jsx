@@ -41,7 +41,12 @@ export default function UserModal({
 		if (!value) return "";
 		const d = new Date(value);
 		if (Number.isNaN(d.getTime())) return "";
-		return d.toISOString().slice(0, 10);
+
+		const pad = (n) => n.toString().padStart(2, "0");
+		const year = d.getFullYear();
+		const month = pad(d.getMonth() + 1);
+		const day = pad(d.getDate());
+		return `${year}-${month}-${day}`;
 	};
 
 	useEffect(() => {

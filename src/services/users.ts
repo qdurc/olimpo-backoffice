@@ -131,7 +131,17 @@ function parseDate(value?: string | null) {
 
 function toDotNetDateTime(value?: string | null) {
 	if (!value) return undefined;
-	const date = new Date(value);
+
+	const trimmed = value.trim();
+
+	const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+	if (dateOnlyMatch) {
+		const [, year, month, day] = dateOnlyMatch;
+
+		return `${year}-${month}-${day}T00:00:00.000`;
+	}
+
+	const date = new Date(trimmed);
 	if (Number.isNaN(date.getTime())) return undefined;
 
 	const pad = (n: number, size = 2) => n.toString().padStart(size, "0");
