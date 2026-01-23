@@ -328,7 +328,7 @@ export async function deleteReservation(id: number | string): Promise<void> {
 	}
 
 	const params = new URLSearchParams({ reservationId: String(numericId) });
-	await apiFetchJson(`/api/Reservation/DeleteReservation?${params.toString()}`, {
+	await apiFetchJson(`/api/Reservation/DeleteReservationFront?${params.toString()}`, {
 		method: "DELETE",
 	}).then((res: DeleteReservationResponse | unknown) => {
 		if (res && typeof res === "object" && "success" in res && (res as DeleteReservationResponse).success === false) {
