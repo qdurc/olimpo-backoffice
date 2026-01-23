@@ -130,6 +130,8 @@ const DashboardPage = () => {
 		};
 	});
 
+	const hasClassificationData = classificationData.some((item) => item.value > 0);
+
 	if (loading) {
 		return (
 			<Box
@@ -304,47 +306,62 @@ const DashboardPage = () => {
 						Clasificación de instalaciones por estado
 					</Typography>
 
-					<Box sx={{ height: 260 }}>
-						<ResponsiveContainer>
-							<PieChart>
-								<Pie
-									data={classificationData}
-									dataKey="value"
-									cx="50%"
-									cy="50%"
-									innerRadius={46}
-									outerRadius={82}
-									paddingAngle={4}
-								>
-									{classificationData.map((entry) => (
-										<Cell
-											key={entry.name}
-											fill={entry.color}
-										/>
-									))}
-								</Pie>
-							</PieChart>
-						</ResponsiveContainer>
-					</Box>
+					{hasClassificationData ? (
+						<>
+							<Box sx={{ height: 260 }}>
+								<ResponsiveContainer>
+									<PieChart>
+										<Pie
+											data={classificationData}
+											dataKey="value"
+											cx="50%"
+											cy="50%"
+											innerRadius={46}
+											outerRadius={82}
+											paddingAngle={4}
+										>
+											{classificationData.map((entry) => (
+												<Cell key={entry.name} fill={entry.color} />
+											))}
+										</Pie>
+									</PieChart>
+								</ResponsiveContainer>
+							</Box>
 
-					<Box sx={{ mt: 2 }}>
-						{classificationData.map((item) => (
-							<Typography
-								key={item.name}
-								variant="body2"
-								component="div"
-								sx={{
-									display: "flex",
-									alignItems: "center",
-									gap: 1,
-									color: theme.palette.text.secondary,
-								}}
-							>
-								<LegendDot color={item.color} />
-								{item.name} — <strong>{item.value}</strong>
+							<Box sx={{ mt: 2 }}>
+								{classificationData.map((item) => (
+									<Typography
+										key={item.name}
+										variant="body2"
+										component="div"
+										sx={{
+											display: "flex",
+											alignItems: "center",
+											gap: 1,
+											color: theme.palette.text.secondary,
+										}}
+									>
+										<LegendDot color={item.color} />
+										{item.name} — <strong>{item.value}</strong>
+									</Typography>
+								))}
+							</Box>
+						</>
+					) : (
+						<Box
+							sx={{
+								height: 260,
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								color: theme.palette.text.secondary,
+							}}
+						>
+							<Typography variant="body2">
+								No hay instalaciones registradas aún.
 							</Typography>
-						))}
-					</Box>
+						</Box>
+					)}
 				</Paper>
 			</Box>
 
@@ -364,68 +381,82 @@ const DashboardPage = () => {
 					Próximos mantenimientos
 				</Typography>
 
-				<TableContainer>
-					<Table size="small">
-						<TableHead
-							sx={{
-								backgroundColor: theme.palette.grey[100],
-							}}
-						>
-							<TableRow>
-								<TableCell
-									sx={{
-										color: theme.palette.common.black,
-										fontWeight: 700,
-									}}
-								>
-									Instalación
-								</TableCell>
-
-								<TableCell
-									sx={{
-										color: theme.palette.common.black,
-										fontWeight: 700,
-									}}
-								>
-									Inicio
-								</TableCell>
-
-								<TableCell
-									sx={{
-										color: theme.palette.common.black,
-										fontWeight: 700,
-									}}
-								>
-									Fin
-								</TableCell>
-
-								<TableCell
-									sx={{
-										color: theme.palette.common.black,
-										fontWeight: 700,
-									}}
-								>
-									Estado
-								</TableCell>
-							</TableRow>
-						</TableHead>
-
-						<TableBody>
-							{maintenances.map((m) => (
-								<TableRow key={m.id}>
-									<TableCell>{m.nombre}</TableCell>
-									<TableCell>
-										{m.inicio ? new Date(m.inicio).toLocaleString() : ""}
+				{maintenances.length === 0 ? (
+					<Box
+						sx={{
+							py: 6,
+							textAlign: "center",
+							color: theme.palette.text.secondary,
+						}}
+					>
+						<Typography variant="body2">
+							No hay mantenimientos registrados aún.
+						</Typography>
+					</Box>
+				) : (
+					<TableContainer>
+						<Table size="small">
+							<TableHead
+								sx={{
+									backgroundColor: theme.palette.grey[100],
+								}}
+							>
+								<TableRow>
+									<TableCell
+										sx={{
+											color: theme.palette.common.black,
+											fontWeight: 700,
+										}}
+									>
+										Instalación
 									</TableCell>
-									<TableCell>
-										{m.fin ? new Date(m.fin).toLocaleString() : ""}
+
+									<TableCell
+										sx={{
+											color: theme.palette.common.black,
+											fontWeight: 700,
+										}}
+									>
+										Inicio
 									</TableCell>
-									<TableCell>{m.estado}</TableCell>
+
+									<TableCell
+										sx={{
+											color: theme.palette.common.black,
+											fontWeight: 700,
+										}}
+									>
+										Fin
+									</TableCell>
+
+									<TableCell
+										sx={{
+											color: theme.palette.common.black,
+											fontWeight: 700,
+										}}
+									>
+										Estado
+									</TableCell>
 								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</TableContainer>
+							</TableHead>
+
+							<TableBody>
+								{maintenances.map((m) => (
+									<TableRow key={m.id}>
+										<TableCell>{m.nombre}</TableCell>
+										<TableCell>
+											{m.inicio ? new Date(m.inicio).toLocaleString() : ""}
+										</TableCell>
+										<TableCell>
+											{m.fin ? new Date(m.fin).toLocaleString() : ""}
+										</TableCell>
+										<TableCell>{m.estado}</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</TableContainer>
+				)}
 			</Paper>
 		</Box>
 	);
