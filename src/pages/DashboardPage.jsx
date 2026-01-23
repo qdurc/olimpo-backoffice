@@ -94,6 +94,24 @@ const DashboardPage = () => {
 	}, []);
 
 	const { stats, activity, classification, maintenances, currentUserName } = data;
+
+	const now = Date.now();
+
+	const upcomingMaintenances = maintenances.filter((m) => {
+		const end = m.fin ? new Date(m.fin) : null;
+		const start = m.inicio ? new Date(m.inicio) : null;
+
+		const endTime =
+			end && !Number.isNaN(end.getTime()) ? end.getTime() : null;
+		const startTime =
+			start && !Number.isNaN(start.getTime()) ? start.getTime() : null;
+
+		if (endTime !== null) return endTime >= now;
+		if (startTime !== null) return startTime >= now;
+
+		return false;
+	});
+
 	const activityColors = [
 		theme.palette.primary.main,
 		theme.palette.primary.light,
@@ -381,7 +399,7 @@ const DashboardPage = () => {
 					Próximos mantenimientos
 				</Typography>
 
-				{maintenances.length === 0 ? (
+				{upcomingMaintenances.length === 0 ? (
 					<Box
 						sx={{
 							py: 6,
@@ -441,7 +459,7 @@ const DashboardPage = () => {
 							</TableHead>
 
 							<TableBody>
-								{maintenances.map((m) => (
+								{upcomingMaintenances.map((m) => (
 									<TableRow key={m.id}>
 										<TableCell>{m.nombre}</TableCell>
 										<TableCell>
