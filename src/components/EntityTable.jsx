@@ -40,6 +40,7 @@ export default function EntityTable({
 				getRowHeight={() => "auto"}
 				getEstimatedRowHeight={() => 64}
 				localeText={{
+					noRowsLabel: "No hay filas para mostrar",
 					columnMenuSortAsc: "Orden ascendente",
 					columnMenuSortDesc: "Orden descendente",
 					columnMenuUnsort: "Quitar orden",
