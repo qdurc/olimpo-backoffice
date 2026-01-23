@@ -7,6 +7,7 @@ import {
 	TextField,
 	Button,
 	MenuItem,
+	Box,
 } from "@mui/material";
 import { installationStatuses } from "../services/installations";
 
@@ -121,83 +122,81 @@ export default function FacilityModal({
 
 			<DialogContent
 				sx={{
-					pt: 1,
+					pt: 1.5,
 					px: 4,
 					pb: 2,
-					display: "flex",
-					flexDirection: "column",
-					gap: 2,
 				}}
 			>
+				<Box component="form" display="flex" flexDirection="column" gap={2} mt={1}>
+					<TextField
+						label="Nombre"
+						name="nombre"
+						fullWidth
+						required
+						value={form.nombre}
+						onChange={handleChange}
+						error={Boolean(errors.nombre)}
+						helperText={errors.nombre}
+					/>
 
-				<TextField
-					label="Nombre"
-					name="nombre"
-					fullWidth
-					required
-					value={form.nombre}
-					onChange={handleChange}
-					error={Boolean(errors.nombre)}
-					helperText={errors.nombre}
-				/>
+					<TextField
+						label="Tipo"
+						name="tipo"
+						fullWidth
+						required
+						value={form.tipo}
+						onChange={handleChange}
+						error={Boolean(errors.tipo)}
+						helperText={errors.tipo}
+					/>
 
+					<TextField
+						label="Capacidad"
+						name="capacidad"
+						type="number"
+						fullWidth
+						required
+						inputProps={{ min: 1 }}
+						value={form.capacidad}
+						onChange={handleChange}
+						error={Boolean(errors.capacidad)}
+						helperText={errors.capacidad}
+					/>
 
-				<TextField
-					label="Tipo"
-					name="tipo"
-					fullWidth
-					required
-					value={form.tipo}
-					onChange={handleChange}
-					error={Boolean(errors.tipo)}
-					helperText={errors.tipo}
-				/>
+					<TextField
+						label="Dirección"
+						name="direccion"
+						fullWidth
+						required
+						value={form.direccion}
+						onChange={handleChange}
+						error={Boolean(errors.direccion)}
+						helperText={errors.direccion}
+					/>
 
-
-				<TextField
-					label="Capacidad"
-					name="capacidad"
-					type="number"
-					fullWidth
-					required
-					inputProps={{ min: 1 }}
-					value={form.capacidad}
-					onChange={handleChange}
-					error={Boolean(errors.capacidad)}
-					helperText={errors.capacidad}
-				/>
-
-
-				<TextField
-					label="Dirección"
-					name="direccion"
-					fullWidth
-					required
-					value={form.direccion}
-					onChange={handleChange}
-					error={Boolean(errors.direccion)}
-					helperText={errors.direccion}
-				/>
-
-
-				<TextField
-					select
-					label="Estado"
-					name="estadoId"
-					fullWidth
-					value={form.estadoId}
-					onChange={handleChange}
-					required
-					error={Boolean(errors.estadoId)}
-					helperText={errors.estadoId}
-				>
-					<MenuItem value="">Selecciona</MenuItem>
-					{installationStatuses.map((status) => (
-						<MenuItem key={status.id} value={status.id} disabled={isEditing && String(status.id) === "2"}>
-							{status.label}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Estado"
+						name="estadoId"
+						fullWidth
+						value={form.estadoId}
+						onChange={handleChange}
+						required
+						error={Boolean(errors.estadoId)}
+						helperText={errors.estadoId}
+					>
+						<MenuItem value="">Selecciona</MenuItem>
+						{installationStatuses.map((status) => (
+							<MenuItem
+								key={status.id}
+								value={status.id}
+								disabled={isEditing && String(status.id) === "2"}
+							>
+								{status.label}
+							</MenuItem>
+						))}
+					</TextField>
+				</Box>
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>

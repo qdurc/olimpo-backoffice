@@ -151,90 +151,89 @@ export default function ReservationModal({
 
 			<DialogContent
 				sx={{
-					pt: 1,
+					pt: 1.5,
 					px: 4,
 					pb: 2,
-					display: "flex",
-					flexDirection: "column",
-					gap: 2,
 				}}
 			>
-				<TextField
-					select
-					label="Instalación"
-					name="facilityId"
-					fullWidth
-					required
-					value={form.facilityId}
-					onChange={handleChange}
-					error={Boolean(errors.facilityId)}
-					helperText={errors.facilityId}
-				>
-					{installations.map((inst) => (
-						<MenuItem key={inst.id} value={inst.id}>
-							{inst.nombre}
-						</MenuItem>
-					))}
-				</TextField>
+				<Box component="form" display="flex" flexDirection="column" gap={2} mt={1}>
+					<TextField
+						select
+						label="Instalación"
+						name="facilityId"
+						fullWidth
+						required
+						value={form.facilityId}
+						onChange={handleChange}
+						error={Boolean(errors.facilityId)}
+						helperText={errors.facilityId}
+					>
+						{installations.map((inst) => (
+							<MenuItem key={inst.id} value={inst.id}>
+								{inst.nombre}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					label="Usuario ID"
-					name="usuarioId"
-					type="number"
-					fullWidth
-					value={form.usuarioId}
-					onChange={handleChange}
-				/>
+					<TextField
+						label="Usuario ID"
+						name="usuarioId"
+						type="number"
+						fullWidth
+						value={form.usuarioId}
+						onChange={handleChange}
+					/>
 
-				<TextField
-					select
-					label="Estado"
-					name="estadoId"
-					fullWidth
-					value={form.estadoId}
-					onChange={handleChange}
-					required
-					error={Boolean(errors.estadoId)}
-					helperText={errors.estadoId}
-				>
-					{statuses.map((status) => (
-						<MenuItem key={status.id} value={status.id}>
-							{status.label}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Estado"
+						name="estadoId"
+						fullWidth
+						value={form.estadoId}
+						onChange={handleChange}
+						required
+						error={Boolean(errors.estadoId)}
+						helperText={errors.estadoId}
+					>
+						{statuses.map((status) => (
+							<MenuItem key={status.id} value={status.id}>
+								{status.label}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					label="Fecha y hora"
-					name="fechaIso"
-					type="datetime-local"
-					fullWidth
-					value={form.fechaIso}
-					onChange={handleChange}
-					required
-					InputLabelProps={{ shrink: true }}
-					error={Boolean(errors.fechaIso)}
-					helperText={errors.fechaIso}
-				/>
+					<TextField
+						label="Fecha y hora"
+						name="fechaIso"
+						type="datetime-local"
+						fullWidth
+						value={form.fechaIso}
+						onChange={handleChange}
+						required
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.fechaIso)}
+						helperText={errors.fechaIso}
+					/>
 
-				<TextField
-					label="Fecha y hora fin"
-					name="endFechaIso"
-					type="datetime-local"
-					fullWidth
-					value={form.endFechaIso}
-					onChange={handleChange}
-					required
-					InputLabelProps={{ shrink: true }}
-					error={Boolean(errors.endFechaIso)}
-					helperText={errors.endFechaIso}
-				/>
+					<TextField
+						label="Fecha y hora fin"
+						name="endFechaIso"
+						type="datetime-local"
+						fullWidth
+						value={form.endFechaIso}
+						onChange={handleChange}
+						required
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.endFechaIso)}
+						helperText={errors.endFechaIso}
+					/>
 
-				{submitError ? (
-					<Alert severity="error" sx={{ mt: 2 }}>
-						{submitError}
-					</Alert>
-				) : null}
+					{submitError ? (
+						<Alert severity="error" sx={{ mt: 2 }}>
+							{submitError}
+						</Alert>
+					) : null}
+				</Box>
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>

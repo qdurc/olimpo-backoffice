@@ -8,6 +8,7 @@ import {
 	Button,
 	MenuItem,
 	Alert,
+	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -70,7 +71,6 @@ export default function TorneoModal({
 			setErrors({});
 			setSubmitError("");
 		} else if (open && !initialData) {
-			// ✅ igual que ReservationModal: si abres NUEVO, resetea
 			setForm(emptyForm);
 			setErrors({});
 			setSubmitError("");
@@ -154,171 +154,171 @@ export default function TorneoModal({
 
 			<DialogContent
 				sx={{
-					pt: 1,
+					pt: 1.5,
 					px: 4,
 					pb: 2,
-					display: "flex",
-					flexDirection: "column",
-					gap: 2,
 				}}
 			>
-				<TextField
-					label="Nombre"
-					name="nombre"
-					fullWidth
-					value={form.nombre}
-					onChange={handleChange}
-					required
-					error={Boolean(errors.nombre)}
-					helperText={errors.nombre}
-				/>
+				<Box component="form" display="flex" flexDirection="column" gap={2} mt={1}>
+					<TextField
+						label="Nombre"
+						name="nombre"
+						fullWidth
+						value={form.nombre}
+						onChange={handleChange}
+						required
+						error={Boolean(errors.nombre)}
+						helperText={errors.nombre}
+					/>
 
-				<TextField
-					label="Descripción"
-					name="descripcion"
-					fullWidth
-					multiline
-					minRows={2}
-					value={form.descripcion}
-					onChange={handleChange}
-					required
-					error={Boolean(errors.descripcion)}
-					helperText={errors.descripcion}
-				/>
+					<TextField
+						label="Descripción"
+						name="descripcion"
+						fullWidth
+						multiline
+						minRows={2}
+						value={form.descripcion}
+						onChange={handleChange}
+						required
+						error={Boolean(errors.descripcion)}
+						helperText={errors.descripcion}
+					/>
 
-				<TextField
-					label="Normas"
-					name="normas"
-					fullWidth
-					multiline
-					minRows={2}
-					value={form.normas}
-					onChange={handleChange}
-					required
-					error={Boolean(errors.normas)}
-					helperText={errors.normas}
-				/>
+					<TextField
+						label="Normas"
+						name="normas"
+						fullWidth
+						multiline
+						minRows={2}
+						value={form.normas}
+						onChange={handleChange}
+						required
+						error={Boolean(errors.normas)}
+						helperText={errors.normas}
+					/>
 
-				<TextField
-					select
-					label="Categoría"
-					name="categoriaId"
-					fullWidth
-					required
-					value={form.categoriaId}
-					onChange={handleChange}
-					error={Boolean(errors.categoriaId)}
-					helperText={errors.categoriaId}
-				>
-					{viewModel.categories.map((c) => (
-						<MenuItem key={c.id} value={c.id}>
-							{c.descripcion}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Categoría"
+						name="categoriaId"
+						fullWidth
+						required
+						value={form.categoriaId}
+						onChange={handleChange}
+						error={Boolean(errors.categoriaId)}
+						helperText={errors.categoriaId}
+					>
+						{viewModel.categories.map((c) => (
+							<MenuItem key={c.id} value={c.id}>
+								{c.descripcion}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					select
-					label="Disciplina"
-					name="disciplinaId"
-					fullWidth
-					required
-					value={form.disciplinaId}
-					onChange={handleChange}
-					error={Boolean(errors.disciplinaId)}
-					helperText={errors.disciplinaId}
-				>
-					{viewModel.disciplines.map((d) => (
-						<MenuItem key={d.id} value={d.id}>
-							{d.descripcion}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Disciplina"
+						name="disciplinaId"
+						fullWidth
+						required
+						value={form.disciplinaId}
+						onChange={handleChange}
+						error={Boolean(errors.disciplinaId)}
+						helperText={errors.disciplinaId}
+					>
+						{viewModel.disciplines.map((d) => (
+							<MenuItem key={d.id} value={d.id}>
+								{d.descripcion}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					select
-					label="Estado"
-					name="estadoId"
-					fullWidth
-					required
-					value={form.estadoId}
-					onChange={handleChange}
-					error={Boolean(errors.estadoId)}
-					helperText={errors.estadoId}
-				>
-					{viewModel.estatus.map((e) => (
-						<MenuItem key={e.estatusID} value={e.estatusID}>
-							{e.descripcion}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Estado"
+						name="estadoId"
+						fullWidth
+						required
+						value={form.estadoId}
+						onChange={handleChange}
+						error={Boolean(errors.estadoId)}
+						helperText={errors.estadoId}
+					>
+						{viewModel.estatus.map((e) => (
+							<MenuItem key={e.estatusID} value={e.estatusID}>
+								{e.descripcion}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					select
-					label="Instalación"
-					name="facilityId"
-					fullWidth
-					required
-					value={form.facilityId}
-					onChange={handleChange}
-					error={Boolean(errors.facilityId)}
-					helperText={errors.facilityId}
-				>
-					{viewModel.facilities.map((f) => (
-						<MenuItem key={f.id} value={f.id}>
-							{f.name}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Instalación"
+						name="facilityId"
+						fullWidth
+						required
+						value={form.facilityId}
+						onChange={handleChange}
+						error={Boolean(errors.facilityId)}
+						helperText={errors.facilityId}
+					>
+						{viewModel.facilities.map((f) => (
+							<MenuItem key={f.id} value={f.id}>
+								{f.name}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					select
-					label="Encargado"
-					name="supervisorId"
-					fullWidth
-					required
-					value={form.supervisorId}
-					onChange={handleChange}
-					error={Boolean(errors.supervisorId)}
-					helperText={errors.supervisorId}
-				>
-					{viewModel.encargados.map((p) => (
-						<MenuItem key={p.id} value={p.id}>
-							{p.fullName}
-						</MenuItem>
-					))}
-				</TextField>
+					<TextField
+						select
+						label="Encargado"
+						name="supervisorId"
+						fullWidth
+						required
+						value={form.supervisorId}
+						onChange={handleChange}
+						error={Boolean(errors.supervisorId)}
+						helperText={errors.supervisorId}
+					>
+						{viewModel.encargados.map((p) => (
+							<MenuItem key={p.id} value={p.id}>
+								{p.fullName}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					label="Fecha"
-					name="fechaIso"
-					type="datetime-local"
-					fullWidth
-					required
-					value={form.fechaIso}
-					onChange={handleChange}
-					InputLabelProps={{ shrink: true }}
-					error={Boolean(errors.fechaIso)}
-					helperText={errors.fechaIso}
-				/>
+					<TextField
+						label="Fecha"
+						name="fechaIso"
+						type="datetime-local"
+						fullWidth
+						required
+						value={form.fechaIso}
+						onChange={handleChange}
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.fechaIso)}
+						helperText={errors.fechaIso}
+					/>
 
-				<TextField
-					label="Fecha fin"
-					name="endFechaIso"
-					type="datetime-local"
-					fullWidth
-					required
-					value={form.endFechaIso}
-					onChange={handleChange}
-					InputLabelProps={{ shrink: true }}
-					error={Boolean(errors.endFechaIso)}
-					helperText={errors.endFechaIso}
-				/>
-				{submitError ? (
-					<Alert severity="error" sx={{ mt: 2 }}>
-						{submitError}
-					</Alert>
-				) : null}
+					<TextField
+						label="Fecha fin"
+						name="endFechaIso"
+						type="datetime-local"
+						fullWidth
+						required
+						value={form.endFechaIso}
+						onChange={handleChange}
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.endFechaIso)}
+						helperText={errors.endFechaIso}
+					/>
+
+					{submitError ? (
+						<Alert severity="error">
+							{submitError}
+						</Alert>
+					) : null}
+				</Box>
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>

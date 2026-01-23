@@ -8,6 +8,7 @@ import {
 	Button,
 	MenuItem,
 	Alert,
+	Box,
 } from "@mui/material";
 
 function formatDateTimeLocal(value) {
@@ -183,92 +184,91 @@ export default function MaintenanceModal({
 
 			<DialogContent
 				sx={{
-					pt: 1,
+					pt: 1.5,
 					px: 4,
 					pb: 2,
-					display: "flex",
-					flexDirection: "column",
-					gap: 2,
 				}}
 			>
-				<TextField
-					select
-					label="Instalación"
-					name="facilityId"
-					fullWidth
-					required
-					value={form.facilityId}
-					onChange={handleChange}
-					error={Boolean(errors.facilityId)}
-					helperText={errors.facilityId}
-				>
-					{installations.map((inst) => (
-						<MenuItem key={inst.id} value={inst.id}>
-							{inst.nombre}
-						</MenuItem>
-					))}
-				</TextField>
+				<Box component="form" display="flex" flexDirection="column" gap={2} mt={1}>
+					<TextField
+						select
+						label="Instalación"
+						name="facilityId"
+						fullWidth
+						required
+						value={form.facilityId}
+						onChange={handleChange}
+						error={Boolean(errors.facilityId)}
+						helperText={errors.facilityId}
+					>
+						{installations.map((inst) => (
+							<MenuItem key={inst.id} value={inst.id}>
+								{inst.nombre}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					label="Descripción"
-					name="descripcion"
-					fullWidth
-					multiline
-					minRows={2}
-					value={form.descripcion}
-					onChange={handleChange}
-				/>
+					<TextField
+						label="Descripción"
+						name="descripcion"
+						fullWidth
+						multiline
+						minRows={2}
+						value={form.descripcion}
+						onChange={handleChange}
+					/>
 
-				<TextField
-					label="Inicio"
-					name="inicio"
-					type="datetime-local"
-					fullWidth
-					value={form.inicio}
-					onChange={handleChange}
-					required
-					InputLabelProps={{ shrink: true }}
-					error={Boolean(errors.inicio)}
-					helperText={errors.inicio}
-				/>
+					<TextField
+						label="Inicio"
+						name="inicio"
+						type="datetime-local"
+						fullWidth
+						value={form.inicio}
+						onChange={handleChange}
+						required
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.inicio)}
+						helperText={errors.inicio}
+					/>
 
-				<TextField
-					label="Fin"
-					name="fin"
-					type="datetime-local"
-					fullWidth
-					value={form.fin}
-					onChange={handleChange}
-					required
-					InputLabelProps={{ shrink: true }}
-					error={Boolean(errors.fin)}
-					helperText={errors.fin}
-				/>
+					<TextField
+						label="Fin"
+						name="fin"
+						type="datetime-local"
+						fullWidth
+						value={form.fin}
+						onChange={handleChange}
+						required
+						InputLabelProps={{ shrink: true }}
+						error={Boolean(errors.fin)}
+						helperText={errors.fin}
+					/>
 
+					<TextField
+						select
+						label="Estado"
+						name="estadoId"
+						fullWidth
+						value={form.estadoId}
+						onChange={handleChange}
+						required
+						error={Boolean(errors.estadoId)}
+						helperText={errors.estadoId}
+					>
+						<MenuItem value="">Selecciona</MenuItem>
+						{statuses.map((status) => (
+							<MenuItem key={status.id} value={String(status.id)}>
+								{status.label}
+							</MenuItem>
+						))}
+					</TextField>
 
-				<TextField
-					select
-					label="Estado"
-					name="estadoId"
-					fullWidth
-					value={form.estadoId}
-					onChange={handleChange}
-					required
-					error={Boolean(errors.estadoId)}
-					helperText={errors.estadoId}
-				>
-					<MenuItem value="">Selecciona</MenuItem>
-					{statuses.map((status) => (
-						<MenuItem key={status.id} value={String(status.id)}>
-							{status.label}
-						</MenuItem>
-					))}
-				</TextField>
-				{submitError ? (
-					<Alert severity="error" sx={{ mt: 2 }}>
-						{submitError}
-					</Alert>
-				) : null}
+					{submitError ? (
+						<Alert severity="error" sx={{ mt: 2 }}>
+							{submitError}
+						</Alert>
+					) : null}
+				</Box>
 			</DialogContent>
 
 			<DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>

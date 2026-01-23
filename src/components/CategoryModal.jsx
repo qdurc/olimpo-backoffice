@@ -6,6 +6,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	TextField,
+	Box,
 } from "@mui/material";
 
 export default function CategoryModal({ open, onClose, onSave, initialData = null, loading = false }) {
@@ -53,16 +54,24 @@ export default function CategoryModal({ open, onClose, onSave, initialData = nul
 			<DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem" }}>
 				{initialData ? "Editar Categoría" : "Nueva Categoría"}
 			</DialogTitle>
-			<DialogContent sx={{ pt: 1.5, pb: 1 }}>
-				<TextField
-					label="Descripción"
-					fullWidth
-					required
-					value={form.descripcion}
-					onChange={handleChange}
-					error={Boolean(errors.descripcion)}
-					helperText={errors.descripcion}
-				/>
+			<DialogContent
+				sx={{
+					pt: 1.5,
+					px: 4,
+					pb: 2,
+				}}
+			>
+				<Box component="form" display="flex" flexDirection="column" gap={2} mt={1}>
+					<TextField
+						label="Descripción"
+						fullWidth
+						required
+						value={form.descripcion}
+						onChange={handleChange}
+						error={Boolean(errors.descripcion)}
+						helperText={errors.descripcion}
+					/>
+				</Box>
 			</DialogContent>
 			<DialogActions sx={{ px: 3, pb: 2 }}>
 				<Button onClick={onClose} disabled={loading}>
