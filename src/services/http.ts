@@ -61,7 +61,7 @@ export async function apiFetchJson<T = Json>(
 			}
 		}
 
-		let message = `Request failed with status ${response.status}`;
+		let message = `La solicitud falló con el estado ${response.status}`;
 
 		if (errorBody && typeof errorBody === "object") {
 			const err = errorBody as { errors?: unknown; message?: unknown };

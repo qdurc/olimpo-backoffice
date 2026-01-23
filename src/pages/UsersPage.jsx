@@ -28,6 +28,17 @@ export default function UsersPage() {
 	const [historyItems, setHistoryItems] = useState([]);
 	const [historyLoading, setHistoryLoading] = useState(false);
 	const [historyError, setHistoryError] = useState("");
+
+	React.useEffect(() => {
+		if (!error) return;
+
+		const timer = setTimeout(() => {
+			setError("");
+		}, 8000);
+
+		return () => clearTimeout(timer);
+	}, [error]);
+
 	const statusOptions = useMemo(
 		() => [
 			{ id: 1, label: "Activo" },
@@ -226,6 +237,7 @@ export default function UsersPage() {
 					<Button
 						variant="contained"
 						onClick={() => {
+							setError("");
 							setEditing(null);
 							setOpenModal(true);
 						}}
