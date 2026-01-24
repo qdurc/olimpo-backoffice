@@ -286,7 +286,7 @@ export default function UserModal({
 					>
 						<MenuItem value="">Selecciona</MenuItem>
 						{statuses.map((s) => (
-							<MenuItem key={s.id} value={String(s.id)}>
+							<MenuItem key={s.id} value={String(s.id)} disabled={Boolean(initialData) && ["2"].includes(String(s.id))}>
 								{s.label}
 							</MenuItem>
 						))}
