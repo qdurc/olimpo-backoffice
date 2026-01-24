@@ -427,7 +427,7 @@ export async function deleteTournament(id: number | string): Promise<void> {
 	if (!Number.isFinite(numericId)) throw new Error("Delete requiere un id numérico válido");
 
 	const params = new URLSearchParams({ id: String(numericId) });
-	await apiFetchJson(`/api/Tournaments/DeleteTournament?${params.toString()}`, {
+	await apiFetchJson(`/api/Tournaments/DeleteTournamentFront?${params.toString()}`, {
 		method: "DELETE",
 	});
 }
