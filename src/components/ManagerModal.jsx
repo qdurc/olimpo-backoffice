@@ -37,7 +37,7 @@ export default function ManagerModal({ open, onClose, onSave, initialData = null
 			setForm({
 				nombreCompleto: initialData.nombreCompleto ?? "",
 				fechaNacimiento: toDateInput(initialData.fechaNacimiento),
-				cedula: initialData.cedula ?? "",
+				cedula: (initialData.cedula ?? "").replace(/\D/g, "").slice(0, 11),
 			});
 			setErrors({});
 		} else if (open) {
@@ -48,6 +48,13 @@ export default function ManagerModal({ open, onClose, onSave, initialData = null
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
+
+		if (name === "cedula") {
+			const digitsOnly = value.replace(/\D/g, "").slice(0, 11);
+			setForm((prev) => ({ ...prev, cedula: digitsOnly }));
+			return;
+		}
+
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 

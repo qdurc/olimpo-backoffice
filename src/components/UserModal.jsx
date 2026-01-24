@@ -72,9 +72,11 @@ export default function UserModal({
 				),
 				gender: initialData?.gender ?? "",
 				identification:
-					initialData?.identification ??
-					initialData?.cedula ??
-					"",
+					(initialData?.identification ??
+						initialData?.cedula ??
+						"")
+						.replace(/\D/g, "")
+						.slice(0, 11),
 			});
 			setErrors({});
 		} else {
@@ -85,6 +87,13 @@ export default function UserModal({
 
 	const handleChange = (event) => {
 		const { name, value } = event.target;
+
+		if (name === "identification") {
+			const digitsOnly = value.replace(/\D/g, "").slice(0, 11);
+			setForm((prev) => ({ ...prev, identification: digitsOnly }));
+			return;
+		}
+
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
