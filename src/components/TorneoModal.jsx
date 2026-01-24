@@ -10,6 +10,7 @@ import {
 	Alert,
 	Box,
 } from "@mui/material";
+import { extractBackendError } from "../utils/apiError";
 
 function formatDateTimeLocal(value) {
 	if (!value) return "";
@@ -160,11 +161,13 @@ export default function TorneoModal({
 			onClose?.();
 		} catch (error) {
 			console.error("Error saving tournament", error);
-			const message =
-				error instanceof Error
-					? error.message
-					: "No se pudo guardar el torneo. Intenta de nuevo.";
-			setSubmitError(message);
+
+			const parsed = extractBackendError(
+				error,
+				"No se pudo guardar el torneo. Intenta de nuevo.",
+			);
+
+			setSubmitError(parsed.message);
 		}
 	};
 
