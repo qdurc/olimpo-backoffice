@@ -49,6 +49,7 @@ export default function MaintenanceModal({
 	const [form, setForm] = useState(emptyForm);
 	const [errors, setErrors] = useState({});
 	const [submitError, setSubmitError] = useState("");
+	const isEditing = Boolean(initialData);
 
 	const getDefaultRange = () => {
 		const start = new Date();
@@ -257,7 +258,7 @@ export default function MaintenanceModal({
 					>
 						<MenuItem value="">Selecciona</MenuItem>
 						{statuses.map((status) => (
-							<MenuItem key={status.id} value={String(status.id)}>
+							<MenuItem key={status.id} value={String(status.id)} disabled={Boolean(initialData) && ["2", "3", "4"].includes(String(status.id))}>
 								{status.label}
 							</MenuItem>
 						))}

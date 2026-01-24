@@ -207,7 +207,7 @@ export default function ReservationModal({
 						helperText={errors.estadoId}
 					>
 						{statuses.map((status) => (
-							<MenuItem key={status.id} value={status.id}>
+							<MenuItem key={status.id} value={status.id} disabled={Boolean(initialData) && ["2"].includes(String(status.id))}>
 								{status.label}
 							</MenuItem>
 						))}

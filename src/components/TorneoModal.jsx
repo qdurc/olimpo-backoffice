@@ -267,7 +267,7 @@ export default function TorneoModal({
 						helperText={errors.estadoId}
 					>
 						{viewModel.estatus.map((e) => (
-							<MenuItem key={e.estatusID} value={e.estatusID}>
+							<MenuItem key={e.estatusID} value={e.estatusID} disabled={Boolean(initialData) && ["2"].includes(String(e.estatusID))}>
 								{e.descripcion}
 							</MenuItem>
 						))}
