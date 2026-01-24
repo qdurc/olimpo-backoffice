@@ -30,19 +30,43 @@ function pickMessagesFromErrors(errors: unknown): string[] {
 	return [stringifyUnknown(errors)];
 }
 
-export function extractBackendError(err: unknown, fallback = "Ocurrió un error. Intenta de nuevo.") {
-	if (err instanceof Error && !isApiErrorShape((err as any)?.cause)) {
-	}
+function cleanValidationMessage(raw: string): string {
+	if (!raw) return raw;
 
-	// caso: el caller nos pasa directamente el JSON del backend 
+	let msg = raw.trim();
+
+	msg = msg.replace(/^Validation failed:\s*/i, "").trim();
+
+	const parts = msg.split(/--\s*/).map((p) => p.trim()).filter(Boolean);
+	if (!parts.length) return msg || raw;
+
+	const cleanedParts = parts.map((p) => {
+		const severityIndex = p.toLowerCase().indexOf("severity:");
+		if (severityIndex !== -1) {
+			p = p.slice(0, severityIndex).trim();
+		}
+		return p;
+	});
+
+	return cleanedParts.join("\n");
+}
+
+export function extractBackendError(
+	err: unknown,
+	fallback = "Ocurrió un error. Intenta de nuevo.",
+) {
 	if (isApiErrorShape(err)) {
 		const list = pickMessagesFromErrors(err.errors);
-		if (list.length) return new Error(list.join("\n"));
-		if (typeof err.message === "string" && err.message.trim()) return new Error(err.message);
+		if (list.length) {
+			const cleaned = list.map((m) => cleanValidationMessage(m));
+			return new Error(cleaned.join("\n"));
+		}
+		if (typeof err.message === "string" && err.message.trim()) {
+			return new Error(cleanValidationMessage(err.message));
+		}
 		return new Error(fallback);
 	}
 
-	// caso: error.message contiene JSON 
 	if (err instanceof Error) {
 		const msg = err.message?.trim();
 		if (msg) {
@@ -50,12 +74,18 @@ export function extractBackendError(err: unknown, fallback = "Ocurrió un error.
 				const parsed = JSON.parse(msg);
 				if (isApiErrorShape(parsed)) {
 					const list = pickMessagesFromErrors(parsed.errors);
-					if (list.length) return new Error(list.join("\n"));
-					if (typeof parsed.message === "string" && parsed.message.trim()) return new Error(parsed.message);
+					if (list.length) {
+						const cleaned = list.map((m) => cleanValidationMessage(m));
+						return new Error(cleaned.join("\n"));
+					}
+					if (typeof parsed.message === "string" && parsed.message.trim()) {
+						return new Error(cleanValidationMessage(parsed.message));
+					}
 				}
 			} catch {
 			}
-			return new Error(msg);
+
+			return new Error(cleanValidationMessage(msg));
 		}
 	}
 

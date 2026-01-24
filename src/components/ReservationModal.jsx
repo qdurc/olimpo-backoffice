@@ -10,6 +10,7 @@ import {
 	Alert,
 	Box,
 } from "@mui/material";
+import { extractBackendError } from "../utils/apiError";
 
 function formatDateTimeLocal(value) {
 	if (!value) return "";
@@ -136,11 +137,13 @@ export default function ReservationModal({
 			onClose?.();
 		} catch (error) {
 			console.error("Error saving reservation", error);
-			const message =
-				error instanceof Error
-					? error.message
-					: "No se pudo guardar la reserva. Intenta de nuevo.";
-			setSubmitError(message);
+
+			const processed = extractBackendError(
+				error,
+				"No se pudo guardar la reserva. Intenta de nuevo.",
+			);
+
+			setSubmitError(processed.message || "No se pudo guardar la reserva. Intenta de nuevo.");
 		}
 	};
 
