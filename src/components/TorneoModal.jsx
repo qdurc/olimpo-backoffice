@@ -32,7 +32,7 @@ export default function TorneoModal({
 	onClose,
 	onSave,
 	initialData = null,
-	viewModel = { categories: [], disciplines: [], estatus: [], facilities: [], encargados: [] },
+	viewModel = { categories: [], disciplines: [], estatus: [], facilities: [], encargados: [], users: [] },
 }) {
 	const emptyForm = useMemo(
 		() => ({
@@ -44,6 +44,7 @@ export default function TorneoModal({
 			estadoId: "",
 			facilityId: "",
 			supervisorId: "",
+			usuarioId: "",
 			fechaIso: "",
 			endFechaIso: "",
 		}),
@@ -54,8 +55,25 @@ export default function TorneoModal({
 	const [errors, setErrors] = useState({});
 	const [submitError, setSubmitError] = useState("");
 
+
 	useEffect(() => {
 		if (open && initialData) {
+			let usuarioId = "";
+
+			if (initialData.usuarioId !== null && initialData.usuarioId !== undefined) {
+				usuarioId = String(initialData.usuarioId);
+			}
+			else if (initialData.usuario && Array.isArray(viewModel.users)) {
+				const match = viewModel.users.find(
+					(u) =>
+						u.name &&
+						u.name.toLowerCase() === String(initialData.usuario).toLowerCase(),
+				);
+				if (match) {
+					usuarioId = String(match.id);
+				}
+			}
+
 			setForm({
 				nombre: initialData.nombre ?? "",
 				descripcion: initialData.descripcion ?? "",
@@ -65,6 +83,7 @@ export default function TorneoModal({
 				estadoId: initialData.estadoId ? String(initialData.estadoId) : "",
 				facilityId: initialData.facilityId ? String(initialData.facilityId) : "",
 				supervisorId: initialData.supervisorId ? String(initialData.supervisorId) : "",
+				usuarioId,
 				fechaIso: formatDateTimeLocal(initialData.fechaIso),
 				endFechaIso: formatDateTimeLocal(initialData.endFechaIso),
 			});
@@ -79,7 +98,7 @@ export default function TorneoModal({
 			setErrors({});
 			setSubmitError("");
 		}
-	}, [open, initialData, emptyForm]);
+	}, [open, initialData, emptyForm, viewModel.users]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -96,6 +115,7 @@ export default function TorneoModal({
 		const estadoNum = form.estadoId === "" ? NaN : Number(form.estadoId);
 		const facilityNum = form.facilityId === "" ? NaN : Number(form.facilityId);
 		const supervisorNum = form.supervisorId === "" ? NaN : Number(form.supervisorId);
+		const usuarioNum = form.usuarioId === "" ? NaN : Number(form.usuarioId);
 
 		if (!form.nombre.trim()) nextErrors.nombre = "Ingresa un nombre";
 		if (!form.descripcion?.trim()) nextErrors.descripcion = "Ingresa una descripción";
@@ -105,6 +125,7 @@ export default function TorneoModal({
 		if (!Number.isFinite(estadoNum) || estadoNum <= 0) nextErrors.estadoId = "Selecciona un estado válido";
 		if (!Number.isFinite(facilityNum) || facilityNum <= 0) nextErrors.facilityId = "Selecciona una instalación válida";
 		if (!Number.isFinite(supervisorNum) || supervisorNum <= 0) nextErrors.supervisorId = "Selecciona un encargado válido";
+		if (!Number.isFinite(usuarioNum) || usuarioNum <= 0) nextErrors.usuarioId = "Ingresa un usuario válido";
 
 		if (!date || Number.isNaN(date.getTime())) {
 			nextErrors.fechaIso = "Ingresa una fecha válida";
@@ -131,6 +152,7 @@ export default function TorneoModal({
 				estadoId: Number(form.estadoId),
 				facilityId: Number(form.facilityId),
 				supervisorId: Number(form.supervisorId),
+				usuarioId: usuarioNum,
 				fechaIso: date.toISOString(),
 				endFechaIso: endDate.toISOString(),
 			});
@@ -283,6 +305,25 @@ export default function TorneoModal({
 						{viewModel.encargados.map((p) => (
 							<MenuItem key={p.id} value={p.id}>
 								{p.fullName}
+							</MenuItem>
+						))}
+					</TextField>
+
+					<TextField
+						select
+						label="Usuario"
+						name="usuarioId"
+						fullWidth
+						required
+						value={form.usuarioId}
+						onChange={handleChange}
+						error={Boolean(errors.usuarioId)}
+						helperText={errors.usuarioId}
+					>
+						<MenuItem value="">Selecciona</MenuItem>
+						{(viewModel.users ?? []).map((u) => (
+							<MenuItem key={u.id} value={String(u.id)}>
+								{u.name} ({u.email})
 							</MenuItem>
 						))}
 					</TextField>

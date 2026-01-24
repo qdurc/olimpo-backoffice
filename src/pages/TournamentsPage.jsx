@@ -29,6 +29,7 @@ export default function TournamentsPage() {
 		categories: [],
 		disciplines: [],
 		encargados: [],
+		users: [],
 	});
 
 	const [openModal, setOpenModal] = useState(false);
@@ -82,7 +83,9 @@ export default function TournamentsPage() {
 				t.instalacion?.toLowerCase?.().includes(term) ||
 				t.supervisor?.toLowerCase?.().includes(term) ||
 				t.descripcion?.toLowerCase?.().includes(term) ||
-				t.normas?.toLowerCase?.().includes(term)
+				t.normas?.toLowerCase?.().includes(term) ||
+				t.usuarioId?.toString().includes(term) ||
+				t.usuario?.toLowerCase?.().includes(term)
 		);
 	}, [search, torneos]);
 
@@ -100,6 +103,7 @@ export default function TournamentsPage() {
 			{ field: "endFecha", headerName: "Fin", flex: 1, minWidth: 140 },
 			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 130 },
 			{ field: "supervisor", headerName: "Encargado", flex: 1, minWidth: 120 },
+			{ field: "usuario", headerName: "Usuario", flex: 0.8, minWidth: 120 },
 			{
 				field: "estado",
 				headerName: "Estado",

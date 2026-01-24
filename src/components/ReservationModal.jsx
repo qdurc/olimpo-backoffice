@@ -33,6 +33,7 @@ export default function ReservationModal({
 	onSave,
 	installations = [],
 	statuses = [],
+	users = [],
 	initialData = null,
 }) {
 	const emptyForm = useMemo(
@@ -102,7 +103,7 @@ export default function ReservationModal({
 			nextErrors.fechaIso = "Ingresa una fecha y hora válida";
 		}
 		if (!Number.isFinite(userIdNum) || userIdNum <= 0) {
-			nextErrors.usuarioId = "Ingresa un usuario válido";
+			nextErrors.usuarioId = "Selecciona un usuario válido";
 		}
 		if (!Number.isFinite(estadoIdNum) || estadoIdNum <= 0) {
 			nextErrors.estadoId = "Ingresa un estado (estatusID) válido";
@@ -176,13 +177,23 @@ export default function ReservationModal({
 					</TextField>
 
 					<TextField
-						label="Usuario ID"
+						select
+						label="Usuario"
 						name="usuarioId"
-						type="number"
 						fullWidth
 						value={form.usuarioId}
 						onChange={handleChange}
-					/>
+						required
+						error={Boolean(errors.usuarioId)}
+						helperText={errors.usuarioId}
+					>
+						<MenuItem value="">Selecciona un usuario</MenuItem>
+						{users.map((u) => (
+							<MenuItem key={u.id} value={u.id}>
+								{u.nombre} ({u.email})
+							</MenuItem>
+						))}
+					</TextField>
 
 					<TextField
 						select

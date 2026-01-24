@@ -26,6 +26,9 @@ type TournamentApi = {
 
 	date?: string | null;
 	endDate?: string | null;
+
+	user?: string | null;
+	userID?: number | null;
 };
 
 export type Tournament = {
@@ -43,6 +46,8 @@ export type Tournament = {
 	estado: string;
 	instalacion: string | false;
 	supervisor: string;
+	usuarioId: number | null;
+	usuario: string;
 	fecha: string;
 	fechaIso: string;
 	endFecha: string;
@@ -60,6 +65,7 @@ export type TournamentPayload = {
 	fechaIso: string;
 	endFechaIso: string;
 	supervisorId?: number | string | null;
+	usuarioId?: number | string | null;
 };
 
 export type UserTournamentHistoryItem = {
@@ -86,6 +92,7 @@ type ViewModel = {
 	categories: Array<{ id: number; descripcion: string }>;
 	disciplines: Array<{ id: number; descripcion: string }>;
 	encargados: Array<{ id: number; fullName: string }>;
+	users: Array<{ id: number; name: string; email: string }>;
 };
 
 function parseNum(value?: number | string | null) {
@@ -233,6 +240,8 @@ function normalizeTournament(
 		findIdByName(helpers?.facilityMapSimple, item.facility) ??
 		null;
 
+	const userId = item.userID ?? null;
+
 	const categoria =
 		item.category ??
 		(helpers?.catMap?.get(Number(categoryId ?? -1)) ?? (categoryId !== null ? String(categoryId) : "Sin categoría"));
@@ -254,6 +263,10 @@ function normalizeTournament(
 		(helpers?.facilityMapSimple?.get(Number(facilityId ?? -1)) ??
 			((facilityId !== null && facilityMap.get(Number(facilityId))?.nombre) ?? (facilityId !== null ? `Instalación ${facilityId}` : "Sin instalación")));
 
+	const usuario =
+		item.user ??
+		(userId !== null ? String(userId) : "");
+
 	return {
 		id: item.id ?? `tournament-${Math.random().toString(36).slice(2)}`,
 		nombre: item.name ?? "",
@@ -269,6 +282,8 @@ function normalizeTournament(
 		estado,
 		instalacion: facilityName,
 		supervisor,
+		usuarioId: userId ?? null,
+		usuario,
 		fechaIso: item.date ?? "",
 		fecha: formatDateTime(item.date),
 		endFechaIso: item.endDate ?? "",
@@ -318,6 +333,7 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 	const estatusID = parseNum(payload.estadoId) ?? 0;
 	const facilityID = parseNum(payload.facilityId);
 	const supervisorID = parseNum(payload.supervisorId) ?? 0;
+	const userID = parseNum(payload.usuarioId) ?? 0;
 
 	const body: TournamentApi = {
 		name: payload.nombre,
@@ -328,6 +344,7 @@ export async function createTournament(payload: TournamentPayload): Promise<Tour
 		estatusID,
 		facilityID,
 		supervisorID,
+		userID,
 		date,
 		endDate,
 	};
@@ -372,6 +389,7 @@ export async function updateTournament(id: number | string, payload: TournamentP
 	const estatusID = parseNum(payload.estadoId) ?? 0;
 	const facilityID = parseNum(payload.facilityId);
 	const supervisorID = parseNum(payload.supervisorId) ?? 0;
+	const userID = parseNum(payload.usuarioId) ?? 0;
 
 	const body: TournamentApi = {
 		id: numericId,
@@ -383,6 +401,7 @@ export async function updateTournament(id: number | string, payload: TournamentP
 		estatusID,
 		facilityID,
 		supervisorID,
+		userID,
 		date,
 		endDate,
 	};

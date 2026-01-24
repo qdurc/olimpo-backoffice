@@ -14,6 +14,7 @@ import {
 	reservationStatuses,
 } from "../services/reservations";
 import { getInstallations } from "../services/installations";
+import { getUsers } from "../services/users";
 
 export default function ReservationsPage() {
 	const [page, setPage] = useState(1);
@@ -23,7 +24,19 @@ export default function ReservationsPage() {
 	const [search, setSearch] = useState("");
 	const [editing, setEditing] = useState(null);
 	const [installations, setInstallations] = useState([]);
+	const [users, setUsers] = useState([]);
 	const [openModal, setOpenModal] = useState(false);
+
+	const userNameById = useMemo(() => {
+		const map = new Map();
+		users.forEach((u) => {
+			const idNum = Number(u.id);
+			if (!Number.isNaN(idNum)) {
+				map.set(idNum, u.nombre);
+			}
+		});
+		return map;
+	}, [users]);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -31,10 +44,17 @@ export default function ReservationsPage() {
 
 		(async () => {
 			try {
-				const instData = await getInstallations();
+				const [instData, usersData] = await Promise.all([
+					getInstallations(),
+					getUsers(),
+				]);
+
 				const resData = await getReservations(instData);
+
 				if (!isMounted) return;
+
 				setInstallations(instData);
+				setUsers(usersData);
 				setReservations(resData);
 			} catch (error) {
 				console.error("Error loading reservations data", error);
@@ -50,16 +70,20 @@ export default function ReservationsPage() {
 		};
 	}, []);
 
+
 	const filtered = useMemo(() => {
 		const term = search.toLowerCase();
-		return reservations.filter(
-			(r) =>
+		return reservations.filter((r) => {
+			const userName = userNameById.get(Number(r.usuarioId)) || "";
+			return (
 				r.instalacion?.toLowerCase().includes(term) ||
 				r.estado?.toLowerCase?.().includes(term) ||
+				userName.toLowerCase().includes(term) ||
 				r.usuarioId?.toString().includes(term) ||
-				r.id?.toString().includes(term),
-		);
-	}, [reservations, search]);
+				r.id?.toString().includes(term)
+			);
+		});
+	}, [reservations, search, userNameById]);
 
 	const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
 	const rows = useMemo(
@@ -67,18 +91,33 @@ export default function ReservationsPage() {
 		[filtered, page, pageSize],
 	);
 
+
 	const columns = useMemo(
 		() => [
 			{ field: "id", headerName: "ID", width: 90 },
-			{ field: "usuarioId", headerName: "Usuario", width: 130 },
+			{
+				field: "usuarioId",
+				headerName: "Usuario",
+				width: 180,
+				renderCell: (params) => {
+					const idNum = Number(params.row.usuarioId);
+					const name = userNameById.get(idNum);
+					return name || params.row.usuarioId || "";
+				},
+			},
 			{ field: "instalacion", headerName: "Instalación", flex: 1, minWidth: 200 },
 			{ field: "fecha", headerName: "Fecha", width: 130 },
 			{ field: "hora", headerName: "Hora", width: 120 },
 			{ field: "endFecha", headerName: "Fin Fecha", width: 130 },
 			{ field: "endHora", headerName: "Fin Hora", width: 120 },
-			{ field: "estado", headerName: "Estado", width: 150, renderCell: (p) => <StatusPill value={p.value} /> },
+			{
+				field: "estado",
+				headerName: "Estado",
+				width: 150,
+				renderCell: (p) => <StatusPill value={p.value} />,
+			},
 		],
-		[],
+		[userNameById],
 	);
 
 	const handleSave = async (data) => {
@@ -201,6 +240,7 @@ export default function ReservationsPage() {
 				onSave={handleSave}
 				installations={installations}
 				statuses={reservationStatuses}
+				users={users}
 				initialData={editing}
 			/>
 		</Box>
