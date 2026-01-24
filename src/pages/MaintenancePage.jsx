@@ -113,13 +113,14 @@ export default function MaintenancePage() {
 			clearMaintenancesCache();
 			const fresh = await getMaintenances(instalaciones);
 			setMantenimientos(fresh);
+
+			setEditing(null);
+			setOpenModal(false);
 		} catch (error) {
 			console.error("Error saving maintenance", error);
 			throw error;
 		} finally {
 			setLoading(false);
-			setEditing(null);
-			setOpenModal(false);
 		}
 	};
 
