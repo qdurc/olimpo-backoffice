@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import { Box, Button, InputAdornment, TextField, Alert } from "@mui/material";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import PageHeader from "../components/PageHeader";
 import EntityTable from "../components/EntityTable";
@@ -16,6 +16,7 @@ export default function DisciplinesPage() {
 	const [submitting, setSubmitting] = useState(false);
 	const [openModal, setOpenModal] = useState(false);
 	const [editing, setEditing] = useState(null);
+	const [deleteInfo, setDeleteInfo] = useState("");
 
 	useEffect(() => {
 		let active = true;
@@ -45,6 +46,14 @@ export default function DisciplinesPage() {
 			active = false;
 		};
 	}, []);
+
+	useEffect(() => {
+		if (!deleteInfo) return;
+		const timer = setTimeout(() => {
+			setDeleteInfo("");
+		}, 8000);
+		return () => clearTimeout(timer);
+	}, [deleteInfo]);
 
 	const refresh = async () => {
 		setLoading(true);
@@ -82,6 +91,7 @@ export default function DisciplinesPage() {
 			setLoading(true);
 			await deleteDiscipline(id);
 			await refresh();
+			setDeleteInfo("Las disciplinas no se eliminan");
 		} catch (error) {
 			console.error("Error eliminando disciplina", error);
 		} finally {
@@ -152,6 +162,17 @@ export default function DisciplinesPage() {
 					}}
 				/>
 			</Box>
+
+			{deleteInfo && (
+				<Box mb={1.5}>
+					<Alert
+						severity="error"
+						onClose={() => setDeleteInfo("")}
+					>
+						{deleteInfo}
+					</Alert>
+				</Box>
+			)}
 
 			<EntityTable
 				rows={paged}
